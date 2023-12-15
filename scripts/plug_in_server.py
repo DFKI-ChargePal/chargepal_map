@@ -15,7 +15,7 @@ from chargepal_map.processes.utils import state_name
 
 class PlugInActionServer:
 
-    _cfg_name =  'default.toml'
+    _cfg_name =  'green_type2.toml'
 
     def __init__(self) -> None:
         # Build configuration path
