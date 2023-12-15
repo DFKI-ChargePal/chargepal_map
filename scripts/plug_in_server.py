@@ -9,8 +9,11 @@ from smach import StateMachine
 from chargepal_actions.msg import PlugInAction, PlugInActionGoal
 from chargepal_actions.msg import PlugInRecoveryAction, PlugInRecoveryActionGoal
 
-from chargepal_map.smach import Foo2FooAAbc, Bar
+from chargepal_map import outcomes as out
+from chargepal_map import connect_to_car as ctc
 from chargepal_map.processes.utils import state_name
+
+from chargepal_map.smach import Foo2FooAAbc, Bar
 
 
 class PlugInActionServer:
@@ -29,36 +32,63 @@ class PlugInActionServer:
         self._recover_as.start()
 
         # Create robot interface
-        # self._ur_pilot = ur_pilot.Pilot(self._cfg_path)
+        self._ur_pilot = ur_pilot.Pilot(self._cfg_path)
 
-        # self.plug_in_sequence = Sequence(
-        #     outcomes=['succeeded', 'aborted'],
-        #     connector_outcome='succeeded'
-        #     )
-
-        # with self.plug_in_sequence:
-        #     Sequence.add('FOO', Foo())
-        #     Sequence.add('BAR', Bar())
-        #     # Sequence.add('FOO', Foo())
-        #     # Sequence.add('BAR', Bar())
-        #     # Sequence.add('FOO', Foo())
-
-        self.sm_plug_in = StateMachine(outcomes=['outcome4'])
-        # Open the container
-        with self.sm_plug_in:
-            # Add states to the container
-            StateMachine.add(state_name(Foo2FooAAbc), Foo2FooAAbc(), transitions={'outcome1':'BAR', 'outcome2':'outcome4'})
-            StateMachine.add('BAR', Bar(), transitions={'outcome1': state_name(Foo2FooAAbc)})
-
-        # self.state = ArmInDrivePose()
+        self.ctc_process = StateMachine(outcomes=[out.ConnectToCar.arm_in_driving_pose])
+        # Open smash container to add states and transitions
+        with self.ctc_process:
+            StateMachine.add(
+                label=state_name(ctc.MoveArmToBattery), 
+                state=ctc.MoveArmToBattery(self._ur_pilot), 
+                transitions={out.ConnectToCar.arm_in_bat_obs:state_name(ctc.ObservePlugOnBattery)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.ObservePlugOnBattery), 
+                state=ctc.ObservePlugOnBattery(self._ur_pilot), 
+                transitions={out.ConnectToCar.arm_in_bat_pre_connect:state_name(ctc.GraspPlugOnBattery)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.GraspPlugOnBattery), 
+                state=ctc.GraspPlugOnBattery(self._ur_pilot), 
+                transitions={out.ConnectToCar.plug_in_bat_connect:state_name(ctc.RemovePlugFromBattery)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.RemovePlugFromBattery), 
+                state=ctc.RemovePlugFromBattery(self._ur_pilot), 
+                transitions={out.ConnectToCar.plug_in_bat_post_connect:state_name(ctc.MovePlugToCar)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.MovePlugToCar), 
+                state=ctc.MovePlugToCar(self._ur_pilot), 
+                transitions={out.ConnectToCar.plug_in_car_obs:state_name(ctc.ObserveSocketOnCar)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.ObserveSocketOnCar), 
+                state=ctc.ObserveSocketOnCar(self._ur_pilot), 
+                transitions={out.ConnectToCar.plug_in_car_pre_connect:state_name(ctc.InsertPlugToCar)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.InsertPlugToCar), 
+                state=ctc.InsertPlugToCar(self._ur_pilot), 
+                transitions={out.ConnectToCar.plug_in_car_connect:state_name(ctc.ReleasePlugOnCar)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.ReleasePlugOnCar), 
+                state=ctc.ReleasePlugOnCar(self._ur_pilot), 
+                transitions={out.ConnectToCar.arm_in_car_post_connect:state_name(ctc.MoveArmToDrivePos)}
+                )
+            StateMachine.add(
+                label=state_name(ctc.MoveArmToDrivePos), 
+                state=ctc.MoveArmToDrivePos(self._ur_pilot), 
+                # No transition. Stop when reaching this state
+                )
 
     def forward(self, goal: PlugInActionGoal) -> None:
         rospy.loginfo(f"Approach plug-in action")
         try:
             rospy.loginfo(f"Process plug-in task step by step")
             # Execute SMACH plan
-            outcome = self.sm_plug_in.execute()
-            print(outcome)
+            outcome = self.ctc_process.execute()
             self._plug_in_as.set_succeeded()
             rospy.loginfo(f"Finish plug-in process successfully.")
         except Exception as e:
