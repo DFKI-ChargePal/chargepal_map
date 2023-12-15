@@ -1,6 +1,5 @@
 import rospy
 import rospkg
-import smach
 import ur_pilot
 import actionlib
 from pathlib import Path
@@ -12,8 +11,6 @@ from chargepal_actions.msg import PlugInRecoveryAction, PlugInRecoveryActionGoal
 from chargepal_map import outcomes as out
 from chargepal_map import connect_to_car as ctc
 from chargepal_map.processes.utils import state_name
-
-from chargepal_map.smach import Foo2FooAAbc, Bar
 
 
 class PlugInActionServer:
