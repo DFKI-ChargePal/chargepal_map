@@ -1,84 +1,38 @@
+
+# libs
 import rospy
 import rospkg
 import ur_pilot
 import actionlib
+import chargepal_map
 from pathlib import Path
-from smach import StateMachine
 
+# actions
 from chargepal_actions.msg import PlugInAction, PlugInActionGoal
 from chargepal_actions.msg import PlugInRecoveryAction, PlugInRecoveryActionGoal
 
-from chargepal_map import outcomes as out
-from chargepal_map import connect_to_car as ctc
-from chargepal_map.processes.utils import state_name
 
 
 class PlugInActionServer:
 
-    _cfg_name =  'green_type2.toml'
+    _ur_pilot_cfg =  'green_type2.toml'
 
     def __init__(self) -> None:
         # Build configuration path
         ros_pack = rospkg.RosPack()
         ros_path = ros_pack.get_path('chargepal_map')
-        self._cfg_path = Path(ros_path).joinpath('config').joinpath(self._cfg_name)
+        self._cfk_dir = Path(ros_path).joinpath('config')
+        
         # Initialize action server
         self._plug_in_as = actionlib.SimpleActionServer('plug_in', PlugInAction, self.forward, False)
         self._recover_as = actionlib.SimpleActionServer('plug_in_recovery', PlugInRecoveryAction, self.recover, False)
         self._plug_in_as.start()
         self._recover_as.start()
-
         # Create robot interface
-        self._ur_pilot = ur_pilot.Pilot(self._cfg_path)
+        self._ur_pilot = ur_pilot.Pilot(self._cfk_dir.joinpath(self._ur_pilot_cfg))
+        # Create state machine
+        self.ctc_process = chargepal_map.ProcessFactory.create('connect_to_car')
 
-        self.ctc_process = StateMachine(outcomes=[out.ConnectToCar.arm_in_driving_pose])
-        # Open smash container to add states and transitions
-        with self.ctc_process:
-            StateMachine.add(
-                label=state_name(ctc.MoveArmToBattery), 
-                state=ctc.MoveArmToBattery(self._ur_pilot), 
-                transitions={out.ConnectToCar.arm_in_bat_obs:state_name(ctc.ObservePlugOnBattery)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.ObservePlugOnBattery), 
-                state=ctc.ObservePlugOnBattery(self._ur_pilot), 
-                transitions={out.ConnectToCar.arm_in_bat_pre_connect:state_name(ctc.GraspPlugOnBattery)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.GraspPlugOnBattery), 
-                state=ctc.GraspPlugOnBattery(self._ur_pilot), 
-                transitions={out.ConnectToCar.plug_in_bat_connect:state_name(ctc.RemovePlugFromBattery)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.RemovePlugFromBattery), 
-                state=ctc.RemovePlugFromBattery(self._ur_pilot), 
-                transitions={out.ConnectToCar.plug_in_bat_post_connect:state_name(ctc.MovePlugToCar)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.MovePlugToCar), 
-                state=ctc.MovePlugToCar(self._ur_pilot), 
-                transitions={out.ConnectToCar.plug_in_car_obs:state_name(ctc.ObserveSocketOnCar)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.ObserveSocketOnCar), 
-                state=ctc.ObserveSocketOnCar(self._ur_pilot), 
-                transitions={out.ConnectToCar.plug_in_car_pre_connect:state_name(ctc.InsertPlugToCar)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.InsertPlugToCar), 
-                state=ctc.InsertPlugToCar(self._ur_pilot), 
-                transitions={out.ConnectToCar.plug_in_car_connect:state_name(ctc.ReleasePlugOnCar)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.ReleasePlugOnCar), 
-                state=ctc.ReleasePlugOnCar(self._ur_pilot), 
-                transitions={out.ConnectToCar.arm_in_car_post_connect:state_name(ctc.MoveArmToDrivePos)}
-                )
-            StateMachine.add(
-                label=state_name(ctc.MoveArmToDrivePos), 
-                state=ctc.MoveArmToDrivePos(self._ur_pilot), 
-                # No transition. Stop when reaching this state
-                )
 
     def forward(self, goal: PlugInActionGoal) -> None:
         rospy.loginfo(f"Approach plug-in action")

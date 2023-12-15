@@ -1,11 +1,7 @@
 
-from chargepal_map.processes import utils
-from chargepal_map.processes import outcomes
-from chargepal_map.processes import connect_to_car
+from chargepal_map.core import ProcessFactory
 
 
 __all__ = [
-    'utils',
-    'outcomes',
-    'connect_to_car',
+    'ProcessFactory',
 ]
