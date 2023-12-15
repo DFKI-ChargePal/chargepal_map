@@ -1,5 +1,4 @@
-# chargepal_map
-
+# ChargePal Manipulation Action Processor (MAP)
 
 
 ## Getting started
