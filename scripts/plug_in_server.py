@@ -22,7 +22,6 @@ class PlugInActionServer:
         ros_pack = rospkg.RosPack()
         ros_path = ros_pack.get_path('chargepal_map')
         self._cfk_dir = Path(ros_path).joinpath('config')
-        
         # Initialize action server
         self._plug_in_as = actionlib.SimpleActionServer('plug_in', PlugInAction, self.forward, False)
         self._recover_as = actionlib.SimpleActionServer('plug_in_recovery', PlugInRecoveryAction, self.recover, False)
@@ -31,8 +30,7 @@ class PlugInActionServer:
         # Create robot interface
         self._ur_pilot = ur_pilot.Pilot(self._cfk_dir.joinpath(self._ur_pilot_cfg))
         # Create state machine
-        self.ctc_process = chargepal_map.ProcessFactory.create('connect_to_car')
-
+        self.ctc_process = chargepal_map.ProcessFactory.create('connect_to_car', self._cfk_dir, self._ur_pilot)
 
     def forward(self, goal: PlugInActionGoal) -> None:
         rospy.loginfo(f"Approach plug-in action")

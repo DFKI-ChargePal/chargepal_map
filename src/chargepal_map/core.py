@@ -15,7 +15,7 @@ class Process(metaclass=abc.ABCMeta):
 
     def __init__(self, cfg_dir: Path, pilot: Pilot):
         self.cfg_dir = cfg_dir
-        self.pilot = pilot
+        self._ur_pilot = pilot
 
     @abc.abstractmethod
     def get_process(self) -> StateMachine:
@@ -29,7 +29,7 @@ class ConnectToCarProcess(Process):
         
         self.process = StateMachine(outcomes=[out.ConnectToCar.arm_in_driving_pose])
         # Open smash container to add states and transitions
-        with self.ctc_process:
+        with self.process:
             StateMachine.add(
                 label=state_name(ctc.MoveArmToBattery), 
                 state=ctc.MoveArmToBattery(self._ur_pilot), 
@@ -91,4 +91,3 @@ class ProcessFactory:
     def create(proc_name: str, cfg_dir: Path, ur_pilot: Pilot) -> StateMachine:
         builder = ProcessFactory._process_builder[proc_name](cfg_dir=cfg_dir, pilot=ur_pilot)
         return builder.get_process()
-
