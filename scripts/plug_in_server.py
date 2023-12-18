@@ -30,7 +30,7 @@ class PlugInActionServer:
         # Create robot interface
         self._ur_pilot = ur_pilot.Pilot(self._cfk_dir.joinpath(self._ur_pilot_cfg))
         # Create state machine
-        self.ctc_process = chargepal_map.ProcessFactory.create('connect_to_car', self._cfk_dir, self._ur_pilot)
+        self.ctc_process = chargepal_map.ProcessFactory.create('implicate_connect_to_car', self._cfk_dir, self._ur_pilot)
 
     def forward(self, goal: PlugInActionGoal) -> None:
         rospy.loginfo(f"Approach plug-in action")
