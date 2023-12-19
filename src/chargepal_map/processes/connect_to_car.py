@@ -24,7 +24,7 @@ _time_out = 1.0
 """   move arm to battery   """
 class MoveArmToBattery(State):
 
-    _battery_obs_j_pos = (3.773, -1.159, 1.914, -0.263, 2.073, -1.267)
+    _battery_obs_j_pos = (3.232, -1.561, 1.970, -0.269, 0.485, -1.647)
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_obs])
@@ -53,19 +53,20 @@ class ImplicateMoveArmToBattery(State):
 """   observe plug on battery   """
 class ObservePlugOnBattery(State):
     
+    _cam_tf_dir = "/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration_hand_eye/tcp2cam"
     _cam_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration/coefficients.toml")
-    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/charuco_ads_socket_ty2_adj.yaml")
+    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/aruco_marker_bat_socket_ccs_adj.yaml")
 
     def __init__(self, pilot: Pilot):
-        super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_pre_connect], output_keys=['t_base2socket'])
+        super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_pre_connect], output_keys=['xyz_xyzw_base2socket'])
         self._pilot = pilot
 
     def execute(self, ud: Any) -> str:
         cam = ck.create('realsense_tcp_cam')
         cam.load_coefficients(self._cam_config_fp)
-        dtt = pd.ArucoPatternDetector(self._dtt_config_fp)
+        dtt = pd.ArucoMarkerDetector(self._dtt_config_fp)
         dtt.register_camera(cam)
-        self._pilot.robot.register_ee_cam(cam)
+        self._pilot.robot.register_ee_cam(cam, self._cam_tf_dir)
 
         # Search for ArUco pattern
         found = False
@@ -87,7 +88,7 @@ class ObservePlugOnBattery(State):
             time.sleep(1.0)
 
         if found:
-            ud.t_base2socket = T_base2socket
+            ud.xyz_xyzw_base2socket = T_base2socket.pose.xyz_xyzw
         else:
             raise RuntimeError(f"Can't find socket."
                                 f"Make sure detector is proper set up and pattern is in camera view")
@@ -116,12 +117,12 @@ class GraspPlugOnBattery(State):
     _pose_socket2hook_itm = Pose().from_xyz([0.03, 0.0, 0.034])
 
     def __init__(self, pilot: Pilot):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_bat_connect], input_keys=['t_base2socket'])
+        super().__init__(outcomes=[out.ConnectToCar.plug_in_bat_connect], input_keys=['xyz_xyzw_base2socket'])
         self._pilot = pilot
 
     def execute(self, ud: Any) -> str:
         # Get transformation matrices
-        T_base2socket = ud.t_base2socket
+        T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
         T_socket2hook = self._pose_socket2hook.transformation
         T_socket2hook_pre = self._pose_socket2hook_pre.transformation
         T_socket2hook_itm = self._pose_socket2hook_itm.transformation
@@ -166,7 +167,7 @@ class RemovePlugFromBattery(State):
             success = self._pilot.tcp_force_mode(
                 wrench=self._plug_out_ft,
                 compliant_axes=[0, 0, 1, 0, 0, 0],
-                distance=0.05,
+                distance=0.075,
                 time_out=10.0)
         if not success:
             raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
@@ -189,7 +190,7 @@ class ImplicateRemovePlugFromBattery(State):
 """   move plug to car   """
 class MovePlugToCar(State):
     
-    _car_obs_j_pos = (3.476, -1.500, 1.756, 0.050, 1.887, -1.267)
+    _car_obs_j_pos = (3.387, -1.469, 1.747, -0.016, 1.789, -1.565)
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.plug_in_car_obs])
@@ -217,12 +218,13 @@ class ImplicateMovePlugToCar(State):
 
 """   observe socket on car   """
 class ObserveSocketOnCar(State):
-    
-    _cam_config_fp = Path()
-    _dtt_config_fp = Path()
+
+    _cam_tf_dir = "/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration_hand_eye/tcp2cam"
+    _cam_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration/coefficients.toml")
+    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/charuco_ads_socket_ty2_adj.yaml")
 
     def __init__(self, pilot: Pilot):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_pre_connect], output_keys=['t_base2socket'])
+        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_pre_connect], output_keys=['xyz_xyzw_base2socket'])
         self._pilot = pilot
 
     def execute(self, ud: Any) -> str:
@@ -230,7 +232,7 @@ class ObserveSocketOnCar(State):
         cam.load_coefficients(self._cam_config_fp)
         dtt = pd.CharucoDetector(self._dtt_config_fp)
         dtt.register_camera(cam)
-        self._pilot.robot.register_ee_cam(cam)
+        self._pilot.robot.register_ee_cam(cam, self._cam_tf_dir)
 
         # Search for ArUco pattern
         found = False
@@ -252,7 +254,7 @@ class ObserveSocketOnCar(State):
             time.sleep(1.0)
 
         if found:
-            ud.t_base2socket = T_base2socket
+            ud.xyz_xyzw_base2socket = T_base2socket.pose.xyz_xyzw
         else:
             raise RuntimeError(f"Can't find socket."
                                 f"Make sure detector is proper set up and pattern is in camera view")
@@ -280,12 +282,12 @@ class InsertPlugToCar(State):
     _pose_socket2fpi = Pose().from_xyz(xyz=[0.0, 0.0, 0.034])
     
     def __init__(self, pilot: Pilot):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_connect], input_keys=['t_base2socket'])
+        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_connect], input_keys=['xyz_xyzw_base2socket'])
         self._pilot = pilot
 
     def execute(self, ud: Any) -> str:
         # Get transformation matrices
-        T_base2socket = ud.t_base2socket
+        T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
         T_socket2fpi = self._pose_socket2fpi.transformation
         T_socket2socket_pre = self._pose_socket2socket_pre.transformation
         # Apply transformation chain
