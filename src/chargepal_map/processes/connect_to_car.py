@@ -24,7 +24,7 @@ _time_out = 1.0
 """   move arm to battery   """
 class MoveArmToBattery(State):
 
-    _battery_obs_j_pos = (3.232, -1.561, 1.970, -0.269, 0.485, -1.647)
+    _battery_obs_j_pos = (3.010, -1.550, 1.931, 0.638, 0.475, -2.530)
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_obs])
@@ -55,7 +55,7 @@ class ObservePlugOnBattery(State):
     
     _cam_tf_dir = "/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration_hand_eye/tcp2cam"
     _cam_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration/coefficients.toml")
-    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/aruco_marker_bat_socket_ccs_adj.yaml")
+    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/aruco_pattern_bat_socket_ccs_adj.yaml")
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_pre_connect], output_keys=['xyz_xyzw_base2socket'])
@@ -64,7 +64,7 @@ class ObservePlugOnBattery(State):
     def execute(self, ud: Any) -> str:
         cam = ck.create('realsense_tcp_cam')
         cam.load_coefficients(self._cam_config_fp)
-        dtt = pd.ArucoMarkerDetector(self._dtt_config_fp)
+        dtt = pd.ArucoPatternDetector(self._dtt_config_fp)
         dtt.register_camera(cam)
         self._pilot.robot.register_ee_cam(cam, self._cam_tf_dir)
 
@@ -190,7 +190,7 @@ class ImplicateRemovePlugFromBattery(State):
 """   move plug to car   """
 class MovePlugToCar(State):
     
-    _car_obs_j_pos = (3.387, -1.469, 1.747, -0.016, 1.789, -1.565)
+    _car_obs_j_pos = (3.330, -1.610, 1.832, 0.168, 1.712, -1.475)
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.plug_in_car_obs])
@@ -221,7 +221,7 @@ class ObserveSocketOnCar(State):
 
     _cam_tf_dir = "/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration_hand_eye/tcp2cam"
     _cam_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration/coefficients.toml")
-    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/charuco_ads_socket_ty2_adj.yaml")
+    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/aruco_pattern_car_socket_ccs_adj.yaml")
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.plug_in_car_pre_connect], output_keys=['xyz_xyzw_base2socket'])
@@ -230,7 +230,7 @@ class ObserveSocketOnCar(State):
     def execute(self, ud: Any) -> str:
         cam = ck.create('realsense_tcp_cam')
         cam.load_coefficients(self._cam_config_fp)
-        dtt = pd.CharucoDetector(self._dtt_config_fp)
+        dtt = pd.ArucoPatternDetector(self._dtt_config_fp)
         dtt.register_camera(cam)
         self._pilot.robot.register_ee_cam(cam, self._cam_tf_dir)
 
