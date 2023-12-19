@@ -53,8 +53,8 @@ class ImplicateMoveArmToBattery(State):
 """   observe plug on battery   """
 class ObservePlugOnBattery(State):
     
-    _cam_config_fp = Path()
-    _dtt_config_fp = Path()
+    _cam_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/camera_info/realsense_tcp_cam/calibration/coefficients.toml")
+    _dtt_config_fp = Path("/home/gejo02/chargepal_ws/src/chargepal/chargepal_map/config/detector/charuco_ads_socket_ty2_adj.yaml")
 
     def __init__(self, pilot: Pilot):
         super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_pre_connect], output_keys=['t_base2socket'])

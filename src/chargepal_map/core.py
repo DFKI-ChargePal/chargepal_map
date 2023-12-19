@@ -96,11 +96,12 @@ class ConnectToCarProcess(Process):
             StateMachine.add(
                 label=state_name(ctc.ObservePlugOnBattery), 
                 state=ctc.ObservePlugOnBattery(self._ur_pilot), 
-                transitions={out.ConnectToCar.arm_in_bat_pre_connect:state_name(ctc.GraspPlugOnBattery)}
+                transitions={out.ConnectToCar.arm_in_bat_pre_connect:state_name(ctc.GraspPlugOnBattery)},
+                remapping={'t_base2socket':'t_base2socket'}
                 )
             StateMachine.add(
                 label=state_name(ctc.GraspPlugOnBattery), 
-                state=ctc.GraspPlugOnBattery(self._ur_pilot), 
+                state=ctc.GraspPlugOnBattery(self._ur_pilot),
                 transitions={out.ConnectToCar.plug_in_bat_connect:state_name(ctc.RemovePlugFromBattery)}
                 )
             StateMachine.add(
@@ -116,7 +117,8 @@ class ConnectToCarProcess(Process):
             StateMachine.add(
                 label=state_name(ctc.ObserveSocketOnCar), 
                 state=ctc.ObserveSocketOnCar(self._ur_pilot), 
-                transitions={out.ConnectToCar.plug_in_car_pre_connect:state_name(ctc.InsertPlugToCar)}
+                transitions={out.ConnectToCar.plug_in_car_pre_connect:state_name(ctc.InsertPlugToCar)},
+                remapping={'t_base2socket':'t_base2socket'}
                 )
             StateMachine.add(
                 label=state_name(ctc.InsertPlugToCar), 
