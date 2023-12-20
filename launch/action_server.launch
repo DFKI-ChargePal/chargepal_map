@@ -1,0 +1,6 @@
+<launch>
+
+	<node pkg="chargepal_map" type="manipulation_server.py" name="manipulation_server" output="screen">
+	</node>
+
+</launch>
