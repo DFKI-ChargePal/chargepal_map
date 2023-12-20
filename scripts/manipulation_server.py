@@ -36,8 +36,8 @@ class ManipulationActionServer:
         # Create robot interface
         self._ur_pilot = ur_pilot.Pilot(self._cfk_dir.joinpath(self._ur_pilot_cfg))
         # Create state machine
-        self.ctc_process = chargepal_map.ProcessFactory.create('connect_to_car', self._cfk_dir, self._ur_pilot)
-        self.dfc_process = chargepal_map.ProcessFactory.create('disconnect_from_car', self._cfk_dir, self._ur_pilot)
+        self.ctc_process = chargepal_map.factory.get_process('connect_to_car', self._cfk_dir, self._ur_pilot)
+        self.dfc_process = chargepal_map.factory.get_process('disconnect_from_car', self._cfk_dir, self._ur_pilot)
 
     def connect_to_car(self, goal: ConnectPlugToCarActionGoal) -> None:
         rospy.loginfo(f"Approach connect plug to car action")

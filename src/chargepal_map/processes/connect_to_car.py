@@ -278,4 +278,3 @@ class MoveArmToDrivePos(State):
             self._pilot.move_to_joint_pos(self._drive_j_pos)
         time.sleep(_time_out)
         return out.ConnectToCar.arm_in_driving_pose
-

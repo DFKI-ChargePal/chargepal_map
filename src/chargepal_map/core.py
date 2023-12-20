@@ -19,7 +19,7 @@ class Process(metaclass=abc.ABCMeta):
         self._ur_pilot = pilot
 
     @abc.abstractmethod
-    def get_process(self) -> StateMachine:
+    def _get_process(self) -> StateMachine:
         raise NotImplementedError("Must be implemented in child class")
 
 
@@ -79,7 +79,7 @@ class ConnectToCarProcess(Process):
                 # No transition. Stop when reaching this state
                 )
 
-    def get_process(self) -> StateMachine:
+    def _get_process(self) -> StateMachine:
         return self.process
 
 
@@ -139,18 +139,21 @@ class DisconnectFromCarProcess(Process):
                 # No transition. Stop when reaching this state
                 )
 
-    def get_process(self) -> StateMachine:
+    def _get_process(self) -> StateMachine:
         return self.process
 
 
 class ProcessFactory:
 
-    _process_builder = {
-        'connect_to_car': ConnectToCarProcess,
-        'disconnect_from_car': DisconnectFromCarProcess, 
-    }
+    def __init__(self) -> None:
+        self._process_builder = {
+            'connect_to_car': ConnectToCarProcess,
+            'disconnect_from_car': DisconnectFromCarProcess,
+            }
 
-    @staticmethod
-    def create(proc_name: str, cfg_dir: Path, ur_pilot: Pilot) -> StateMachine:
-        builder = ProcessFactory._process_builder[proc_name](cfg_dir=cfg_dir, pilot=ur_pilot)
-        return builder.get_process()
+    def get_process(self, proc_name: str, cfg_dir: Path, ur_pilot: Pilot) -> StateMachine:
+        builder = self._process_builder[proc_name](cfg_dir=cfg_dir, pilot=ur_pilot)
+        return builder._get_process()
+
+
+factory = ProcessFactory()
