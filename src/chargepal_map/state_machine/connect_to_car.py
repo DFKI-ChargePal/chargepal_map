@@ -2,11 +2,13 @@ from __future__ import annotations
 
 # global
 import time
+import rospy
 from smach import State
 from pathlib import Path
 
 # local
 import chargepal_map.state_machine.outcomes as out
+from chargepal_map.state_machine.user_srvs import UserServices
 
 # typing
 from typing import Any
@@ -19,10 +21,12 @@ class MoveArmToBattery(State):
     def __init__(self, cfg_dir: Path):
         super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_obs])
         self.cfg_dir = cfg_dir
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Move arm to battery')
-        time.sleep(_time_out)
+        print('    Wait for user...')
+        print(self.usr_srvs.wait_for_user())
         return out.ConnectToCar.arm_in_bat_obs
 
 
@@ -31,10 +35,13 @@ class ObservePlugOnBattery(State):
     def __init__(self, cfg_dir: Path):
         super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_pre_connect], output_keys=['xyz_xyzw_base2socket'])
         self.cfg_dir = cfg_dir
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Observe plug on battery')
         time.sleep(_time_out)
+        print('    Wait for user...')
+        print(self.usr_srvs.wait_for_user())
         return out.ConnectToCar.arm_in_bat_pre_connect
 
 
@@ -43,10 +50,13 @@ class GraspPlugOnBattery(State):
     def __init__(self, cfg_dir: Path):
         super().__init__(outcomes=[out.ConnectToCar.plug_in_bat_connect], input_keys=['xyz_xyzw_base2socket'])
         self.cfg_dir = cfg_dir
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Grasp plug on battery')
         time.sleep(_time_out)
+        print('    Wait for user...')
+        print(self.usr_srvs.wait_for_user())
         return out.ConnectToCar.plug_in_bat_connect
 
 
@@ -55,10 +65,13 @@ class RemovePlugFromBattery(State):
     def __init__(self, cfg_dir: Path):
         super().__init__(outcomes=[out.ConnectToCar.plug_in_bat_post_connect])
         self.cfg_dir = cfg_dir
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Remove plug from battery')
         time.sleep(_time_out)
+        print('    Wait for user...')
+        self.usr_srvs.wait_for_user()
         return out.ConnectToCar.plug_in_bat_post_connect
 
 
@@ -67,10 +80,13 @@ class MovePlugToCar(State):
     def __init__(self, cfg_dir: Path):
         super().__init__(outcomes=[out.ConnectToCar.plug_in_car_obs])
         self.cfg_dir = cfg_dir
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Move plug to car')
         time.sleep(_time_out)
+        print('    Wait for user...')
+        self.usr_srvs.wait_for_user()
         return out.ConnectToCar.plug_in_car_obs
 
 

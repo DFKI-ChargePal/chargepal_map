@@ -11,8 +11,7 @@ def state_name(obj: type) -> str:
 
 
 def silent_smach() -> None:
-
     def suppress_msg(msg: str) -> None:
         pass
-
     smach.set_loggers(info=suppress_msg, warn=smach.logwarn, debug=suppress_msg, error=smach.logerr)
+

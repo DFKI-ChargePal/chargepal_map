@@ -39,5 +39,6 @@ include_directories(
 
 catkin_install_python(PROGRAMS
   scripts/manipulation_server.py
+  scripts/state_machine_ui.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
