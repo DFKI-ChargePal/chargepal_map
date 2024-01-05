@@ -1,7 +1,7 @@
 
-from chargepal_map.core import factory
+from chargepal_map.core import manipulation_action_processor
 
 
 __all__ = [
-    'factory',
+    'manipulation_action_processor',
 ]
