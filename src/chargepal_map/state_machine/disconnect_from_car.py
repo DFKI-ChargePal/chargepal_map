@@ -4,8 +4,9 @@ from __future__ import annotations
 import time
 from smach import State
 from pathlib import Path
+
 # local
-import state_machine.outcomes as out
+import chargepal_map.state_machine.outcomes as out
 
 # typing
 from typing import Any
@@ -20,7 +21,7 @@ class MoveArmToCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('move arm to car')
+        print('Move arm to car')
         time.sleep(_time_out)
         return out.DisconnectFromCar.arm_in_car_obs
 
@@ -32,7 +33,7 @@ class ObservePlugOnCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('observe plug on car')
+        print('Observe plug on car')
         time.sleep(_time_out)
         return out.DisconnectFromCar.arm_in_car_pre_connect
 
@@ -44,7 +45,7 @@ class GraspPlugOnCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('grasp plug on car')
+        print('Grasp plug on car')
         time.sleep(_time_out)
         return out.DisconnectFromCar.plug_in_car_connect
 
@@ -56,7 +57,7 @@ class RemovePlugFromCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('remove plug from car')
+        print('Remove plug from car')
         time.sleep(_time_out)
         return out.DisconnectFromCar.plug_in_car_post_connect
 
@@ -68,7 +69,7 @@ class MovePlugToBattery(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('move plug to battery')
+        print('Move plug to battery')
         time.sleep(_time_out)
         return out.DisconnectFromCar.plug_in_bat_obs
 
@@ -80,7 +81,7 @@ class ObserveSocketOnBattery(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('observe socket on battery')
+        print('Observe socket on battery')
         time.sleep(_time_out)
         return out.DisconnectFromCar.plug_in_bat_pre_connect
 
@@ -92,7 +93,7 @@ class InsertPlugToBattery(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('insert plug to battery')
+        print('Insert plug to battery')
         time.sleep(_time_out)
         return out.DisconnectFromCar.plug_in_bat_connect
 
@@ -104,7 +105,7 @@ class ReleasePlugOnBattery(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('release plug on battery')
+        print('Release plug on battery')
         time.sleep(_time_out)
         return out.DisconnectFromCar.arm_in_bat_post_connect
 
@@ -116,6 +117,6 @@ class MoveArmToDrivePos(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('move arm to drive pos')
+        print('Move arm to drive pos')
         time.sleep(_time_out)
         return out.DisconnectFromCar.arm_in_driving_pose

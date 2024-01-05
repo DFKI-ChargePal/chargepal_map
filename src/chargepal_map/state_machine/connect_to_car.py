@@ -45,7 +45,7 @@ class GraspPlugOnBattery(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('grasp plug on battery')
+        print('Grasp plug on battery')
         time.sleep(_time_out)
         return out.ConnectToCar.plug_in_bat_connect
 
@@ -57,7 +57,7 @@ class RemovePlugFromBattery(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('remove plug from battery')
+        print('Remove plug from battery')
         time.sleep(_time_out)
         return out.ConnectToCar.plug_in_bat_post_connect
 
@@ -69,7 +69,7 @@ class MovePlugToCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('move plug to car')
+        print('Move plug to car')
         time.sleep(_time_out)
         return out.ConnectToCar.plug_in_car_obs
 
@@ -81,7 +81,7 @@ class ObserveSocketOnCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('observe socket on car')
+        print('Observe socket on car')
         time.sleep(_time_out)
         return out.ConnectToCar.plug_in_car_pre_connect
 
@@ -93,7 +93,7 @@ class InsertPlugToCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('insert plug to car')
+        print('Insert plug to car')
         time.sleep(_time_out)
         return out.ConnectToCar.plug_in_car_connect
 
@@ -105,7 +105,7 @@ class ReleasePlugOnCar(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('release plug on car ')
+        print('Release plug on car ')
         time.sleep(_time_out)
         return out.ConnectToCar.arm_in_car_post_connect
 
@@ -117,6 +117,6 @@ class MoveArmToDrivePos(State):
         self.cfg_dir = cfg_dir
 
     def execute(self, ud: Any) -> str:
-        print('move arm to drive pos')
+        print('Move arm to drive pos')
         time.sleep(_time_out)
         return out.ConnectToCar.arm_in_driving_pose

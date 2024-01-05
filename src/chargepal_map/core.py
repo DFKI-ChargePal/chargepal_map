@@ -8,12 +8,13 @@ from smach import StateMachine
 import chargepal_map.state_machine.outcomes as out
 import chargepal_map.state_machine.connect_to_car as ctc
 import chargepal_map.state_machine.disconnect_from_car as dfc
-from chargepal_map.state_machine.utils import state_name
+from chargepal_map.state_machine.utils import state_name, silent_smach
 
 
 class StateMachineBuilder(metaclass=abc.ABCMeta):
 
     def __init__(self, cfg_dir: Path):
+        silent_smach()
         self.cfg_dir = cfg_dir
 
     @abc.abstractmethod
@@ -142,14 +143,14 @@ class DisconnectFromCar(StateMachineBuilder):
 class ProcessFactory:
 
     def __init__(self) -> None:
-        self._process_builder = {
+        self._selection = {
             'connect_to_car': ConnectToCar,
             'disconnect_from_car': DisconnectFromCar,
             }
 
-    def create(self, proc_name: str, cfg_dir: Path, ur_pilot: Pilot) -> StateMachine:
-        builder = self._process_builder[proc_name](cfg_dir=cfg_dir, pilot=ur_pilot)
-        return builder._get_process()
+    def create(self, name: str, cfg_dir: Path) -> StateMachine:
+        builder = self._selection[name](cfg_dir=cfg_dir)
+        return builder.set_up()
 
 
 manipulation_action_processor = ProcessFactory()
