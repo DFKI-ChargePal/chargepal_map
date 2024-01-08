@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# global
+import time
 import rospy
 from time import perf_counter
 from std_srvs.srv import Empty, EmptyResponse, EmptyRequest
@@ -51,17 +53,29 @@ class UserServices(metaclass=Singleton):
     stop_process = 'stop_process'
 
     def __init__(self) -> None:
-        self._user_update_rate = rospy.Rate(10) # 10hz
+        self._user_update_rate = 1/10 # 10hz
         self._cont_proc = UserRequestService(self.continue_process)
         self._stop_proc = UserRequestService(self.stop_process)
 
-    def wait_for_user(self) -> str:
-        # Reset service
-        self._cont_proc.reset()
-        self._stop_proc.reset()
-        while True:
-            self._user_update_rate.sleep()
-            if self._cont_proc.user_request():
-                return self.continue_process
-            elif self._stop_proc.user_request():
-                return self.stop_process
+    def wait_for_user(self, execute: bool = True) -> str:
+        action = ''
+        if execute:
+            rospy.loginfo(f"Wait for user input...")
+            # Reset service
+            self._cont_proc.reset()
+            self._stop_proc.reset()
+            while True:
+                try:
+                    time.sleep(self._user_update_rate)
+                    # except KeyboardInterrupt:
+                    if self._cont_proc.user_request():
+                        action = self.continue_process
+                    elif self._stop_proc.user_request():
+                        action =  self.stop_process
+                    if action:
+                        break
+                except (KeyboardInterrupt, SystemExit):
+                    break
+        else:
+            action = self.continue_process
+        return action

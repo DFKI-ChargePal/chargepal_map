@@ -15,7 +15,6 @@ from chargepal_actions.msg import (
 )
 
 
-
 class ManipulationActionServer:
 
     _ur_pilot_cfg =  'green_type2.toml'

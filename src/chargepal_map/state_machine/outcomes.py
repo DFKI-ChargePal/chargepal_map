@@ -1,4 +1,10 @@
 
+# Common process outcomes
+class Common:
+
+    # Outcome mapping
+    stop = 'stop'
+
 
 # Connect battery with car
 class ConnectToCar:

@@ -9,8 +9,9 @@ from smach import StateMachine
 
 # local
 import chargepal_map.state_machine.outcomes as out
-import chargepal_map.state_machine.connect_to_car as ctc
-import chargepal_map.state_machine.disconnect_from_car as dfc
+import chargepal_map.state_machine.states.common as com
+import chargepal_map.state_machine.states.connect_to_car as ctc
+import chargepal_map.state_machine.states.disconnect_from_car as dfc
 from chargepal_map.state_machine.utils import (
     state_name, 
     silent_smach
@@ -45,7 +46,7 @@ class ConnectToCar(StateMachineBuilder):
 
     def __init__(self, cfg_fp: Path) -> None:
         super().__init__(cfg_fp)
-        self.state_machine = StateMachine(outcomes=[out.ConnectToCar.arm_in_driving_pose])
+        self.state_machine = StateMachine(outcomes=[out.Common.stop, out.ConnectToCar.arm_in_driving_pose])
 
     def set_up(self) -> StateMachine:
         # Open smash container to add states and transitions
@@ -53,7 +54,8 @@ class ConnectToCar(StateMachineBuilder):
             StateMachine.add(
                 label=state_name(ctc.MoveArmToBattery),
                 state=ctc.MoveArmToBattery(self.config),
-                transitions={out.ConnectToCar.arm_in_bat_obs: state_name(ctc.ObservePlugOnBattery)}
+                transitions={out.ConnectToCar.arm_in_bat_obs: state_name(ctc.ObservePlugOnBattery),
+                             out.Common.stop:                 state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.ObservePlugOnBattery),
@@ -96,6 +98,11 @@ class ConnectToCar(StateMachineBuilder):
                 label=state_name(ctc.MoveArmToDrivePos),
                 state=ctc.MoveArmToDrivePos(self.config),
                 # No transition. Stop when reaching this state
+            )
+            StateMachine.add(
+                label=state_name(com.Stop),
+                state=com.Stop(self.config),
+                transitions={out.Common.stop: out.Common.stop}
             )
         return self.state_machine
 
