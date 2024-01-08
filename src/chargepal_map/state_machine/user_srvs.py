@@ -20,7 +20,7 @@ class Singleton(type):
 
 class UserRequestService:
 
-    _block_duration = 1.0  # Block service call for x seconds
+    _block_duration = 0.5  # Block service call for x seconds
 
     def __init__(self, srv_name: str) -> None:
         self._t_cb_call = perf_counter()
@@ -32,6 +32,10 @@ class UserRequestService:
         if _t_now - self._t_cb_call > self._block_duration:
             self._t_cb_call = _t_now
         return EmptyResponse()
+
+    def reset(self) -> None:
+        self._t_cb_call = perf_counter()
+        self._t_rq_call = self._t_cb_call
 
     def user_request(self) -> bool:
         if self._t_rq_call != self._t_cb_call:
@@ -52,6 +56,9 @@ class UserServices(metaclass=Singleton):
         self._stop_proc = UserRequestService(self.stop_process)
 
     def wait_for_user(self) -> str:
+        # Reset service
+        self._cont_proc.reset()
+        self._stop_proc.reset()
         while True:
             self._user_update_rate.sleep()
             if self._cont_proc.user_request():

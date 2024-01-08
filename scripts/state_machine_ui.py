@@ -1,5 +1,6 @@
 import rospy
 import PySimpleGUI as sg
+from std_srvs.srv import Empty
 
 
 class UserInterface:
@@ -13,7 +14,6 @@ class UserInterface:
     def __init__(self) -> None:
         # Create the Window
         self.window = sg.Window('State Machine UI', self.layout, margins=(30, 30))
-        
         rospy.wait_for_service('stop_process')
         rospy.wait_for_service('continue_process')
 
@@ -24,9 +24,17 @@ class UserInterface:
             if event == sg.WIN_CLOSED:
                 break
             elif event == 'Continue':
-                print('user continue')
+                try:
+                    continue_process = rospy.ServiceProxy('continue_process', Empty)
+                    continue_process()
+                except rospy.ServiceException as e:
+                    rospy.logerr(f"Service call to continue the process failed. {e}")
             elif event == 'Stop':
-                print('user stop')
+                try:
+                    stop_process = rospy.ServiceProxy('stop_process', Empty)
+                    stop_process()
+                except rospy.ServiceException as e:
+                    rospy.logerr(f"Service call to stop process failed. {e}")
         self.window.close()
 
 
