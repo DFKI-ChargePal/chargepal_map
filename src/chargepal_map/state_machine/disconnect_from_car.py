@@ -7,6 +7,8 @@ from pathlib import Path
 
 # local
 import chargepal_map.state_machine.outcomes as out
+from chargepal_map.state_machine.user_srvs import UserServices
+from chargepal_map.state_machine.state_config import StateConfig
 
 # typing
 from typing import Any
@@ -16,9 +18,10 @@ _time_out = 1.0
 
 class MoveArmToCar(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.arm_in_car_obs])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Move arm to car')
@@ -28,9 +31,10 @@ class MoveArmToCar(State):
 
 class ObservePlugOnCar(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.arm_in_car_pre_connect], output_keys=['xyz_xyzw_base2socket'])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Observe plug on car')
@@ -40,9 +44,10 @@ class ObservePlugOnCar(State):
 
 class GraspPlugOnCar(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.plug_in_car_connect], input_keys=['xyz_xyzw_base2socket'])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Grasp plug on car')
@@ -52,9 +57,10 @@ class GraspPlugOnCar(State):
 
 class RemovePlugFromCar(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.plug_in_car_post_connect])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Remove plug from car')
@@ -64,9 +70,10 @@ class RemovePlugFromCar(State):
 
 class MovePlugToBattery(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.plug_in_bat_obs])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Move plug to battery')
@@ -76,9 +83,10 @@ class MovePlugToBattery(State):
 
 class ObserveSocketOnBattery(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.plug_in_bat_pre_connect], output_keys=['xyz_xyzw_base2socket'])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Observe socket on battery')
@@ -88,9 +96,10 @@ class ObserveSocketOnBattery(State):
 
 class InsertPlugToBattery(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.plug_in_bat_connect], input_keys=['xyz_xyzw_base2socket'])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Insert plug to battery')
@@ -100,9 +109,10 @@ class InsertPlugToBattery(State):
 
 class ReleasePlugOnBattery(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.arm_in_bat_post_connect])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Release plug on battery')
@@ -112,9 +122,10 @@ class ReleasePlugOnBattery(State):
 
 class MoveArmToDrivePos(State):
 
-    def __init__(self, cfg_dir: Path):
+    def __init__(self, config: dict[str, Any]):
         super().__init__(outcomes=[out.DisconnectFromCar.arm_in_driving_pose])
-        self.cfg_dir = cfg_dir
+        self.cfg = StateConfig(type(self), config=config)
+        self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
         print('Move arm to drive pos')

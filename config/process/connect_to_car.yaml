@@ -1,0 +1,5 @@
+common:
+  step_by_user: true
+
+move_arm_to_battery:
+  const: 10

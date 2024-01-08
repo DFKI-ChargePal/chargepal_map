@@ -33,8 +33,9 @@ class ManipulationActionServer:
         self._ctc_as.start()
         self._dfc_as.start()
         # Create state machine
-        self.ctc_process = manipulation_action_processor.create('connect_to_car', self._cfk_dir)
-        self.dfc_process = manipulation_action_processor.create('disconnect_from_car', self._cfk_dir)
+        self._proc_cfg_dir = self._cfk_dir.joinpath('process')
+        self.ctc_process = manipulation_action_processor.create('connect_to_car', self._proc_cfg_dir)
+        self.dfc_process = manipulation_action_processor.create('disconnect_from_car', self._proc_cfg_dir)
 
     def connect_to_car(self, goal: ConnectPlugToCarActionGoal) -> None:
         rospy.loginfo(f"Approach connect plug to car process")
