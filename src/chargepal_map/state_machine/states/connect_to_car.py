@@ -42,7 +42,8 @@ class MoveArmToBattery(State):
 class ObservePlugOnBattery(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.arm_in_bat_pre_connect], output_keys=['xyz_xyzw_base2socket'])
+        super().__init__(outcomes=[out.Common.stop,out.ConnectToCar.arm_in_bat_pre_connect], 
+                         output_keys=['xyz_xyzw_base2socket'])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -65,7 +66,8 @@ class ObservePlugOnBattery(State):
 class GraspPlugOnBattery(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_bat_connect], input_keys=['xyz_xyzw_base2socket'])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.plug_in_bat_connect], 
+                         input_keys=['xyz_xyzw_base2socket'])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -88,7 +90,7 @@ class GraspPlugOnBattery(State):
 class RemovePlugFromBattery(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_bat_post_connect])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.plug_in_bat_post_connect])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -111,7 +113,7 @@ class RemovePlugFromBattery(State):
 class MovePlugToCar(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_obs])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.plug_in_car_obs])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -134,7 +136,8 @@ class MovePlugToCar(State):
 class ObserveSocketOnCar(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_pre_connect], output_keys=['xyz_xyzw_base2socket'])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.plug_in_car_pre_connect],
+                         output_keys=['xyz_xyzw_base2socket'])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -157,7 +160,8 @@ class ObserveSocketOnCar(State):
 class InsertPlugToCar(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.plug_in_car_connect], input_keys=['xyz_xyzw_base2socket'])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.plug_in_car_connect],
+                         input_keys=['xyz_xyzw_base2socket'])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -180,7 +184,7 @@ class InsertPlugToCar(State):
 class ReleasePlugOnCar(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.arm_in_car_post_connect])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.arm_in_car_post_connect])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
@@ -203,7 +207,7 @@ class ReleasePlugOnCar(State):
 class MoveArmToDrivePos(State):
 
     def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.ConnectToCar.arm_in_driving_pose])
+        super().__init__(outcomes=[out.Common.stop, out.ConnectToCar.arm_in_driving_pose])
         self.cfg = StateConfig(type(self), config=config)
         self.usr_srvs = UserServices()
 
