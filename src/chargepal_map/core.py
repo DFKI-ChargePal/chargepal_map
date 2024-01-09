@@ -4,6 +4,7 @@ from __future__ import annotations
 import abc
 import yaml
 import rospy
+import actionlib
 from pathlib import Path
 from smach import StateMachine
 
@@ -17,14 +18,24 @@ from chargepal_map.state_machine.utils import (
     silent_smach
 )
 
+# actions
+from chargepal_actions.msg import (
+    ConnectPlugToCarAction, 
+    ConnectPlugToCarActionGoal,
+    ConnectPlugToCarActionFeedback,
+    DisconnectPlugFromCarAction,
+    DisconnectPlugFromCarActionGoal,
+)
+
 # typing 
 from typing import Any, Type
 
 
 class StateMachineBuilder(metaclass=abc.ABCMeta):
 
-    def __init__(self, cfg_fp: Path):
+    def __init__(self, name: str, cfg_fp: Path):
         silent_smach()
+        self.name = name
         if not cfg_fp.exists():
             raise FileNotFoundError(f"Can't find configuration file under: {cfg_fp}")
         # load configuration file
@@ -38,17 +49,40 @@ class StateMachineBuilder(metaclass=abc.ABCMeta):
             self.config = {}
 
     @abc.abstractmethod
-    def set_up(self) -> StateMachine:
+    def action_callback(self, goal: Any) -> None:
+        raise NotImplementedError("Must be implemented in child class")
+
+    @abc.abstractmethod
+    def set_up(self) -> None:
         raise NotImplementedError("Must be implemented in child class")
 
 
 class ConnectToCar(StateMachineBuilder):
 
-    def __init__(self, cfg_fp: Path) -> None:
-        super().__init__(cfg_fp)
+    def __init__(self, name: str, cfg_fp: Path) -> None:
+        super().__init__(name, cfg_fp)
         self.state_machine = StateMachine(outcomes=[out.Common.stop, out.ConnectToCar.arm_in_driving_pose])
+        self.action_server = actionlib.SimpleActionServer(self.name, 
+                                                          ConnectPlugToCarAction, self.action_callback, False)
+        self.action_server.start()
 
-    def set_up(self) -> StateMachine:
+    def action_callback(self, goal: ConnectPlugToCarActionGoal) -> None:
+        rospy.loginfo(f"Approach connect plug to car process")
+        try:
+            rospy.loginfo(f"Process connect task step by step")
+            feedback = ConnectPlugToCarActionFeedback()
+            feedback.status = "BlaBlaBla"
+            self.action_server.publish_feedback(feedback)
+            # Execute SMACH plan
+            outcome = self.state_machine.execute()
+            self.action_server.set_succeeded()
+            rospy.loginfo(f"Finish connect process successfully.")
+        except Exception as e:
+            rospy.logwarn(f"Error while plugging process: {e}")
+            self.action_server.set_aborted()
+        rospy.loginfo(f"Leaving connect plug to car process")
+
+    def set_up(self) -> None:
         # Open smash container to add states and transitions
         with self.state_machine:
             StateMachine.add(
@@ -111,16 +145,31 @@ class ConnectToCar(StateMachineBuilder):
                 state=com.Stop(self.config),
                 transitions={out.Common.stop: out.Common.stop}
             )
-        return self.state_machine
 
 
 class DisconnectFromCar(StateMachineBuilder):
 
-    def __init__(self, cfg_fp: Path) -> None:
-        super().__init__(cfg_fp)
+    def __init__(self, name: str, cfg_fp: Path) -> None:
+        super().__init__(name, cfg_fp)
         self.state_machine = StateMachine(outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_driving_pose])
+        self.action_server = actionlib.SimpleActionServer(self.name, 
+                                                          DisconnectPlugFromCarAction, self.action_callback, False)
+        self.action_server.start()
 
-    def set_up(self) -> StateMachine:
+    def action_callback(self, goal: DisconnectPlugFromCarActionGoal) -> None:
+        rospy.loginfo(f"Approach disconnect plug from car process")
+        try:
+            rospy.loginfo(f"Process disconnect task step by step")
+            # Execute SMACH plan
+            outcome = self.state_machine.execute()
+            self.action_server.set_succeeded()
+            rospy.loginfo(f"Finish disconnect process successfully.")
+        except Exception as e:
+            rospy.logwarn(f"Error while plugging process: {e}")
+            self.action_server.set_aborted()
+        rospy.loginfo(f"Leaving disconnect plug from car process")
+
+    def set_up(self) -> None:
         # Open smash container to add states and transitions
         with self.state_machine:
             StateMachine.add(
@@ -183,7 +232,6 @@ class DisconnectFromCar(StateMachineBuilder):
                 state=com.Stop(self.config),
                 transitions={out.Common.stop: out.Common.stop}
             )
-        return self.state_machine
 
 
 class ProcessFactory:
@@ -194,10 +242,11 @@ class ProcessFactory:
     def register_process(self, name: str, process: Type[StateMachineBuilder]) -> None:
         self._selection[name] = process
 
-    def create(self, name: str, cfg_dir: Path) -> StateMachine:
+    def create(self, name: str, cfg_dir: Path) -> StateMachineBuilder:
         cfg_fp = cfg_dir.joinpath(name + '.yaml')
-        builder = self._selection[name](cfg_fp=cfg_fp)
-        return builder.set_up()
+        builder = self._selection[name](name=name, cfg_fp=cfg_fp)
+        builder.set_up()
+        return builder
 
 
 manipulation_action_processor = ProcessFactory()

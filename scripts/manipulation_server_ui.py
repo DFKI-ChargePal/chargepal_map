@@ -32,7 +32,7 @@ class UserInterface:
         [sg.Text('Process status: '), sg.Text('READY', text_color='blue', key='-STATUS-')],
         [sg.Text('    ')],
         [sg.Text('User commands: ')],
-        [sg.Button('Continue', size=(32, 7)), sg.Button('Stop', size=(32, 7))],
+        [sg.Button('Continue', size=(32, 7), disabled=True), sg.Button('Stop', size=(32, 7), disabled=True)],
     ]
 
     def __init__(self) -> None:
@@ -44,7 +44,6 @@ class UserInterface:
         rospy.wait_for_service('stop_process')
         rospy.wait_for_service('continue_process')
         self.state = ProcessStatus.READY
-
 
     def run(self) -> None:
         while True:
@@ -97,7 +96,7 @@ class UserInterface:
                 self.window['-STATUS-'].update(value='READY', text_color='blue')
             else:
                 self.window['-STATUS-'].update(value='')
-        
+
         self.window.close()
 
 
