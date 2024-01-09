@@ -2,5 +2,28 @@ common:
   step_by_user: true
 
 move_arm_to_battery:
-  step_by_user: true
+  step_by_user: false
 
+observe_plug_on_battery:
+  step_by_user: false
+
+grasp_plug_on_battery:
+  step_by_user: false
+
+remove_plug_from_battery:
+  step_by_user: false
+
+move_plug_to_car:
+  step_by_user: false
+
+observe_socket_on_car:
+  step_by_user: false
+
+insert_plug_to_car:
+  step_by_user: false
+
+release_plug_on_car:
+  step_by_user: false
+
+move_arm_to_drive_pos:
+  step_by_user: false

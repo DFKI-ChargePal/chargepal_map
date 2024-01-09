@@ -1,6 +1,14 @@
 <launch>
 
+	<arg name="gui" default="true" doc="Option to bringup a GUI"/>
+
+
 	<node pkg="chargepal_map" type="manipulation_server.py" name="manipulation_server" output="screen">
 	</node>
+
+	<group if="$(eval arg('gui'))">
+		<node pkg="chargepal_map" type="manipulation_server_ui.py" name="manipulation_server_ui" output="screen">
+		</node>
+	</group>
 
 </launch>

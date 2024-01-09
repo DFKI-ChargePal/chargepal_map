@@ -48,7 +48,7 @@ class ObservePlugOnBattery(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Observe plug on battery')
+        rospy.loginfo('Observe plug on battery')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -72,7 +72,7 @@ class GraspPlugOnBattery(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Grasp plug on battery')
+        rospy.loginfo('Grasp plug on battery')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -95,7 +95,7 @@ class RemovePlugFromBattery(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Remove plug from battery')
+        rospy.loginfo('Remove plug from battery')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -118,7 +118,7 @@ class MovePlugToCar(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Move plug to car')
+        rospy.loginfo('Move plug to car')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -142,7 +142,7 @@ class ObserveSocketOnCar(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Observe socket on car')
+        rospy.loginfo('Observe socket on car')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -166,7 +166,7 @@ class InsertPlugToCar(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Insert plug to car')
+        rospy.loginfo('Insert plug to car')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -189,7 +189,7 @@ class ReleasePlugOnCar(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Release plug on car ')
+        rospy.loginfo('Release plug on car ')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
@@ -212,7 +212,7 @@ class MoveArmToDrivePos(State):
         self.usr_srvs = UserServices()
 
     def execute(self, ud: Any) -> str:
-        print('Move arm to drive pos')
+        rospy.loginfo('Move arm to drive pos')
 
         # --- Add your magic here --- #
         time.sleep(_time_out)
