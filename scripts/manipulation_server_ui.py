@@ -32,7 +32,7 @@ class UserInterface:
         [sg.Text('Process status: '), sg.Text('READY', text_color='blue', key='-STATUS-')],
         [sg.Text('    ')],
         [sg.Text('User commands: ')],
-        [sg.Button('Continue', size=(32, 7), disabled=True), sg.Button('Stop', size=(32, 7), disabled=True)],
+        [sg.Button('Continue', size=(32, 7), disabled=False), sg.Button('Stop', size=(32, 7), disabled=True)],
     ]
 
     def __init__(self) -> None:

@@ -6,17 +6,19 @@ from smach import State
 
 # local
 import chargepal_map.state_machine.outcomes as out
-from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.states.base import BaseState
 
 # typing
 from typing import Any
+from actionlib import SimpleActionServer
 
 
 class Stop(State):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop])
-        self.cfg = StateConfig(type(self), config=config)
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+
+        State.__init__(self, outcomes=[out.Common.stop])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo(f"Ended up in stop condition. Stop process...")

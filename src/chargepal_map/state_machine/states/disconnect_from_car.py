@@ -7,21 +7,20 @@ from smach import State
 
 # local
 import chargepal_map.state_machine.outcomes as out
-from chargepal_map.state_machine.user_srvs import UserServices
-from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.states.base import BaseState
 
 # typing
 from typing import Any
+from actionlib import SimpleActionServer
 
 _time_out = 1.0
 
 
-class MoveArmToCar(State):
+class MoveArmToCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_obs])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_obs])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to car')
@@ -29,23 +28,16 @@ class MoveArmToCar(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-        
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.arm_in_car_obs
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.arm_in_car_obs, out.Common.stop)
 
 
-class ObservePlugOnCar(State):
+class ObservePlugOnCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_pre_connect],
-                         output_keys=['xyz_xyzw_base2socket'])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, 
+                       outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_pre_connect],
+                       output_keys=['xyz_xyzw_base2socket'])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Observe plug on car')
@@ -53,23 +45,16 @@ class ObservePlugOnCar(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.arm_in_car_pre_connect
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.arm_in_car_pre_connect, out.Common.stop)
 
 
-class GraspPlugOnCar(State):
+class GraspPlugOnCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_connect],
-                         input_keys=['xyz_xyzw_base2socket'])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, 
+                       outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_connect],
+                       input_keys=['xyz_xyzw_base2socket'])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Grasp plug on car')
@@ -77,22 +62,14 @@ class GraspPlugOnCar(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.plug_in_car_connect
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.plug_in_car_connect, out.Common.stop)
 
 
-class RemovePlugFromCar(State):
+class RemovePlugFromCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_post_connect])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_post_connect])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Remove plug from car')
@@ -100,22 +77,14 @@ class RemovePlugFromCar(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.plug_in_car_post_connect
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.plug_in_car_post_connect, out.Common.stop)
 
 
-class MovePlugToBattery(State):
+class MovePlugToBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_obs])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_obs])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move plug to battery')
@@ -123,23 +92,16 @@ class MovePlugToBattery(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.plug_in_bat_obs
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.plug_in_bat_obs, out.Common.stop)
 
 
-class ObserveSocketOnBattery(State):
+class ObserveSocketOnBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_pre_connect],
-                         output_keys=['xyz_xyzw_base2socket'])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, 
+                       outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_pre_connect],
+                       output_keys=['xyz_xyzw_base2socket'])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Observe socket on battery')
@@ -147,23 +109,16 @@ class ObserveSocketOnBattery(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.plug_in_bat_pre_connect
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.plug_in_bat_pre_connect, out.Common.stop)
 
 
-class InsertPlugToBattery(State):
+class InsertPlugToBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_connect],
-                         input_keys=['xyz_xyzw_base2socket'])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, 
+                       outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_connect],
+                       input_keys=['xyz_xyzw_base2socket'])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Insert plug to battery')
@@ -171,22 +126,14 @@ class InsertPlugToBattery(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.plug_in_bat_connect
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.plug_in_bat_connect, out.Common.stop)
 
 
-class ReleasePlugOnBattery(State):
+class ReleasePlugOnBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_bat_post_connect])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_bat_post_connect])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Release plug on battery')
@@ -194,22 +141,14 @@ class ReleasePlugOnBattery(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.arm_in_bat_post_connect
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.arm_in_bat_post_connect, out.Common.stop)
 
 
-class MoveArmToDrivePos(State):
+class MoveArmToDrivePos(State, BaseState):
 
-    def __init__(self, config: dict[str, Any]):
-        super().__init__(outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_driving_pose])
-        self.cfg = StateConfig(type(self), config=config)
-        self.usr_srvs = UserServices()
+    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+        State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_driving_pose])
+        BaseState.__init__(self, config, action_srv)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to drive pos')
@@ -217,11 +156,4 @@ class MoveArmToDrivePos(State):
         # --- Add your magic here --- #
         time.sleep(_time_out)
         # --------------------------- #
-
-        usr_action = self.usr_srvs.wait_for_user(self.cfg.data['step_by_user'])
-        if usr_action == UserServices.continue_process:
-            return out.DisconnectFromCar.arm_in_driving_pose
-        elif usr_action == UserServices.stop_process:
-            return out.Common.stop
-        else:
-            raise ValueError(f"Undefined user action {usr_action}")
+        return self._user_request(out.DisconnectFromCar.arm_in_driving_pose, out.Common.stop)
