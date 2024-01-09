@@ -66,8 +66,6 @@ class UserInterface:
             
             ctc_ac_state = self._ctc_ac.get_state()
             dfc_ac_state = self._dfc_ac.get_state()
-            # rospy.loginfo(f"Action client CTC state: {self._ctc_ac.get_state()}")
-            # rospy.loginfo(f"Action client DFC state: {self._dfc_ac.get_state()}")
             if ctc_ac_state == GoalStatus.ACTIVE or dfc_ac_state == GoalStatus.ACTIVE:
                 self.state = ProcessStatus.RUN
             elif (ctc_ac_state == GoalStatus.SUCCEEDED or ctc_ac_state == GoalStatus.LOST) and (dfc_ac_state == GoalStatus.SUCCEEDED or dfc_ac_state == GoalStatus.LOST):

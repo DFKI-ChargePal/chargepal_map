@@ -70,9 +70,6 @@ class ConnectToCar(StateMachineBuilder):
         rospy.loginfo(f"Approach connect plug to car process")
         try:
             rospy.loginfo(f"Process connect task step by step")
-            feedback = ConnectPlugToCarActionFeedback()
-            feedback.status = "BlaBlaBla"
-            self.action_server.publish_feedback(feedback)
             # Execute SMACH plan
             outcome = self.state_machine.execute()
             self.action_server.set_succeeded()
@@ -81,6 +78,11 @@ class ConnectToCar(StateMachineBuilder):
             rospy.logwarn(f"Error while plugging process: {e}")
             self.action_server.set_aborted()
         rospy.loginfo(f"Leaving connect plug to car process")
+
+    def action_feedback(self) -> None:
+        feedback = ConnectPlugToCarActionFeedback()
+        feedback.status = "BlaBlaBla"
+        self.action_server.publish_feedback(feedback)
 
     def set_up(self) -> None:
         # Open smash container to add states and transitions
