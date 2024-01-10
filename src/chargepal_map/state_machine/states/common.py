@@ -10,15 +10,15 @@ from chargepal_map.state_machine.states.base import BaseState
 
 # typing
 from typing import Any
-from actionlib import SimpleActionServer
+from chargepal_map.state_machine.process import ProcessABC
 
 
 class Stop(State):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
 
         State.__init__(self, outcomes=[out.Common.stop])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo(f"Ended up in stop condition. Stop process...")

@@ -11,16 +11,16 @@ from chargepal_map.state_machine.states.base import BaseState
 
 # typing
 from typing import Any
-from actionlib import SimpleActionServer
+from chargepal_map.state_machine.process import ProcessABC
 
 _time_out = 1.0
 
 
 class MoveArmToCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_obs])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to car')
@@ -33,11 +33,11 @@ class MoveArmToCar(State, BaseState):
 
 class ObservePlugOnCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, 
                        outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_pre_connect],
                        output_keys=['xyz_xyzw_base2socket'])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Observe plug on car')
@@ -50,11 +50,11 @@ class ObservePlugOnCar(State, BaseState):
 
 class GraspPlugOnCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, 
                        outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_connect],
                        input_keys=['xyz_xyzw_base2socket'])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Grasp plug on car')
@@ -67,9 +67,9 @@ class GraspPlugOnCar(State, BaseState):
 
 class RemovePlugFromCar(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_post_connect])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Remove plug from car')
@@ -82,9 +82,9 @@ class RemovePlugFromCar(State, BaseState):
 
 class MovePlugToBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_obs])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move plug to battery')
@@ -97,11 +97,11 @@ class MovePlugToBattery(State, BaseState):
 
 class ObserveSocketOnBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, 
                        outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_pre_connect],
                        output_keys=['xyz_xyzw_base2socket'])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Observe socket on battery')
@@ -114,11 +114,11 @@ class ObserveSocketOnBattery(State, BaseState):
 
 class InsertPlugToBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, 
                        outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_connect],
                        input_keys=['xyz_xyzw_base2socket'])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Insert plug to battery')
@@ -131,9 +131,9 @@ class InsertPlugToBattery(State, BaseState):
 
 class ReleasePlugOnBattery(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_bat_post_connect])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Release plug on battery')
@@ -146,9 +146,9 @@ class ReleasePlugOnBattery(State, BaseState):
 
 class MoveArmToDrivePos(State, BaseState):
 
-    def __init__(self, config: dict[str, Any], action_srv: SimpleActionServer):
+    def __init__(self, config: dict[str, Any], process: ProcessABC):
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_driving_pose])
-        BaseState.__init__(self, config, action_srv)
+        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to drive pos')

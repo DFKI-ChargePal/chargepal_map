@@ -2,10 +2,10 @@ common:
   step_by_user: true
 
 move_arm_to_battery:
-  step_by_user: false
+  step_by_user: true
 
 observe_plug_on_battery:
-  step_by_user: false
+  step_by_user: true
 
 grasp_plug_on_battery:
   step_by_user: false

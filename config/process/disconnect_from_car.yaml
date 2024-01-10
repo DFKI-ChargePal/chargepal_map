@@ -23,7 +23,7 @@ insert_plug_to_battery:
   step_by_user: false
 
 release_plug_on_battery:
-  step_by_user: false
+  step_by_user: true
 
 move_arm_to_drive_pos:
-  step_by_user: false
+  step_by_user: true
