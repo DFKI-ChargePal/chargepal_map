@@ -3,6 +3,7 @@ from __future__ import annotations
 # global
 import re
 import copy
+import yaml
 
 # typing
 from typing import Any
@@ -22,9 +23,9 @@ class StateConfig:
         # Split object name at uppercase letters
         upper_split = re.findall('[A-Z][^A-Z]*', obj.__name__)
         # Make all splits lowercase and connect them by _
-        name = "_".join(upper_split).lower()
+        self.name = "_".join(upper_split).lower()
         # Try to get configuration with class name
-        state_data = copy.deepcopy(config.get(name))
+        state_data = copy.deepcopy(config.get(self.name))
         if state_data is None:
             state_data = {}
         # Set default values if not already exists
@@ -33,3 +34,9 @@ class StateConfig:
         # Set configuration data
         common_data.update(state_data)
         self.data = common_data
+
+    def dump(self) -> str:
+        _data = {
+            self.name: self.data
+        }
+        return  yaml.dump(_data)

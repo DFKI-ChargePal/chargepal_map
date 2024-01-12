@@ -167,3 +167,29 @@ class MoveArmToDrivePos(State):
         time.sleep(_time_out)
         # --------------------------- #
         return self.uc.request_action(out.ConnectToCar.arm_in_driving_pose, out.Common.stop)
+
+
+def default_config() -> str:
+
+    res = ''
+    states = [
+        MoveArmToBattery,
+        ObservePlugOnBattery,
+        GraspPlugOnBattery,
+        RemovePlugFromBattery,
+        MovePlugToCar,
+        ObserveSocketOnCar,
+        InsertPlugToCar,
+        ReleasePlugOnCar,
+        MoveArmToDrivePos
+    ]
+
+    for s in states:
+        
+        res += StateConfig(s, {}).dump()
+
+    return res
+
+
+if __name__ == '__main__':
+    print(default_config())
