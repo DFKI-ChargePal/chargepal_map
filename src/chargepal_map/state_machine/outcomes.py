@@ -1,4 +1,3 @@
-
 # Common process outcomes
 class Common:
 
