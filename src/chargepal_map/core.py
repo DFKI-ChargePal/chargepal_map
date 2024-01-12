@@ -26,7 +26,7 @@ from chargepal_actions.msg import (
     DisconnectPlugFromCarFeedback,
 )
 
-# typing 
+# typing
 from typing import Type
 
 
@@ -35,7 +35,7 @@ class ConnectToCar(ProcessABC):
     def __init__(self, name: str, cfg_fp: Path) -> None:
         super().__init__(name, cfg_fp)
         self.state_machine = StateMachine(outcomes=[out.Common.stop, out.ConnectToCar.arm_in_driving_pose])
-        self.action_server = actionlib.SimpleActionServer(self.name, 
+        self.action_server = actionlib.SimpleActionServer(self.name,
                                                           ConnectPlugToCarAction, self.action_callback, False)
         self.action_server.start()
 

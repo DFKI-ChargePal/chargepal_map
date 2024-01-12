@@ -29,7 +29,7 @@ class UserRequestService:
         self._t_rq_call = self._t_cb_call
         self.ros_srv = rospy.Service(srv_name, Empty, self._callback)
 
-    def _callback(self, req: EmptyRequest) -> EmptyRequest:
+    def _callback(self, req: EmptyRequest) -> EmptyResponse:
         _t_now = perf_counter()
         if _t_now - self._t_cb_call > self._block_duration:
             self._t_cb_call = _t_now

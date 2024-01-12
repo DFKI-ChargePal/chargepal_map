@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(chargepal_map)
 
 find_package(catkin REQUIRED COMPONENTS
+  message_generation
   actionlib
   actionlib_msgs
   rospy
@@ -9,6 +10,22 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 catkin_python_setup()
+
+
+################################################
+## Declare ROS messages, services and actions ##
+################################################
+
+add_service_files(
+  DIRECTORY srv
+  FILES
+  User.srv
+)
+
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+)
 
 
 ###################################
