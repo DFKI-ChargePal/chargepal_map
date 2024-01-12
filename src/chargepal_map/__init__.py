@@ -1,10 +1,9 @@
 
 from chargepal_map.core import manipulation_action_processor
-
-from chargepal_map.state_machine.user_srvs import UserServices
+from chargepal_map.ui.user_interface import ui
 
 
 __all__ = [
-    'UserServices',
+    'ui',
     'manipulation_action_processor',
 ]

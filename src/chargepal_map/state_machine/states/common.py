@@ -6,19 +6,19 @@ from smach import State
 
 # local
 import chargepal_map.state_machine.outcomes as out
-from chargepal_map.state_machine.states.base import BaseState
+from chargepal_map.ui.user_client import UserClient
+from chargepal_map.state_machine.state_config import StateConfig
 
 # typing
 from typing import Any
-from chargepal_map.state_machine.process import ProcessABC
 
 
 class Stop(State):
 
-    def __init__(self, config: dict[str, Any], process: ProcessABC):
-
+    def __init__(self, config: dict[str, Any]):
+        self.cfg = StateConfig(type(self), config=config)
+        self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.Common.stop])
-        BaseState.__init__(self, config, process)
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo(f"Ended up in stop condition. Stop process...")

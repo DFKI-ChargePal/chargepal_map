@@ -62,62 +62,62 @@ class ConnectToCar(ProcessABC):
         with self.state_machine:
             StateMachine.add(
                 label=state_name(ctc.MoveArmToBattery),
-                state=ctc.MoveArmToBattery(self.config, self),
+                state=ctc.MoveArmToBattery(self.config),
                 transitions={out.ConnectToCar.arm_in_bat_obs: state_name(ctc.ObservePlugOnBattery),
                              out.Common.stop:                 state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.ObservePlugOnBattery),
-                state=ctc.ObservePlugOnBattery(self.config, self),
+                state=ctc.ObservePlugOnBattery(self.config),
                 transitions={out.ConnectToCar.arm_in_bat_pre_connect: state_name(ctc.GraspPlugOnBattery),
                              out.Common.stop:                         state_name(com.Stop)},
                 remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc.GraspPlugOnBattery),
-                state=ctc.GraspPlugOnBattery(self.config, self),
+                state=ctc.GraspPlugOnBattery(self.config),
                 transitions={out.ConnectToCar.plug_in_bat_connect: state_name(ctc.RemovePlugFromBattery),
                              out.Common.stop:                      state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.RemovePlugFromBattery),
-                state=ctc.RemovePlugFromBattery(self.config, self),
+                state=ctc.RemovePlugFromBattery(self.config),
                 transitions={out.ConnectToCar.plug_in_bat_post_connect: state_name(ctc.MovePlugToCar),
                              out.Common.stop:                           state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.MovePlugToCar),
-                state=ctc.MovePlugToCar(self.config, self),
+                state=ctc.MovePlugToCar(self.config),
                 transitions={out.ConnectToCar.plug_in_car_obs: state_name(ctc.ObserveSocketOnCar),
                              out.Common.stop:                  state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.ObserveSocketOnCar),
-                state=ctc.ObserveSocketOnCar(self.config, self),
+                state=ctc.ObserveSocketOnCar(self.config),
                 transitions={out.ConnectToCar.plug_in_car_pre_connect: state_name(ctc.InsertPlugToCar),
                              out.Common.stop:                          state_name(com.Stop)},
                 remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc.InsertPlugToCar),
-                state=ctc.InsertPlugToCar(self.config, self),
+                state=ctc.InsertPlugToCar(self.config),
                 transitions={out.ConnectToCar.plug_in_car_connect: state_name(ctc.ReleasePlugOnCar),
                              out.Common.stop:                      state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.ReleasePlugOnCar),
-                state=ctc.ReleasePlugOnCar(self.config, self),
+                state=ctc.ReleasePlugOnCar(self.config),
                 transitions={out.ConnectToCar.arm_in_car_post_connect: state_name(ctc.MoveArmToDrivePos),
                              out.Common.stop:                          state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc.MoveArmToDrivePos),
-                state=ctc.MoveArmToDrivePos(self.config, self),
+                state=ctc.MoveArmToDrivePos(self.config),
                 transitions={out.ConnectToCar.arm_in_driving_pose: out.ConnectToCar.arm_in_driving_pose}
             )
             StateMachine.add(
                 label=state_name(com.Stop),
-                state=com.Stop(self.config, self),
+                state=com.Stop(self.config),
                 transitions={out.Common.stop: out.Common.stop}
             )
 
@@ -154,62 +154,62 @@ class DisconnectFromCar(ProcessABC):
         with self.state_machine:
             StateMachine.add(
                 label=state_name(dfc.MoveArmToCar),
-                state=dfc.MoveArmToCar(self.config, self),
+                state=dfc.MoveArmToCar(self.config),
                 transitions={out.DisconnectFromCar.arm_in_car_obs: state_name(dfc.ObservePlugOnCar),
                              out.Common.stop:                      state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc.ObservePlugOnCar),
-                state=dfc.ObservePlugOnCar(self.config, self),
+                state=dfc.ObservePlugOnCar(self.config),
                 transitions={out.DisconnectFromCar.arm_in_car_pre_connect: state_name(dfc.GraspPlugOnCar),
                              out.Common.stop:                              state_name(com.Stop)},
                 remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc.GraspPlugOnCar),
-                state=dfc.GraspPlugOnCar(self.config, self),
+                state=dfc.GraspPlugOnCar(self.config),
                 transitions={out.DisconnectFromCar.plug_in_car_connect: state_name(dfc.RemovePlugFromCar),
                              out.Common.stop:                           state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc.RemovePlugFromCar),
-                state=dfc.RemovePlugFromCar(self.config, self),
+                state=dfc.RemovePlugFromCar(self.config),
                 transitions={out.DisconnectFromCar.plug_in_car_post_connect: state_name(dfc.MovePlugToBattery),
                              out.Common.stop:                                state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc.MovePlugToBattery),
-                state=dfc.MovePlugToBattery(self.config, self),
+                state=dfc.MovePlugToBattery(self.config),
                 transitions={out.DisconnectFromCar.plug_in_bat_obs: state_name(dfc.ObserveSocketOnBattery),
                              out.Common.stop:                       state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc.ObserveSocketOnBattery),
-                state=dfc.ObserveSocketOnBattery(self.config, self),
+                state=dfc.ObserveSocketOnBattery(self.config),
                 transitions={out.DisconnectFromCar.plug_in_bat_pre_connect: state_name(dfc.InsertPlugToBattery),
                              out.Common.stop:                               state_name(com.Stop)},
                 remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc.InsertPlugToBattery),
-                state=dfc.InsertPlugToBattery(self.config, self),
+                state=dfc.InsertPlugToBattery(self.config),
                 transitions={out.DisconnectFromCar.plug_in_bat_connect: state_name(dfc.ReleasePlugOnBattery),
                              out.Common.stop:                           state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc.ReleasePlugOnBattery),
-                state=dfc.ReleasePlugOnBattery(self.config, self),
+                state=dfc.ReleasePlugOnBattery(self.config),
                 transitions={out.DisconnectFromCar.arm_in_bat_post_connect: state_name(dfc.MoveArmToDrivePos),
                              out.Common.stop:                               state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc.MoveArmToDrivePos),
-                state=dfc.MoveArmToDrivePos(self.config, self),
+                state=dfc.MoveArmToDrivePos(self.config),
                 transitions={out.DisconnectFromCar.arm_in_driving_pose: out.DisconnectFromCar.arm_in_driving_pose}
             )
             StateMachine.add(
                 label=state_name(com.Stop),
-                state=com.Stop(self.config, self),
+                state=com.Stop(self.config),
                 transitions={out.Common.stop: out.Common.stop}
             )
 
@@ -219,7 +219,7 @@ class ProcessFactory:
     def __init__(self) -> None:
         self._selection: dict[str, Type[ProcessABC]] = {}
 
-    def register_process(self, name: str, process: Type[ProcessABC]) -> None:
+    def register(self, name: str, process: Type[ProcessABC]) -> None:
         self._selection[name] = process
 
     def create(self, name: str, cfg_dir: Path) -> ProcessABC:
@@ -230,5 +230,5 @@ class ProcessFactory:
 
 
 manipulation_action_processor = ProcessFactory()
-manipulation_action_processor.register_process('connect_to_car', ConnectToCar)
-manipulation_action_processor.register_process('disconnect_from_car', DisconnectFromCar)
+manipulation_action_processor.register('connect_to_car', ConnectToCar)
+manipulation_action_processor.register('disconnect_from_car', DisconnectFromCar)
