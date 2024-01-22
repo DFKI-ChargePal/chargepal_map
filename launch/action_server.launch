@@ -1,10 +1,10 @@
 <launch>
 
 	<arg name="gui" default="true" doc="Option to bringup a GUI"/>
-	<arg name="config_dir" default="$(find chargepal_map)/config"/>
+	<arg name="config_file" default="$(find chargepal_map)/config/config.yaml"/>
 
 	<node pkg="chargepal_map" type="manipulation_server.py" name="manipulation_server" 
-			args="$(arg config_dir)" output="screen"/>
+			args="$(arg config_file)" output="screen"/>
 
 	<group if="$(eval arg('gui'))">
 		<node pkg="chargepal_map" type="manipulation_server_ui.py" name="manipulation_server_ui" output="screen">

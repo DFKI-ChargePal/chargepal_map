@@ -22,18 +22,19 @@ class ManipulationActionServer:
         dir_config = fp_config.parent
         with fp_config.open('r') as fp:
             try:
-                config_raw: dict[str, Any] = yaml.save_load(fp)
+                config_raw: dict[str, Any] = yaml.safe_load(fp)
             except Exception as e:
                 raise RuntimeError(f"Error while reading {fp_config} configuration with error msg: {e}")
 
         # Setting up end-effector camera
-        cam_cc_path = dir_config.joinpath('camera', config_raw['camera']['cc'])
+        cam_dir = dir_config.joinpath('camera_info')
+        cam_cc_path = cam_dir.joinpath(config_raw['camera']['cc'])
         cam = ck.camera_factory.create(config_raw['camera']['name'])
         cam.load_coefficients(cam_cc_path)
         # Setting up ur-pilot
         pilot_cfg_path = dir_config.joinpath('ur_arm', config_raw['ur_arm']['config_file'])
         self.ur_pilot = ur_pilot.Pilot(pilot_cfg_path)
-        self.ur_pilot.robot.register_ee_cam(cam)
+        self.ur_pilot.robot.register_ee_cam(cam, cam_dir)
         # Create detector directory path
         dtt_path = dir_config.joinpath('cv_detector')
         # Create action processors
