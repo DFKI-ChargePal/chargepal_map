@@ -34,17 +34,20 @@ class ManipulationActionServer:
         pilot_cfg_path = dir_config.joinpath('ur_arm', config_raw['ur_arm']['config_file'])
         self.ur_pilot = ur_pilot.Pilot(pilot_cfg_path)
         self.ur_pilot.robot.register_ee_cam(cam)
-
+        # Create detector directory path
+        dtt_path = dir_config.joinpath('cv_detector')
         # Create action processors
         proc_cfg_dir = dir_config.joinpath('process')
         proc_name = 'connect_to_car'
         manipulation_action_processor.create(proc_name, 
                                              proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
-                                             self.ur_pilot)
+                                             self.ur_pilot,
+                                             dtt_path)
         proc_name = 'disconnect_from_car'
         manipulation_action_processor.create(proc_name, 
                                              proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
-                                             self.ur_pilot)
+                                             self.ur_pilot,
+                                             dtt_path)
 
 
 if __name__ == '__main__':

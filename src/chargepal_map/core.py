@@ -31,8 +31,8 @@ from ur_pilot import Pilot
 
 class ConnectToCar(ProcessABC):
 
-    def __init__(self, name: str, cfg_fp: Path) -> None:
-        super().__init__(name, cfg_fp)
+    def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
+        super().__init__(name, cfg_fp, dtt_dir)
         self.state_machine = StateMachine(outcomes=[out.Common.stop, out.ConnectToCar.arm_in_driving_pose])
         self.action_server = actionlib.SimpleActionServer(self.name,
                                                           ConnectPlugToCarAction, self.action_callback, False)
@@ -123,8 +123,8 @@ class ConnectToCar(ProcessABC):
 
 class DisconnectFromCar(ProcessABC):
 
-    def __init__(self, name: str, cfg_fp: Path) -> None:
-        super().__init__(name, cfg_fp)
+    def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
+        super().__init__(name, cfg_fp, dtt_dir)
         self.state_machine = StateMachine(outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_driving_pose])
         self.action_server = actionlib.SimpleActionServer(self.name, 
                                                           DisconnectPlugFromCarAction, self.action_callback, False)
@@ -221,8 +221,8 @@ class ProcessFactory:
     def register(self, name: str, process: Type[ProcessABC]) -> None:
         self._selection[name] = process
 
-    def create(self, name: str, cfg_fp: Path, pilot: Pilot) -> ProcessABC:
-        builder = self._selection[name](name=name, cfg_fp=cfg_fp)
+    def create(self, name: str, cfg_fp: Path, pilot: Pilot, detector_dir: Path) -> ProcessABC:
+        builder = self._selection[name](name=name, cfg_fp=cfg_fp, dtt_dir=detector_dir)
         builder.set_up(pilot)
         return builder
 
