@@ -1,33 +1,59 @@
+from __future__ import annotations
 
 # libs
 import sys
+import yaml
 import rospy
-import rospkg
 import ur_pilot
+import camera_kit as ck
 from pathlib import Path
 
 from chargepal_map import manipulation_action_processor
 
+# typing
+from typing import Any
+
+
 
 class ManipulationActionServer:
 
-    def __init__(self, cfg_path: Path) -> None:
+    def __init__(self, fp_config: Path) -> None:
         # Create robot interface
-        arm_cfg_file = cfg_path.joinpath('ur_arm').joinpath('robot.toml')
-        # self.ur_pilot = ur_pilot.Pilot(arm_cfg_file)
+        dir_config = fp_config.parent
+        with fp_config.open('r') as fp:
+            try:
+                config_raw: dict[str, Any] = yaml.save_load(fp)
+            except Exception as e:
+                raise RuntimeError(f"Error while reading {fp_config} configuration with error msg: {e}")
+
+        # Setting up end-effector camera
+        cam_cc_path = dir_config.joinpath('camera', config_raw['camera']['cc'])
+        cam = ck.camera_factory.create(config_raw['camera']['name'])
+        cam.load_coefficients(cam_cc_path)
+        # Setting up ur-pilot
+        pilot_cfg_path = dir_config.joinpath('ur_arm', config_raw['ur_arm']['config_file'])
+        self.ur_pilot = ur_pilot.Pilot(pilot_cfg_path)
+        self.ur_pilot.robot.register_ee_cam(cam)
+
         # Create action processors
-        proc_cfg_dir = cfg_path.joinpath('process')
-        manipulation_action_processor.create('connect_to_car', proc_cfg_dir)
-        manipulation_action_processor.create('disconnect_from_car', proc_cfg_dir)
+        proc_cfg_dir = dir_config.joinpath('process')
+        proc_name = 'connect_to_car'
+        manipulation_action_processor.create(proc_name, 
+                                             proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
+                                             self.ur_pilot)
+        proc_name = 'disconnect_from_car'
+        manipulation_action_processor.create(proc_name, 
+                                             proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
+                                             self.ur_pilot)
 
 
 if __name__ == '__main__':
     rospy.init_node('manipulation_action_server')
     rospy.loginfo(f"Starting manipulation action servers")
     sys_cfg_path = Path(sys.argv[1])
-    if sys_cfg_path.exists():
+    if sys_cfg_path.exists() and sys_cfg_path.is_file():
         ManipulationActionServer(sys_cfg_path)
     else:
-        raise NotADirectoryError(f"Can not find parent configuration folder under '{sys_cfg_path}'")
+        raise FileNotFoundError(f"Can not find configuration file '{sys_cfg_path}'")
     rospy.loginfo(f"Ready to receive action goal")
     rospy.spin()

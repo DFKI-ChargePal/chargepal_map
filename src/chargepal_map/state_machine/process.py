@@ -11,6 +11,7 @@ from chargepal_map.state_machine.utils import silent_smach
 
 # typing
 from typing import Any
+from ur_pilot import Pilot
 
 
 
@@ -40,5 +41,5 @@ class ProcessABC(metaclass=abc.ABCMeta):
         raise NotImplementedError("Must be implemented in child class")
 
     @abc.abstractmethod
-    def set_up(self) -> None:
+    def set_up(self, pilot: Pilot) -> None:
         raise NotImplementedError("Must be implemented in child class")

@@ -12,6 +12,7 @@ from chargepal_map.state_machine.state_config import StateConfig
 
 # typing
 from typing import Any
+from ur_pilot import Pilot
 
 
 _time_out = 1.0
@@ -19,7 +20,8 @@ _time_out = 1.0
 
 class MoveArmToCar(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_car_obs])
@@ -35,7 +37,8 @@ class MoveArmToCar(State):
 
 class ObservePlugOnCar(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
@@ -53,7 +56,8 @@ class ObservePlugOnCar(State):
 
 class GraspPlugOnCar(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
@@ -71,7 +75,8 @@ class GraspPlugOnCar(State):
 
 class RemovePlugFromCar(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_car_post_connect])
@@ -87,7 +92,8 @@ class RemovePlugFromCar(State):
 
 class MovePlugToBattery(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.plug_in_bat_obs])
@@ -103,7 +109,8 @@ class MovePlugToBattery(State):
 
 class ObserveSocketOnBattery(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
@@ -121,7 +128,8 @@ class ObserveSocketOnBattery(State):
 
 class InsertPlugToBattery(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
@@ -139,7 +147,8 @@ class InsertPlugToBattery(State):
 
 class ReleasePlugOnBattery(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_bat_post_connect])
@@ -155,7 +164,8 @@ class ReleasePlugOnBattery(State):
 
 class MoveArmToDrivePos(State):
 
-    def __init__(self, config: dict[str, Any]):
+    def __init__(self, config: dict[str, Any], pilot: Pilot):
+        self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCar.arm_in_driving_pose])
