@@ -19,9 +19,6 @@ from typing import Any
 from ur_pilot import Pilot
 
 
-_time_out = 1.0
-
-
 class MoveArmToBattery(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
@@ -129,10 +126,10 @@ class RemovePlugFromBattery(State):
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Remove plug from battery')
-        plug_out_ft = Vector6d().from_xyzXYZ([0.0, 0.0, self.cfg.data['force'], 0.0, 0.0, 0.0])
+        plug_out_ft = Vector6d().from_xyzXYZ([0.0, 0.0, -abs(self.cfg.data['force']), 0.0, 0.0, 0.0])
         with self.pilot.force_control():
             success = self._pilot.tcp_force_mode(
-                wrench=self._plug_out_ft,
+                wrench=plug_out_ft,
                 compliant_axes=[0, 0, 1, 0, 0, 0],
                 distance=self.cfg.data['moving_distance'],
                 time_out=self.cfg.data['force_mode_time_out'])
