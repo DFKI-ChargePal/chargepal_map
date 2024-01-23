@@ -207,8 +207,8 @@ class DisconnectFromCar(ProcessABC):
                 transitions={out.DisconnectFromCar.arm_in_driving_pose: out.DisconnectFromCar.arm_in_driving_pose}
             )
             StateMachine.add(
-                label=state_name(com.Stop, pilot),
-                state=com.Stop(self.config),
+                label=state_name(com.Stop),
+                state=com.Stop(self.config, pilot),
                 transitions={out.Common.stop: out.Common.stop}
             )
 

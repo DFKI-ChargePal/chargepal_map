@@ -128,7 +128,7 @@ class RemovePlugFromBattery(State):
         rospy.loginfo('Remove plug from battery')
         plug_out_ft = Vector6d().from_xyzXYZ([0.0, 0.0, -abs(self.cfg.data['force']), 0.0, 0.0, 0.0])
         with self.pilot.force_control():
-            success = self._pilot.tcp_force_mode(
+            success = self.pilot.tcp_force_mode(
                 wrench=plug_out_ft,
                 compliant_axes=[0, 0, 1, 0, 0, 0],
                 distance=self.cfg.data['moving_distance'],
@@ -252,21 +252,21 @@ class ReleasePlugOnCar(State):
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Release plug on car ')
-        with self._pilot.motion_control():
+        with self.pilot.motion_control():
             # Rotate 90 deg counter clockwise to open the plug lock
             pose_tcp2target = Pose().from_axis_angle([0, 0, -np.pi/2])
-            pose_base2tcp = self._pilot.robot.get_tcp_pose()
+            pose_base2tcp = self.pilot.robot.get_tcp_pose()
             pose_base2target = pose_base2tcp * pose_tcp2target
-            self._pilot.move_to_tcp_pose(pose_base2target, time_out=5.0)
+            self.pilot.move_to_tcp_pose(pose_base2target, time_out=5.0)
             # Move -20 mm in tcp z direction to disconnect from plug
             pose_tcp2target = Pose().from_xyz([0.0, 0.0, -0.020])
-            pose_base2tcp = self._pilot.robot.get_tcp_pose()
+            pose_base2tcp = self.pilot.robot.get_tcp_pose()
             pose_base2target = pose_base2tcp * pose_tcp2target
-            self._pilot.move_to_tcp_pose(pose_base2target, time_out=3.0)
+            self.pilot.move_to_tcp_pose(pose_base2target, time_out=3.0)
 
         # Check if robot is in target area
         xyz_base2target_base_est = np.reshape(pose_base2target.xyz, 3)
-        xyz_base2target_base_meas = np.reshape(self._pilot.robot.get_tcp_pose().xyz, 3)
+        xyz_base2target_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
         error = np.sqrt(np.sum(np.square(xyz_base2target_base_est - xyz_base2target_base_meas)))
         if error > 0.01:
             raise RuntimeError(f"Remaining position error {error} is to large. "
