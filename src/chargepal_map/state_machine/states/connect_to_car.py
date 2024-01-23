@@ -111,7 +111,10 @@ class GraspPlugOnBattery(State):
             self.pilot.move_to_tcp_pose(T_base2hook_pre.pose)
         with self.pilot.motion_control():
             self.pilot.move_to_tcp_pose(T_base2hook_itm.pose, time_out=5.0)
-            self.pilot.move_to_tcp_pose(T_base2hook.pose, time_out=5.0)
+        pose_base2tcp = self.pilot.robot.get_tcp_pose()
+        pose_base2tcp = pose_base2tcp.from_axis_angle(T_base2hook.pose.axis_angle)
+        with self.pilot.position_control():
+            self.pilot.move_to_tcp_pose(pose_base2tcp, time_out=5.0)
 
         return self.uc.request_action(out.ConnectToCar.plug_in_bat_connect, out.Common.stop)
 
@@ -252,14 +255,15 @@ class ReleasePlugOnCar(State):
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Release plug on car ')
-        with self.pilot.motion_control():
+        with self.pilot.position_control():
             # Rotate 90 deg counter clockwise to open the plug lock
             pose_tcp2target = Pose().from_axis_angle([0, 0, -np.pi/2])
             pose_base2tcp = self.pilot.robot.get_tcp_pose()
             pose_base2target = pose_base2tcp * pose_tcp2target
-            self.pilot.move_to_tcp_pose(pose_base2target, time_out=5.0)
+            self.pilot.move_to_tcp_pose(pose_base2target, time_out=3.0)
+        with self.pilot.motion_control():
             # Move -20 mm in tcp z direction to disconnect from plug
-            pose_tcp2target = Pose().from_xyz([0.0, 0.0, -0.020])
+            pose_tcp2target = Pose().from_xyz([0.0, 0.0, -0.025])
             pose_base2tcp = self.pilot.robot.get_tcp_pose()
             pose_base2target = pose_base2tcp * pose_tcp2target
             self.pilot.move_to_tcp_pose(pose_base2target, time_out=3.0)

@@ -262,7 +262,7 @@ class ReleasePlugOnBattery(State):
             self.pilot.move_to_tcp_pose(pose_base2target, time_out=3.0)
         with self.pilot.motion_control():
             # Move -20 mm in tcp z direction to disconnect from plug
-            pose_tcp2target = Pose().from_xyz([0.0, 0.0, -0.020])
+            pose_tcp2target = Pose().from_xyz([0.0, 0.0, -0.025])
             pose_base2tcp = self.pilot.robot.get_tcp_pose()
             pose_base2target = pose_base2tcp * pose_tcp2target
             self.pilot.move_to_tcp_pose(pose_base2target, time_out=3.0)
