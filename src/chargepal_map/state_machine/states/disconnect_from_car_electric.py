@@ -229,7 +229,7 @@ class ObserveSocketOnBattery(State):
         return self.uc.request_action(out.DisconnectFromCarElectric.plug_in_bat_post_obs, out.Common.stop)
 
 
-class MovePlugToCarPreConnect(State):
+class MovePlugToBatteryPreConnect(State):
 
     _pose_socket2save_pre = Pose().from_xyz([0.0, 0.0, -0.02])
     

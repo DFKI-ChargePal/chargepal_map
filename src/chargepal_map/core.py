@@ -13,6 +13,7 @@ from chargepal_map.state_machine.process import ProcessABC
 import chargepal_map.state_machine.states.connect_to_car as ctc
 import chargepal_map.state_machine.states.connect_to_car_electric as ctc_e
 import chargepal_map.state_machine.states.disconnect_from_car as dfc
+import chargepal_map.state_machine.states.disconnect_from_car_electric as dfc_e
 from chargepal_map.state_machine.utils import state_name
 
 # actions
@@ -300,6 +301,91 @@ class DisconnectFromCar(ProcessABC):
             )
 
 
+class DisconnectFromCarElectric(DisconnectFromCar):
+
+    def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
+        super().__init__('disconnect_from_car', cfg_fp, dtt_dir)
+
+    def set_up(self, pilot: Pilot) -> None:
+        # Open smach container to add states and transitions
+        with self.state_machine:
+            StateMachine.add(
+                label=state_name(dfc_e.MoveArmToCar),
+                state=dfc_e.MoveArmToCar(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.arm_in_car_pre_obs: state_name(dfc_e.ObservePlugOnCar),
+                             out.Common.stop:                                  state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.ObservePlugOnCar),
+                state=dfc_e.ObservePlugOnCar(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.arm_in_car_post_obs: state_name(dfc_e.MoveArmToCarPreGrasp),
+                             out.Common.stop:                                   state_name(com.Stop)},
+                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.MoveArmToCarPreGrasp),
+                state=dfc_e.MoveArmToCarPreGrasp(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.arm_in_car_pre_connect: state_name(dfc_e.GraspPlugOnCar),
+                             out.Common.stop:                                      state_name(com.Stop)},
+                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.GraspPlugOnCar),
+                state=dfc_e.GraspPlugOnCar(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.plug_in_car_connect: state_name(dfc_e.RemovePlugFromCar),
+                             out.Common.stop:                                   state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.RemovePlugFromCar),
+                state=dfc_e.RemovePlugFromCar(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.plug_in_car_post_connect: state_name(dfc_e.MovePlugToBattery),
+                             out.Common.stop:                                        state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.MovePlugToBattery),
+                state=dfc_e.MovePlugToBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.plug_in_bat_pre_obs: state_name(dfc_e.ObserveSocketOnBattery),
+                             out.Common.stop:                                   state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.ObserveSocketOnBattery),
+                state=dfc_e.ObserveSocketOnBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.plug_in_bat_post_obs: state_name(dfc_e.MovePlugToBatteryPreConnect),
+                             out.Common.stop:                                    state_name(com.Stop)},
+                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.MovePlugToBatteryPreConnect),
+                state=dfc_e.MovePlugToBatteryPreConnect(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.plug_in_bat_pre_connect: state_name(dfc_e.InsertPlugToBattery),
+                             out.Common.stop:                                       state_name(com.Stop)},
+                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.InsertPlugToBattery),
+                state=dfc_e.InsertPlugToBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.plug_in_bat_connect: state_name(dfc_e.ReleasePlugOnBattery),
+                             out.Common.stop:                                   state_name(com.Stop)}
+            )
+
+            StateMachine.add(
+                label=state_name(dfc_e.ReleasePlugOnBattery),
+                state=dfc_e.ReleasePlugOnBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.arm_in_bat_post_connect: state_name(dfc_e.MoveArmToDrivePos),
+                             out.Common.stop:                                       state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_e.MoveArmToDrivePos),
+                state=dfc_e.MoveArmToDrivePos(self.config, pilot),
+                transitions={out.DisconnectFromCarElectric.arm_in_driving_pose: out.DisconnectFromCarElectric.arm_in_driving_pose}
+            )
+            StateMachine.add(
+                label=state_name(com.Stop),
+                state=com.Stop(self.config, pilot),
+                transitions={out.Common.stop: out.Common.stop}
+            )
+
+
 class ProcessFactory:
 
     def __init__(self) -> None:
@@ -322,3 +408,4 @@ manipulation_action_processor = ProcessFactory()
 manipulation_action_processor.register('connect_to_car', ConnectToCar)
 manipulation_action_processor.register('connect_to_car_electric', ConnectToCarElectric)
 manipulation_action_processor.register('disconnect_from_car', DisconnectFromCar)
+manipulation_action_processor.register('disconnect_from_car_electric', DisconnectFromCarElectric)
