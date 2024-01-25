@@ -44,7 +44,7 @@ class ManipulationActionServer:
                                              proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
                                              self.ur_pilot,
                                              dtt_path)
-        proc_name = 'disconnect_from_car'
+        proc_name = 'disconnect_from_car_electric'
         manipulation_action_processor.create(proc_name, 
                                              proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
                                              self.ur_pilot,
