@@ -25,7 +25,7 @@ class MoveArmToBattery(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.arm_in_bat_obs])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.arm_in_bat_pre_obs])
         
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to battery observation pose')
@@ -82,7 +82,7 @@ class ObservePlugOnBattery(State):
 
 class MoveArmToBatteryPreGrasp(State):
 
-    _pose_socket2save_pre = Pose().from_xyz([0.0, 0.0, 0.034 - 0.115])
+    _pose_socket2save_pre = Pose().from_xyz([0.005, 0.0, 0.034 - 0.115])
     
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
@@ -127,13 +127,13 @@ class GraspPlugOnBattery(State):
         # Perform actions
         with self.pilot.force_control():
             with self.pilot.open_plug_connection():
-                self.pilot.one_axis_tcp_force_mode(axis='z', force=20.0, time_out=4.0)
+                self.pilot.one_axis_tcp_force_mode(axis='z', force=20.0, time_out=7.0)
             # Check if robot is in target area
             T_base2fpi = T_base2socket @ T_socket2fpi
             xyz_base2fpi_base_est = np.reshape(T_base2fpi.tau, 3)
             xyz_base2fpi_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
             error = np.sqrt(np.sum(np.square(xyz_base2fpi_base_est - xyz_base2fpi_base_meas)))
-            if error > 0.01:
+            if error > 0.0075:
                 raise RuntimeError(f"Remaining position error {error} is to large. "
                                    f"Robot is probably in an undefined condition.")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_bat_connect, out.Common.stop)
@@ -219,12 +219,12 @@ class ObserveSocketOnCar(State):
         else:
             raise RuntimeError(f"Can't find socket."
                                f"Make sure detector is proper set up and pattern is in camera view")
-        return self.uc.request_action(out.ConnectToCar.plug_in_car_post_obs, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarElectric.plug_in_car_post_obs, out.Common.stop)
 
 
 class MovePlugToCarPreConnect(State):
 
-    _pose_socket2save_pre = Pose().from_xyz([0.0, 0.0, 0.02])
+    _pose_socket2save_pre = Pose().from_xyz([0.0, 0.0, -0.02])
     
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot

@@ -39,7 +39,7 @@ class ManipulationActionServer:
         dtt_path = dir_config.joinpath('cv_detector')
         # Create action processors
         proc_cfg_dir = dir_config.joinpath('process')
-        proc_name = 'connect_to_car'
+        proc_name = 'connect_to_car_electric'
         manipulation_action_processor.create(proc_name, 
                                              proc_cfg_dir.joinpath(config_raw['process'][proc_name]),
                                              self.ur_pilot,

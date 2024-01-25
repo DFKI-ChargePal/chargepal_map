@@ -125,7 +125,7 @@ class ConnectToCar(ProcessABC):
 class ConnectToCarElectric(ConnectToCar):
 
     def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
-        super().__init__(name, cfg_fp, dtt_dir)
+        super().__init__('connect_to_car', cfg_fp, dtt_dir)
 
 
     def set_up(self, pilot: Pilot) -> None:
@@ -134,8 +134,8 @@ class ConnectToCarElectric(ConnectToCar):
             StateMachine.add(
                 label=state_name(ctc_e.MoveArmToBattery),
                 state=ctc_e.MoveArmToBattery(self.config, pilot),
-                transitions={out.ConnectToCarElectric.arm_in_bat_obs: state_name(ctc_e.ObservePlugOnBattery),
-                             out.Common.stop:                         state_name(com.Stop)}
+                transitions={out.ConnectToCarElectric.arm_in_bat_pre_obs: state_name(ctc_e.ObservePlugOnBattery),
+                             out.Common.stop:                             state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(ctc_e.ObservePlugOnBattery),
@@ -309,11 +309,16 @@ class ProcessFactory:
         self._selection[name] = process
 
     def create(self, name: str, cfg_fp: Path, pilot: Pilot, detector_dir: Path) -> ProcessABC:
-        builder = self._selection[name](name=name, cfg_fp=cfg_fp, dtt_dir=detector_dir)
+        proc_type = self._selection.get(name)
+        if proc_type is None:
+            raise KeyError(f"Unknown or unregistered process '{name}'. " 
+                           f"Available processes are: {list(self._selection.keys())}")
+        builder = proc_type(name=name, cfg_fp=cfg_fp, dtt_dir=detector_dir)
         builder.set_up(pilot)
         return builder
 
 
 manipulation_action_processor = ProcessFactory()
 manipulation_action_processor.register('connect_to_car', ConnectToCar)
+manipulation_action_processor.register('connect_to_car_electric', ConnectToCarElectric)
 manipulation_action_processor.register('disconnect_from_car', DisconnectFromCar)

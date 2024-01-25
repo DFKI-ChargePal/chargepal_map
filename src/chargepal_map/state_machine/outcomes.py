@@ -51,7 +51,7 @@ class DisconnectFromCar:
     arm_in_driving_pose = 'arm_in_driving_pose'
 
 
-class DisconnectFromCar:
+class DisconnectFromCarElectric:
 
     # Outcome mapping
     arm_in_car_pre_obs = 'arm_in_car_pre_observation'
