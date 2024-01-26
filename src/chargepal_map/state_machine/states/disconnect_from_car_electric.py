@@ -123,7 +123,7 @@ class GraspPlugOnCar(State):
                        input_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start grasping the plug on battery')
+        print(), rospy.loginfo('Start grasping the plug on car')
         # Get transformation matrices
         T_socket2fpi = self._pose_socket2fpi.transformation
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
@@ -152,7 +152,7 @@ class RemovePlugFromCar(State):
         State.__init__(self, outcomes=[out.Common.stop, out.DisconnectFromCarElectric.plug_in_car_post_connect])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start removing the plug from battery')
+        print(), rospy.loginfo('Start removing the plug from car')
         plug_out_ft = Vector6d().from_xyzXYZ([0.0, 0.0, -abs(self.cfg.data['force']), 0.0, 0.0, 0.0])
         with self.pilot.force_control():
             success = self.pilot.tcp_force_mode(
@@ -259,7 +259,8 @@ class MovePlugToBatteryPreConnect(State):
 
 class InsertPlugToBattery(State):
 
-    _pose_socket2socket_pre = Pose().from_xyz(xyz=[0.0, 0.0, 0.0 - 0.02])
+    _pose_socket2socket_touch = Pose().from_xyz(xyz=[-0.01, 0.0, 0.005])
+    _pose_socket2socket_align = Pose().from_xyz(xyz=[0.0, 0.0, 0.01])
     _pose_socket2fpi = Pose().from_xyz(xyz=[0.0, 0.0, 0.034])
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
@@ -274,19 +275,32 @@ class InsertPlugToBattery(State):
         print(), rospy.loginfo('Start inserting the plug to battery')
         # Get transformation matrices
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
+        T_socket2socket_touch = self._pose_socket2socket_touch.transformation
+        T_socket2socket_align = self._pose_socket2socket_align.transformation
         T_socket2fpi = self._pose_socket2fpi.transformation
         # Perform actions
+        T_base2socket_touch = T_base2socket @ T_socket2socket_touch
+        T_base2socket_align = T_base2socket @ T_socket2socket_align
+        with self.pilot.motion_control():
+            self.pilot.move_to_tcp_pose(T_base2socket_touch.pose, time_out=3.0)
+            self.pilot.move_to_tcp_pose(T_base2socket_align.pose, time_out=3.0)
+            # Check if robot is in target area
+            xyz_base2sa_base_est = np.reshape(T_base2socket_align.tau, 3)
+            xyz_base2sa_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
+            error = np.sqrt(np.sum(np.square(xyz_base2sa_base_est - xyz_base2sa_base_meas)))
+            if error > 0.01:
+                raise RuntimeError(f"Remaining position error {error} to alignment state is to large. "
+                                   f"Robot is probably in an undefined condition.")
         with self.pilot.force_control():
-            self.pilot.one_axis_tcp_force_mode(axis='z', force=20.0, time_out=4.0)
-            self.pilot.plug_in_force_ramp(f_axis='z', f_start=75.0, f_end=125, duration=4.0)
-            self.pilot.relax(2.0)
+            self.pilot.plug_in_force_ramp(f_axis='z', f_start=50.0, f_end=90, duration=3.0)
+            self.pilot.relax(1.0)
             # Check if robot is in target area
             T_base2fpi = T_base2socket @ T_socket2fpi
             xyz_base2fpi_base_est = np.reshape(T_base2fpi.tau, 3)
             xyz_base2fpi_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
             error = np.sqrt(np.sum(np.square(xyz_base2fpi_base_est - xyz_base2fpi_base_meas)))
             if error > 0.01:
-                raise RuntimeError(f"Remaining position error {error} is to large. "
+                raise RuntimeError(f"Remaining position error {error} to fully plugged in state is to large. "
                                    f"Robot is probably in an undefined condition.")
         rospy.loginfo(f"Plug inserted in battery with a residual position error of {1000 * error} mm")
         return self.uc.request_action(out.DisconnectFromCarElectric.plug_in_bat_connect, out.Common.stop)
