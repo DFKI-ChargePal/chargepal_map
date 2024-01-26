@@ -1,3 +1,7 @@
+""" 
+    State implementations to connect from battery to the car/adapter station
+    using the plug with the mechanical twist lock.
+"""
 from __future__ import annotations
 
 # global
@@ -25,14 +29,14 @@ class MoveArmToBattery(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCar.arm_in_bat_obs])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.arm_in_bat_pre_obs])
         
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to battery')
         rospy.logdebug(f"Battery observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
-        return self.uc.request_action(out.ConnectToCar.arm_in_bat_obs, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.arm_in_bat_pre_obs, out.Common.stop)
 
 
 class ObservePlugOnBattery(State):
@@ -42,7 +46,7 @@ class ObservePlugOnBattery(State):
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
-                       outcomes=[out.Common.stop,out.ConnectToCar.arm_in_bat_pre_connect],
+                       outcomes=[out.Common.stop,out.ConnectToCarTwist.arm_in_bat_pre_connect],
                        output_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
@@ -77,7 +81,7 @@ class ObservePlugOnBattery(State):
         else:
             raise RuntimeError(f"Can't find socket."
                                f"Make sure detector is proper set up and pattern is in camera view")
-        return self.uc.request_action(out.ConnectToCar.arm_in_bat_pre_connect, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.arm_in_bat_pre_connect, out.Common.stop)
 
 
 class GraspPlugOnBattery(State):
@@ -91,7 +95,7 @@ class GraspPlugOnBattery(State):
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
-                       outcomes=[out.Common.stop, out.ConnectToCar.plug_in_bat_connect],
+                       outcomes=[out.Common.stop, out.ConnectToCarTwist.plug_in_bat_connect],
                        input_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
@@ -116,7 +120,7 @@ class GraspPlugOnBattery(State):
         with self.pilot.position_control():
             self.pilot.move_to_tcp_pose(pose_base2tcp, time_out=5.0)
 
-        return self.uc.request_action(out.ConnectToCar.plug_in_bat_connect, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.plug_in_bat_connect, out.Common.stop)
 
 
 class RemovePlugFromBattery(State):
@@ -125,7 +129,7 @@ class RemovePlugFromBattery(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCar.plug_in_bat_post_connect])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.plug_in_bat_post_connect])
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Remove plug from battery')
@@ -139,7 +143,7 @@ class RemovePlugFromBattery(State):
         if not success:
             raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
 
-        return self.uc.request_action(out.ConnectToCar.plug_in_bat_post_connect, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.plug_in_bat_post_connect, out.Common.stop)
 
 
 class MovePlugToCar(State):
@@ -148,14 +152,14 @@ class MovePlugToCar(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCar.plug_in_car_obs])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.plug_in_car_pre_obs])
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move plug to car')
         rospy.logdebug(f"Car observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
-        return self.uc.request_action(out.ConnectToCar.plug_in_car_obs, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.plug_in_car_pre_obs, out.Common.stop)
 
 
 class ObserveSocketOnCar(State):
@@ -165,7 +169,7 @@ class ObserveSocketOnCar(State):
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
-                       outcomes=[out.Common.stop, out.ConnectToCar.plug_in_car_pre_connect],
+                       outcomes=[out.Common.stop, out.ConnectToCarTwist.plug_in_car_pre_connect],
                        output_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
@@ -200,7 +204,7 @@ class ObserveSocketOnCar(State):
         else:
             raise RuntimeError(f"Can't find socket."
                                f"Make sure detector is proper set up and pattern is in camera view")
-        return self.uc.request_action(out.ConnectToCar.plug_in_car_pre_connect, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.plug_in_car_pre_connect, out.Common.stop)
 
 
 class InsertPlugToCar(State):
@@ -213,7 +217,7 @@ class InsertPlugToCar(State):
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
-                       outcomes=[out.Common.stop, out.ConnectToCar.plug_in_car_connect],
+                       outcomes=[out.Common.stop, out.ConnectToCarTwist.plug_in_car_connect],
                        input_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
@@ -242,7 +246,7 @@ class InsertPlugToCar(State):
                 raise RuntimeError(f"Remaining position error {error} is to large. "
                                    f"Robot is probably in an undefined condition.")
 
-        return self.uc.request_action(out.ConnectToCar.plug_in_car_connect, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.plug_in_car_connect, out.Common.stop)
 
 
 class ReleasePlugOnCar(State):
@@ -251,7 +255,7 @@ class ReleasePlugOnCar(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCar.arm_in_car_post_connect])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.arm_in_car_post_connect])
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Release plug on car ')
@@ -276,7 +280,7 @@ class ReleasePlugOnCar(State):
             raise RuntimeError(f"Remaining position error {error} is to large. "
                                f"Robot is probably in an undefined condition.")
 
-        return self.uc.request_action(out.ConnectToCar.arm_in_car_post_connect, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.arm_in_car_post_connect, out.Common.stop)
 
 
 class MoveArmToDrivePos(State):
@@ -285,14 +289,14 @@ class MoveArmToDrivePos(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCar.arm_in_driving_pose])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.arm_in_driving_pose])
 
     def execute(self, ud: Any) -> str:
         rospy.loginfo('Move arm to drive pos')
         rospy.logdebug(f"Driving joint positions: {self.cfg.data['drive_joint_position']}")
         with self.pilot.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['drive_joint_position'])
-        return self.uc.request_action(out.ConnectToCar.arm_in_driving_pose, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.arm_in_driving_pose, out.Common.stop)
 
 
 def default_config() -> str:

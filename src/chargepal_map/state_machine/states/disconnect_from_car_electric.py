@@ -1,3 +1,7 @@
+""" 
+    State implementations to disconnect from the car/adapter station
+    using the plug with the electrical lock.
+"""
 from __future__ import annotations
 
 # global
