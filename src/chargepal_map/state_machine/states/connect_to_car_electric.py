@@ -32,10 +32,11 @@ class MoveArmToBattery(State):
         State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.arm_in_bat_pre_obs])
         
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Move arm to battery observation pose')
+        print(), rospy.loginfo('Start moving the arm to battery observation pose')
         rospy.logdebug(f"Battery observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
+        rospy.loginfo(f"Arm ended in battery observation pose: Base-TCP = {self.pilot.robot.get_tcp_pose()}")
         return self.uc.request_action(out.ConnectToCarElectric.arm_in_bat_pre_obs, out.Common.stop)
 
 
@@ -50,7 +51,7 @@ class ObservePlugOnBattery(State):
                        output_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Observe plug on battery')
+        print(), rospy.loginfo('Start observing the socket with plug on battery')
         # Create detector
         dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg'])
         dtt = pd.factory.create(dtt_cfg_fp)
@@ -81,6 +82,7 @@ class ObservePlugOnBattery(State):
         else:
             raise RuntimeError(f"Can't find socket."
                                f"Make sure detector is proper set up and pattern is in camera view")
+        rospy.loginfo(f"Found socket pose: Base-Socket = {T_base2socket.pose}")
         return self.uc.request_action(out.ConnectToCarElectric.arm_in_bat_post_obs, out.Common.stop)
 
 
@@ -98,7 +100,7 @@ class MoveArmToBatteryPreGrasp(State):
                        output_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud):
-        rospy.loginfo('Move arm to pre grasp pose on battery')
+        print(), rospy.loginfo('Start moving the arm to pre-grasp pose on battery')
         # Get transformation matrices
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
         T_socket2save_pre = self._pose_socket2save_pre.transformation
@@ -108,6 +110,7 @@ class MoveArmToBatteryPreGrasp(State):
         with self.pilot.position_control():
             # Move to pre-pose to hook up to plug
             self.pilot.move_to_tcp_pose(T_base2save_pre.pose)
+        rospy.loginfo(f"Arm ended in pre-grasp pose: Base-TCP = {self.pilot.robot.get_tcp_pose()}")
         return self.uc.request_action(out.ConnectToCarElectric.arm_in_bat_pre_connect, out.Common.stop)
 
 
@@ -124,7 +127,7 @@ class GraspPlugOnBattery(State):
                        input_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Grasp plug on battery')
+        print(), rospy.loginfo('Start grasping the plug on battery')
         # Get transformation matrices
         T_socket2fpi = self._pose_socket2fpi.transformation
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
@@ -140,6 +143,7 @@ class GraspPlugOnBattery(State):
             if error > 0.0075:
                 raise RuntimeError(f"Remaining position error {error} is to large. "
                                    f"Robot is probably in an undefined condition.")
+        rospy.loginfo(f"Arm connected to the plug with a residual position error of {1000 * error} mm")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_bat_connect, out.Common.stop)
 
 
@@ -152,7 +156,7 @@ class RemovePlugFromBattery(State):
         State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.plug_in_bat_post_connect])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Remove plug from battery')
+        print(), rospy.loginfo('Start removing the plug from battery')
         plug_out_ft = Vector6d().from_xyzXYZ([0.0, 0.0, -abs(self.cfg.data['force']), 0.0, 0.0, 0.0])
         with self.pilot.force_control():
             success = self.pilot.tcp_force_mode(
@@ -162,6 +166,7 @@ class RemovePlugFromBattery(State):
                 time_out=self.cfg.data['force_mode_time_out'])
         if not success:
             raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
+        rospy.loginfo(f"Plug successfully removed from the battery socket.")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_bat_post_connect, out.Common.stop)
 
 
@@ -174,10 +179,11 @@ class MovePlugToCar(State):
         State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.plug_in_car_pre_obs])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Move plug to car')
+        print(), rospy.loginfo('Start moving the plug to the car')
         rospy.logdebug(f"Car observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
+        rospy.loginfo(f"Plug ended in car observation pose: Base-TCP = {self.pilot.robot.get_tcp_pose()}")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_car_pre_obs, out.Common.stop)
 
 
@@ -192,7 +198,7 @@ class ObserveSocketOnCar(State):
                        output_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Observe socket on car')
+        print(), rospy.loginfo('Start observing the socket on the car')
         # Create detector
         dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg'])
         dtt = pd.factory.create(dtt_cfg_fp)
@@ -223,6 +229,7 @@ class ObserveSocketOnCar(State):
         else:
             raise RuntimeError(f"Can't find socket."
                                f"Make sure detector is proper set up and pattern is in camera view")
+        rospy.loginfo(f"Found socket pose: Base-Socket = {T_base2socket.pose}")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_car_post_obs, out.Common.stop)
 
 
@@ -240,7 +247,7 @@ class MovePlugToCarPreConnect(State):
                        output_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud):
-        rospy.loginfo('Move arm to pre grasp pose on battery')
+        print(), rospy.loginfo('Start moving the plug to pre-insert pose on the car')
         # Get transformation matrices
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
         T_socket2save_pre = self._pose_socket2save_pre.transformation
@@ -250,12 +257,14 @@ class MovePlugToCarPreConnect(State):
         with self.pilot.position_control():
             # Move to pre-pose to hook up to plug
             self.pilot.move_to_tcp_pose(T_base2save_pre.pose)
+        rospy.loginfo(f"Plug ended in pre-insert pose: Base-TCP = {self.pilot.robot.get_tcp_pose()}")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_car_pre_connect, out.Common.stop)
 
 
 class InsertPlugToCar(State):
 
-    _pose_socket2socket_pre = Pose().from_xyz(xyz=[0.0, 0.0, 0.0 - 0.02])
+    _pose_socket2socket_touch = Pose().from_xyz(xyz=[-0.01, 0.0, 0.005])
+    _pose_socket2socket_align = Pose().from_xyz(xyz=[0.0, 0.0, 0.01])
     _pose_socket2fpi = Pose().from_xyz(xyz=[0.0, 0.0, 0.034])
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
@@ -267,23 +276,37 @@ class InsertPlugToCar(State):
                        input_keys=['xyz_xyzw_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Insert plug to car')
+        print(), rospy.loginfo('Start inserting the plug to the car')
         # Get transformation matrices
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
+        T_socket2socket_touch = self._pose_socket2socket_touch.transformation
+        T_socket2socket_align = self._pose_socket2socket_align.transformation
         T_socket2fpi = self._pose_socket2fpi.transformation
         # Perform actions
+        T_base2socket_touch = T_base2socket @ T_socket2socket_touch
+        T_base2socket_align = T_base2socket @ T_socket2socket_align
+        with self.pilot.motion_control():
+            self.pilot.move_to_tcp_pose(T_base2socket_touch.pose, time_out=3.0)
+            self.pilot.move_to_tcp_pose(T_base2socket_align.pose, time_out=3.0)
+            # Check if robot is in target area
+            xyz_base2sa_base_est = np.reshape(T_base2socket_align.tau, 3)
+            xyz_base2sa_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
+            error = np.sqrt(np.sum(np.square(xyz_base2sa_base_est - xyz_base2sa_base_meas)))
+            if error > 0.01:
+                raise RuntimeError(f"Remaining position error {error} to alignment state is to large. "
+                                   f"Robot is probably in an undefined condition.")
         with self.pilot.force_control():
-            self.pilot.one_axis_tcp_force_mode(axis='z', force=20.0, time_out=4.0)
-            self.pilot.plug_in_force_ramp(f_axis='z', f_start=75.0, f_end=125, duration=4.0)
-            self.pilot.relax(2.0)
+            self.pilot.plug_in_force_ramp(f_axis='z', f_start=50.0, f_end=90, duration=3.0)
+            self.pilot.relax(1.0)
             # Check if robot is in target area
             T_base2fpi = T_base2socket @ T_socket2fpi
             xyz_base2fpi_base_est = np.reshape(T_base2fpi.tau, 3)
             xyz_base2fpi_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
             error = np.sqrt(np.sum(np.square(xyz_base2fpi_base_est - xyz_base2fpi_base_meas)))
             if error > 0.01:
-                raise RuntimeError(f"Remaining position error {error} is to large. "
+                raise RuntimeError(f"Remaining position error {error} to fully plugged in state is to large. "
                                    f"Robot is probably in an undefined condition.")
+        rospy.loginfo(f"Plug inserted in car with a residual position error of {1000 * error} mm")
         return self.uc.request_action(out.ConnectToCarElectric.plug_in_car_connect, out.Common.stop)
 
 
@@ -296,7 +319,7 @@ class ReleasePlugOnCar(State):
         State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.arm_in_car_post_connect])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Release plug on car ')
+        print(), rospy.loginfo('Start releasing the arm from the plug on the car')
         # Move -115 mm in tcp z direction to disconnect from plug
         pose_tcp2target = Pose().from_xyz([0.0, 0.0, -0.125])
         pose_base2tcp = self.pilot.robot.get_tcp_pose()
@@ -316,6 +339,7 @@ class ReleasePlugOnCar(State):
         if error > 0.01:
             raise RuntimeError(f"Remaining position error {error} is to large. "
                                f"Robot is probably in an undefined condition.")
+        rospy.loginfo(f"Arm successfully released from the plug on the car.")
         return self.uc.request_action(out.ConnectToCarElectric.arm_in_car_post_connect, out.Common.stop)
 
 
@@ -328,8 +352,9 @@ class MoveArmToDrivePos(State):
         State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarElectric.arm_in_driving_pose])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo('Move arm to drive pos')
+        print(), rospy.loginfo('Start moving the arm to drive configuration')
         rospy.logdebug(f"Driving joint positions: {self.cfg.data['drive_joint_position']}")
         with self.pilot.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['drive_joint_position'])
+        rospy.loginfo(f"Arm ended in drive pose: Base-TCP = {self.pilot.robot.get_tcp_pose()}")
         return self.uc.request_action(out.ConnectToCarElectric.arm_in_driving_pose, out.Common.stop)
