@@ -263,8 +263,8 @@ class MovePlugToCarPreConnect(State):
 
 class InsertPlugToCar(State):
 
-    _pose_socket2socket_touch = Pose().from_xyz(xyz=[-0.01, 0.0, 0.005])
-    _pose_socket2socket_align = Pose().from_xyz(xyz=[0.0, 0.0, 0.01])
+    _pose_socket2touch = Pose().from_xyz(xyz=[-0.01, 0.0, 0.005])
+    _pose_socket2junction = Pose().from_xyz(xyz=[0.0, 0.0, 0.01])
     _pose_socket2fpi = Pose().from_xyz(xyz=[0.0, 0.0, 0.034])
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
@@ -279,19 +279,21 @@ class InsertPlugToCar(State):
         print(), rospy.loginfo('Start inserting the plug to the car')
         # Get transformation matrices
         T_base2socket = Pose().from_xyz_xyzw(*ud.xyz_xyzw_base2socket).transformation
-        T_socket2socket_touch = self._pose_socket2socket_touch.transformation
-        T_socket2socket_align = self._pose_socket2socket_align.transformation
+        T_socket2touch = self._pose_socket2touch.transformation
+        T_socket2junction = self._pose_socket2junction.transformation
         T_socket2fpi = self._pose_socket2fpi.transformation
+        # Apply transformation chain
+        T_base2fpi = T_base2socket @ T_socket2fpi
+        T_base2touch = T_base2socket @ T_socket2touch
+        T_base2junction = T_base2socket @ T_socket2junction
         # Perform actions
-        T_base2socket_touch = T_base2socket @ T_socket2socket_touch
-        T_base2socket_align = T_base2socket @ T_socket2socket_align
         with self.pilot.motion_control():
-            self.pilot.move_to_tcp_pose(T_base2socket_touch.pose, time_out=3.0)
-            self.pilot.move_to_tcp_pose(T_base2socket_align.pose, time_out=3.0)
+            self.pilot.move_to_tcp_pose(T_base2touch.pose, time_out=3.0)
+            self.pilot.move_to_tcp_pose(T_base2junction.pose, time_out=3.0)
             # Check if robot is in target area
-            xyz_base2sa_base_est = np.reshape(T_base2socket_align.tau, 3)
-            xyz_base2sa_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
-            error = np.sqrt(np.sum(np.square(xyz_base2sa_base_est - xyz_base2sa_base_meas)))
+            xyz_base2jct_base_est = np.reshape(T_base2junction.tau, 3)
+            xyz_base2jct_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
+            error = np.sqrt(np.sum(np.square(xyz_base2jct_base_est - xyz_base2jct_base_meas)))
             if error > 0.01:
                 raise RuntimeError(f"Remaining position error {error} to alignment state is to large. "
                                    f"Robot is probably in an undefined condition.")
@@ -299,7 +301,6 @@ class InsertPlugToCar(State):
             self.pilot.plug_in_force_ramp(f_axis='z', f_start=50.0, f_end=90, duration=3.0)
             self.pilot.relax(1.0)
             # Check if robot is in target area
-            T_base2fpi = T_base2socket @ T_socket2fpi
             xyz_base2fpi_base_est = np.reshape(T_base2fpi.tau, 3)
             xyz_base2fpi_base_meas = np.reshape(self.pilot.robot.get_tcp_pose().xyz, 3)
             error = np.sqrt(np.sum(np.square(xyz_base2fpi_base_est - xyz_base2fpi_base_meas)))
