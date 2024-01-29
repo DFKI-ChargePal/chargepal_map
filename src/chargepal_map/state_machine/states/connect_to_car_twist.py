@@ -140,7 +140,7 @@ class GraspPlugOnBattery(State):
         with self.pilot.motion_control():
             self.pilot.move_to_tcp_pose(T_base2fpi_twist.pose, time_out=5.0)
         with self.pilot.force_control():
-            self.pilot.screw_ee_force_mode(torque=3.0, ang=np.pi, time_out=10.0)
+            self.pilot.screw_ee_force_mode(torque=3.0, ang=np.pi/2, time_out=10.0)
         # Check if robot is in target area
         T_base2fpi = T_base2socket @ T_socket2fpi
         pose_base2fpi_est = T_base2fpi.pose
@@ -148,8 +148,8 @@ class GraspPlugOnBattery(State):
         xyz_base2fpi_base_est = np.array(pose_base2fpi_est.xyz)
         xyz_base2fpi_base_meas = np.array(pose_base2fpi_meas.xyz)
         lin_error = np.sqrt(np.sum(np.square(xyz_base2fpi_base_est - xyz_base2fpi_base_meas)))
-        q_base2fpi_est = pose_base2fpi_est.q
-        q_base2fpi_meas = pose_base2fpi_meas.q
+        q_base2fpi_est = np.array(pose_base2fpi_est.q.wxyz)
+        q_base2fpi_meas = np.array(pose_base2fpi_meas.q.wxyz)
         ang_error = np.arccos(np.clip((2 * (q_base2fpi_est.dot(q_base2fpi_meas))**2 - 1), -1.0, 1.0))
         if lin_error > 0.0075:
             raise RuntimeError(f"Remaining linear error {lin_error} is to large. "
