@@ -68,20 +68,27 @@ class DisconnectFromCarTwist(DisconnectFromCar):
                 label=state_name(dfc_t.MoveArmToCar),
                 state=dfc_t.MoveArmToCar(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.arm_in_car_pre_obs: state_name(dfc_t.ObservePlugOnCar),
-                             out.Common.stop:                      state_name(com.Stop)}
+                             out.Common.stop:                               state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc_t.ObservePlugOnCar),
                 state=dfc_t.ObservePlugOnCar(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.arm_in_car_post_obs: state_name(dfc_t.MoveArmToCarPreGrasp),
+                             out.Common.stop:                                state_name(com.Stop)},
+                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.MoveArmToCarPreGrasp),
+                state=dfc_t.MoveArmToCarPreGrasp(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.arm_in_car_pre_connect: state_name(dfc_t.GraspPlugOnCar),
-                             out.Common.stop:                              state_name(com.Stop)},
+                             out.Common.stop:                                   state_name(com.Stop)},
                 remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_t.GraspPlugOnCar),
                 state=dfc_t.GraspPlugOnCar(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.plug_in_car_connect: state_name(dfc_t.RemovePlugFromCar),
-                             out.Common.stop:                           state_name(com.Stop)}
+                             out.Common.stop:                                state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc_t.RemovePlugFromCar),
@@ -98,21 +105,28 @@ class DisconnectFromCarTwist(DisconnectFromCar):
             StateMachine.add(
                 label=state_name(dfc_t.ObserveSocketOnBattery),
                 state=dfc_t.ObserveSocketOnBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.plug_in_bat_post_obs: state_name(dfc_t.MovePlugToBatteryPreConnect),
+                             out.Common.stop:                                 state_name(com.Stop)},
+                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.MovePlugToBatteryPreConnect),
+                state=dfc_t.MovePlugToBatteryPreConnect(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.plug_in_bat_pre_connect: state_name(dfc_t.InsertPlugToBattery),
-                             out.Common.stop:                               state_name(com.Stop)},
+                             out.Common.stop:                                    state_name(com.Stop)},
                 remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_t.InsertPlugToBattery),
                 state=dfc_t.InsertPlugToBattery(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.plug_in_bat_connect: state_name(dfc_t.ReleasePlugOnBattery),
-                             out.Common.stop:                           state_name(com.Stop)}
+                             out.Common.stop:                                state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc_t.ReleasePlugOnBattery),
                 state=dfc_t.ReleasePlugOnBattery(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.arm_in_bat_post_connect: state_name(dfc_t.MoveArmToDrivePos),
-                             out.Common.stop:                               state_name(com.Stop)}
+                             out.Common.stop:                                    state_name(com.Stop)}
             )
             StateMachine.add(
                 label=state_name(dfc_t.MoveArmToDrivePos),
@@ -192,7 +206,6 @@ class DisconnectFromCarElectric(DisconnectFromCar):
                 transitions={out.DisconnectFromCarElectric.plug_in_bat_connect: state_name(dfc_e.ReleasePlugOnBattery),
                              out.Common.stop:                                   state_name(com.Stop)}
             )
-
             StateMachine.add(
                 label=state_name(dfc_e.ReleasePlugOnBattery),
                 state=dfc_e.ReleasePlugOnBattery(self.config, pilot),
