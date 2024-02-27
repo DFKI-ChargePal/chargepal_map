@@ -32,8 +32,8 @@ class ManipulationActionServer:
         cam = ck.camera_factory.create(config_raw['camera']['name'])
         cam.load_coefficients(cam_cc_path)
         # Setting up ur-pilot
-        pilot_cfg_path = dir_config.joinpath('ur_arm', config_raw['ur_arm']['config_file'])
-        self.ur_pilot = ur_pilot.Pilot(pilot_cfg_path)
+        arm_dir = dir_config.joinpath('ur_arm')
+        self.ur_pilot = ur_pilot.Pilot(config_dir=arm_dir)
         self.ur_pilot.robot.register_ee_cam(cam, cam_dir)
         # Create detector directory path
         dtt_path = dir_config.joinpath('cv_detector')

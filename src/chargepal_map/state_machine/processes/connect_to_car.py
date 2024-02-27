@@ -75,14 +75,14 @@ class ConnectToCarTwist(ConnectToCar):
                 state=ctc_t.ObservePlugOnBattery(self.config, pilot),
                 transitions={out.ConnectToCarTwist.arm_in_bat_post_obs: state_name(ctc_t.MoveArmToBatteryPreGrasp),
                              out.Common.stop:                           state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_t.MoveArmToBatteryPreGrasp),
                 state=ctc_t.MoveArmToBatteryPreGrasp(self.config, pilot),
                 transitions={out.ConnectToCarTwist.arm_in_bat_pre_connect: state_name(ctc_t.GraspPlugOnBattery),
                              out.Common.stop:                              state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_t.GraspPlugOnBattery),
@@ -107,14 +107,14 @@ class ConnectToCarTwist(ConnectToCar):
                 state=ctc_t.ObserveSocketOnCar(self.config, pilot),
                 transitions={out.ConnectToCarTwist.plug_in_car_post_obs: state_name(ctc_t.MovePlugToCarPreConnect),
                              out.Common.stop:                            state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_t.MovePlugToCarPreConnect),
                 state=ctc_t.MovePlugToCarPreConnect(self.config, pilot),
                 transitions={out.ConnectToCarTwist.plug_in_car_pre_connect: state_name(ctc_t.InsertPlugToCar),
                              out.Common.stop:                               state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_t.InsertPlugToCar),
@@ -159,14 +159,14 @@ class ConnectToCarElectric(ConnectToCar):
                 state=ctc_e.ObservePlugOnBattery(self.config, pilot),
                 transitions={out.ConnectToCarElectric.arm_in_bat_post_obs: state_name(ctc_e.MoveArmToBatteryPreGrasp),
                              out.Common.stop:                              state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_e.MoveArmToBatteryPreGrasp),
                 state=ctc_e.MoveArmToBatteryPreGrasp(self.config, pilot),
                 transitions={out.ConnectToCarElectric.arm_in_bat_pre_connect: state_name(ctc_e.GraspPlugOnBattery),
                              out.Common.stop:                                 state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_e.GraspPlugOnBattery),
@@ -191,14 +191,14 @@ class ConnectToCarElectric(ConnectToCar):
                 state=ctc_e.ObserveSocketOnCar(self.config, pilot),
                 transitions={out.ConnectToCarElectric.plug_in_car_post_obs: state_name(ctc_e.MovePlugToCarPreConnect),
                              out.Common.stop:                               state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_e.MovePlugToCarPreConnect),
                 state=ctc_e.MovePlugToCarPreConnect(self.config, pilot),
                 transitions={out.ConnectToCarElectric.plug_in_car_pre_connect: state_name(ctc_e.InsertPlugToCar),
                              out.Common.stop:                                  state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(ctc_e.InsertPlugToCar),

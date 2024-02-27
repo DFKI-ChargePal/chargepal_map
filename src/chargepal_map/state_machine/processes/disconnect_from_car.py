@@ -75,14 +75,14 @@ class DisconnectFromCarTwist(DisconnectFromCar):
                 state=dfc_t.ObservePlugOnCar(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.arm_in_car_post_obs: state_name(dfc_t.MoveArmToCarPreGrasp),
                              out.Common.stop:                                state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_t.MoveArmToCarPreGrasp),
                 state=dfc_t.MoveArmToCarPreGrasp(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.arm_in_car_pre_connect: state_name(dfc_t.GraspPlugOnCar),
                              out.Common.stop:                                   state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_t.GraspPlugOnCar),
@@ -107,14 +107,14 @@ class DisconnectFromCarTwist(DisconnectFromCar):
                 state=dfc_t.ObserveSocketOnBattery(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.plug_in_bat_post_obs: state_name(dfc_t.MovePlugToBatteryPreConnect),
                              out.Common.stop:                                 state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_t.MovePlugToBatteryPreConnect),
                 state=dfc_t.MovePlugToBatteryPreConnect(self.config, pilot),
                 transitions={out.DisconnectFromCarTwist.plug_in_bat_pre_connect: state_name(dfc_t.InsertPlugToBattery),
                              out.Common.stop:                                    state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_t.InsertPlugToBattery),
@@ -159,14 +159,14 @@ class DisconnectFromCarElectric(DisconnectFromCar):
                 state=dfc_e.ObservePlugOnCar(self.config, pilot),
                 transitions={out.DisconnectFromCarElectric.arm_in_car_post_obs: state_name(dfc_e.MoveArmToCarPreGrasp),
                              out.Common.stop:                                   state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_e.MoveArmToCarPreGrasp),
                 state=dfc_e.MoveArmToCarPreGrasp(self.config, pilot),
                 transitions={out.DisconnectFromCarElectric.arm_in_car_pre_connect: state_name(dfc_e.GraspPlugOnCar),
                              out.Common.stop:                                      state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_e.GraspPlugOnCar),
@@ -191,14 +191,14 @@ class DisconnectFromCarElectric(DisconnectFromCar):
                 state=dfc_e.ObserveSocketOnBattery(self.config, pilot),
                 transitions={out.DisconnectFromCarElectric.plug_in_bat_post_obs: state_name(dfc_e.MovePlugToBatteryPreConnect),
                              out.Common.stop:                                    state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_e.MovePlugToBatteryPreConnect),
                 state=dfc_e.MovePlugToBatteryPreConnect(self.config, pilot),
                 transitions={out.DisconnectFromCarElectric.plug_in_bat_pre_connect: state_name(dfc_e.InsertPlugToBattery),
                              out.Common.stop:                                       state_name(com.Stop)},
-                remapping={'xyz_xyzw_base2socket': 'xyz_xyzw_base2socket'}
+                remapping={'T_base2socket': 'T_base2socket'}
             )
             StateMachine.add(
                 label=state_name(dfc_e.InsertPlugToBattery),

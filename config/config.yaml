@@ -1,0 +1,19 @@
+camera:
+  cc: coefficients.toml
+  chessboard_size:
+  - 11
+  - 17
+  chessboard_size_mm: 16
+  name: realsense_ee_cam
+
+cv_detector:
+  battery_socket_ccs: aruco_pattern_bat_socket_ccs.yaml
+  car_socket_ccs: aruco_pattern_car_socket_ccs.yaml
+  flange_eye_calibration: charuco_calibration.yaml
+
+process:
+  connect_to_car_twist: connect_to_car_twist.yaml
+  disconnect_from_car_twist: disconnect_from_car_twist.yaml
+
+ur_arm:
+  flange_eye_calibration: viewpoints_records.json
