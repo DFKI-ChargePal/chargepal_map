@@ -37,7 +37,7 @@ class MoveArmToCar(State):
         print(), rospy.loginfo('Start moving the arm to car observation pose')
         rospy.logdebug(f"Car observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.context.position_control():
-            self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
         rospy.loginfo(f"Arm ended in car observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.DisconnectFromCarTwist.arm_in_car_pre_obs, out.Common.stop)
@@ -212,7 +212,7 @@ class MovePlugToBattery(State):
         print(), rospy.loginfo('Start moving the plug to the battery')
         rospy.logdebug(f"Battery observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.context.position_control():
-            self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
         rospy.loginfo(f"Plug ended in battery observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.DisconnectFromCarTwist.plug_in_bat_post_obs, out.Common.stop)
@@ -231,7 +231,10 @@ class MovePlugToBatteryPreConnect(State):
     def execute(self, ud):
         print(), rospy.loginfo('Start moving the plug to pre-insert pose on the battery')
         # Get transformation matrices
-        T_base2socket = ud.T_base2socket
+        T_base2socket = sm.SE3().Rt(
+            R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2socket']), 
+            t=self.cfg.data['trans_base2socket']
+            )
         T_socket2pre_connect = self._T_socket2pre_connect
         # Apply transformation chain
         T_base2pre_connect = T_base2socket * T_socket2pre_connect
@@ -260,7 +263,10 @@ class InsertPlugToBattery(State):
         # Get transformation matrices
         T_socket2fpi = self._T_socket2fpi
         T_socket2junction = self._T_socket2junction
-        T_base2socket: sm.SE3 = ud.T_base2socket
+        T_base2socket = sm.SE3().Rt(
+            R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2socket']), 
+            t=self.cfg.data['trans_base2socket']
+            )
         # Apply transformation chain
         T_base2fpi = T_base2socket * T_socket2fpi
         T_base2junction = T_base2socket * T_socket2junction

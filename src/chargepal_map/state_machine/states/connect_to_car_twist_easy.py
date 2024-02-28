@@ -88,7 +88,10 @@ class GraspPlugOnBattery(State):
         # Get transformation matrices
         T_socket2fpi = self._T_socket2fpi
         T_socket2fpi_twist = self._T_socket2fpi_twist
-        T_base2socket: sm.SE3 = ud.T_base2socket
+        T_base2socket = sm.SE3().Rt(
+            R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2socket']), 
+            t=self.cfg.data['trans_base2socket']
+            )
         # Apply transformation chain
         T_base2fpi = T_base2socket * T_socket2fpi
         T_base2fpi_twist = T_base2socket * T_socket2fpi_twist
@@ -168,7 +171,7 @@ class MovePlugToCar(State):
         print(), rospy.loginfo('Start moving the plug to the car')
         rospy.logdebug(f"Car observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.context.position_control():
-            self.pilot.move_to_joint_pos(self.cfg.data['observation_joint_position'])
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
         rospy.loginfo(f"Plug ended in car observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.ConnectToCarTwist.plug_in_car_pre_obs, out.Common.stop)
@@ -337,7 +340,7 @@ class MoveArmToDrivePos(State):
         print(), rospy.loginfo('Start moving the arm to drive configuration')
         rospy.logdebug(f"Driving joint positions: {self.cfg.data['drive_joint_position']}")
         with self.pilot.context.position_control():
-            self.pilot.move_to_joint_pos(self.cfg.data['drive_joint_position'])
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
         rospy.loginfo(f"Arm ended in drive pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.ConnectToCarTwist.arm_in_driving_pose, out.Common.stop)
