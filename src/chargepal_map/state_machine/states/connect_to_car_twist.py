@@ -281,7 +281,7 @@ class MovePlugToCarPreConnect(State):
         T_base2socket = ud.T_base2socket
         T_socket2pre_connect = self._T_socket2pre_connect
         # Apply transformation chain
-        T_base2pre_connect = T_base2socket * T_base2pre_connect
+        T_base2pre_connect = T_base2socket * T_socket2pre_connect
         # Perform actions
         with self.pilot.context.position_control():
             # Move to pre-pose to hook up to plug
@@ -365,7 +365,6 @@ class ReleasePlugOnCar(State):
             if not success:
                 raise RuntimeError(
                     f"Error while trying to release the lock. Robot end-effector is probably still connected.")
-
         rospy.loginfo(f"Arm successfully released from the plug on the car.")
         return self.uc.request_action(out.ConnectToCarTwist.arm_in_car_post_connect, out.Common.stop)
 

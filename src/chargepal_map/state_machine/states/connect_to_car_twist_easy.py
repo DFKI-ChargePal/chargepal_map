@@ -31,7 +31,7 @@ class MoveArmToBattery(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.arm_in_bat_pre_obs])
+        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.arm_in_bat_post_obs])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the arm to battery observation pose')
@@ -40,7 +40,7 @@ class MoveArmToBattery(State):
             self.pilot.move_to_joint_pos(q=self.cfg.data['observation_joint_position'])
         rospy.loginfo(f"Arm ended in battery observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
-        return self.uc.request_action(out.ConnectToCarTwist.arm_in_bat_pre_obs, out.Common.stop)
+        return self.uc.request_action(out.ConnectToCarTwist.arm_in_bat_post_obs, out.Common.stop)
 
 
 class MoveArmToBatteryPreGrasp(State):
