@@ -140,6 +140,82 @@ class DisconnectFromCarTwist(DisconnectFromCar):
             )
 
 
+class DisconnectFromCarTwistEasy(DisconnectFromCar):
+
+    def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
+        super().__init__(name, cfg_fp, dtt_dir)
+
+    def set_up(self, pilot: Pilot) -> None:
+        # Open smash container to add states and transitions
+        with self.state_machine:
+            StateMachine.add(
+                label=state_name(dfc_t.MoveArmToCar),
+                state=dfc_t.MoveArmToCar(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.arm_in_car_pre_obs: state_name(dfc_t.ObservePlugOnCar),
+                             out.Common.stop:                               state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.ObservePlugOnCar),
+                state=dfc_t.ObservePlugOnCar(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.arm_in_car_post_obs: state_name(dfc_t.MoveArmToCarPreGrasp),
+                             out.Common.stop:                                state_name(com.Stop)},
+                remapping={'T_base2socket': 'T_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.MoveArmToCarPreGrasp),
+                state=dfc_t.MoveArmToCarPreGrasp(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.arm_in_car_pre_connect: state_name(dfc_t.GraspPlugOnCar),
+                             out.Common.stop:                                   state_name(com.Stop)},
+                remapping={'T_base2socket': 'T_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.GraspPlugOnCar),
+                state=dfc_t.GraspPlugOnCar(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.plug_in_car_connect: state_name(dfc_t.RemovePlugFromCar),
+                             out.Common.stop:                                state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.RemovePlugFromCar),
+                state=dfc_t.RemovePlugFromCar(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.plug_in_car_post_connect: state_name(dfc_t.MovePlugToBattery),
+                             out.Common.stop:                                state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.MovePlugToBattery),
+                state=dfc_t.MovePlugToBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.plug_in_bat_pre_obs: state_name(dfc_t.MovePlugToBatteryPreConnect),
+                             out.Common.stop:                       state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.MovePlugToBatteryPreConnect),
+                state=dfc_t.MovePlugToBatteryPreConnect(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.plug_in_bat_pre_connect: state_name(dfc_t.InsertPlugToBattery),
+                             out.Common.stop:                                    state_name(com.Stop)},
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.InsertPlugToBattery),
+                state=dfc_t.InsertPlugToBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.plug_in_bat_connect: state_name(dfc_t.ReleasePlugOnBattery),
+                             out.Common.stop:                                state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.ReleasePlugOnBattery),
+                state=dfc_t.ReleasePlugOnBattery(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.arm_in_bat_post_connect: state_name(dfc_t.MoveArmToDrivePos),
+                             out.Common.stop:                                    state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(dfc_t.MoveArmToDrivePos),
+                state=dfc_t.MoveArmToDrivePos(self.config, pilot),
+                transitions={out.DisconnectFromCarTwist.arm_in_driving_pose: out.DisconnectFromCarTwist.arm_in_driving_pose}
+            )
+            StateMachine.add(
+                label=state_name(com.Stop),
+                state=com.Stop(self.config, pilot),
+                transitions={out.Common.stop: out.Common.stop}
+            )
+
+
 class DisconnectFromCarElectric(DisconnectFromCar):
 
     def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:

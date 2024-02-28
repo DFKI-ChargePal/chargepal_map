@@ -140,6 +140,82 @@ class ConnectToCarTwist(ConnectToCar):
             )
 
 
+class ConnectToCarTwistEasy(ConnectToCar):
+
+    def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
+        super().__init__(name, cfg_fp, dtt_dir)
+
+    def set_up(self, pilot: Pilot) -> None:
+        # Open smash container to add states and transitions
+        with self.state_machine:
+            StateMachine.add(
+                label=state_name(ctc_t.MoveArmToBattery),
+                state=ctc_t.MoveArmToBattery(self.config, pilot),
+                transitions={out.ConnectToCarTwist.arm_in_bat_pre_obs: state_name(ctc_t.MoveArmToBatteryPreGrasp),
+                             out.Common.stop:                          state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.MoveArmToBatteryPreGrasp),
+                state=ctc_t.MoveArmToBatteryPreGrasp(self.config, pilot),
+                transitions={out.ConnectToCarTwist.arm_in_bat_pre_connect: state_name(ctc_t.GraspPlugOnBattery),
+                             out.Common.stop:                              state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.GraspPlugOnBattery),
+                state=ctc_t.GraspPlugOnBattery(self.config, pilot),
+                transitions={out.ConnectToCarTwist.plug_in_bat_connect: state_name(ctc_t.RemovePlugFromBattery),
+                             out.Common.stop:                           state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.RemovePlugFromBattery),
+                state=ctc_t.RemovePlugFromBattery(self.config, pilot),
+                transitions={out.ConnectToCarTwist.plug_in_bat_post_connect: state_name(ctc_t.MovePlugToCar),
+                             out.Common.stop:                                state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.MovePlugToCar),
+                state=ctc_t.MovePlugToCar(self.config, pilot),
+                transitions={out.ConnectToCarTwist.plug_in_car_pre_obs: state_name(ctc_t.ObserveSocketOnCar),
+                             out.Common.stop:                           state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.ObserveSocketOnCar),
+                state=ctc_t.ObserveSocketOnCar(self.config, pilot),
+                transitions={out.ConnectToCarTwist.plug_in_car_post_obs: state_name(ctc_t.MovePlugToCarPreConnect),
+                             out.Common.stop:                            state_name(com.Stop)},
+                remapping={'T_base2socket': 'T_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.MovePlugToCarPreConnect),
+                state=ctc_t.MovePlugToCarPreConnect(self.config, pilot),
+                transitions={out.ConnectToCarTwist.plug_in_car_pre_connect: state_name(ctc_t.InsertPlugToCar),
+                             out.Common.stop:                               state_name(com.Stop)},
+                remapping={'T_base2socket': 'T_base2socket'}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.InsertPlugToCar),
+                state=ctc_t.InsertPlugToCar(self.config, pilot),
+                transitions={out.ConnectToCarTwist.plug_in_car_connect: state_name(ctc_t.ReleasePlugOnCar),
+                             out.Common.stop:                           state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.ReleasePlugOnCar),
+                state=ctc_t.ReleasePlugOnCar(self.config, pilot),
+                transitions={out.ConnectToCarTwist.arm_in_car_post_connect: state_name(ctc_t.MoveArmToDrivePos),
+                             out.Common.stop:                               state_name(com.Stop)}
+            )
+            StateMachine.add(
+                label=state_name(ctc_t.MoveArmToDrivePos),
+                state=ctc_t.MoveArmToDrivePos(self.config, pilot),
+                transitions={out.ConnectToCarTwist.arm_in_driving_pose: out.ConnectToCarTwist.arm_in_driving_pose}
+            )
+            StateMachine.add(
+                label=state_name(com.Stop),
+                state=com.Stop(self.config, pilot),
+                transitions={out.Common.stop: out.Common.stop}
+            )
+
+
 class ConnectToCarElectric(ConnectToCar):
 
     def __init__(self, name: str, cfg_fp: Path, dtt_dir: Path) -> None:
