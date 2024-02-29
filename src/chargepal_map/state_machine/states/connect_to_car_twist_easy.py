@@ -75,7 +75,7 @@ class MoveArmToBatteryPreGrasp(State):
 class GraspPlugOnBattery(State):
 
     _T_socket2fpi = sm.SE3().Trans([0.0, 0.0, 0.034])
-    _T_socket2fpi_twist = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(-0.005, 0.0, 0.034))
+    _T_socket2fpi_twist = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0, 0.0, 0.034))
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
