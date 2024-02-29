@@ -4,6 +4,7 @@ from __future__ import annotations
 import sys
 import yaml
 import rospy
+import logging
 import ur_pilot
 import camera_kit as ck
 from pathlib import Path
@@ -33,6 +34,7 @@ class ManipulationActionServer:
         cam.load_coefficients(cam_cc_path)
         # Setting up ur-pilot
         arm_dir = dir_config.joinpath('ur_arm')
+        ur_pilot.logger.set_logging_level(logging.DEBUG)
         self.ur_pilot = ur_pilot.Pilot(config_dir=arm_dir)
         self.ur_pilot.register_ee_cam(cam, cam_dir)
         # Create detector directory path

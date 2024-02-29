@@ -96,23 +96,23 @@ class GraspPlugOnBattery(State):
         T_base2fpi = T_base2socket * T_socket2fpi
         T_base2fpi_twist = T_base2socket * T_socket2fpi_twist
 
-        # Getting in junction between plug and robot
-        with self.pilot.context.motion_control():
-            self.pilot.move_to_tcp_pose(T_base2fpi_twist, time_out=5.0)
-            # Check if robot is in target area
-            xyz_base2ft_base_est = T_base2fpi_twist.t
-            xyz_base2ft_base_meas = self.pilot.robot.tcp_pos
-            error = np.linalg.norm(xyz_base2ft_base_est - xyz_base2ft_base_meas)
-            if error > 0.01:
-                raise RuntimeError(f"Remaining position error {error} to alignment state is to large. "
-                                    f"Robot is probably in an undefined condition.")
+        # # Getting in junction between plug and robot
+        # with self.pilot.context.motion_control():
+        #     self.pilot.move_to_tcp_pose(T_base2fpi_twist, time_out=5.0)
+        #     # Check if robot is in target area
+        #     xyz_base2ft_base_est = T_base2fpi_twist.t
+        #     xyz_base2ft_base_meas = self.pilot.robot.tcp_pos
+        #     error = np.linalg.norm(xyz_base2ft_base_est - xyz_base2ft_base_meas)
+        #     if error > 0.01:
+        #         raise RuntimeError(f"Remaining position error {error} to alignment state is to large. "
+        #                             f"Robot is probably in an undefined condition.")
         # Start to apply some force
         with self.pilot.context.force_control():
             # Move further to apply better connection
             _ = self.pilot.tcp_force_mode(
                     wrench=np.array([0.0, 0.0, 30.0, 0.0, 0.0, 0.0]),
                     compliant_axes=[0, 0, 1, 0, 0, 0],
-                    distance=0.01,  # 1cm
+                    distance=0.02,  # 1cm
                     time_out=3.0)
             # Fix plug via twisting end-effector
             success = self.pilot.screw_ee_force_mode(4.0, np.pi / 2, 12.0)
@@ -169,7 +169,6 @@ class MovePlugToCar(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the plug to the car')
-        rospy.logdebug(f"Car observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
         rospy.loginfo(f"Plug ended in car observation pose: "
@@ -338,7 +337,6 @@ class MoveArmToDrivePos(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the arm to drive configuration')
-        rospy.logdebug(f"Driving joint positions: {self.cfg.data['drive_joint_position']}")
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
         rospy.loginfo(f"Arm ended in drive pose: "
