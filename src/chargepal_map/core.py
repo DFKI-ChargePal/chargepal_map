@@ -5,8 +5,8 @@ from pathlib import Path
 
 # local
 from chargepal_map.state_machine.processes.process import ProcessABC
-from chargepal_map.state_machine.processes.connect_to_car import ConnectToCarTwist, ConnectToCarTwistEasy, ConnectToCarElectric
-from chargepal_map.state_machine.processes.disconnect_from_car import DisconnectFromCarTwist, DisconnectFromCarTwistEasy, DisconnectFromCarElectric
+from chargepal_map.state_machine.processes.connect_to_car import ConnectToCarTwist, ConnectToCarTwistEasy
+from chargepal_map.state_machine.processes.disconnect_from_car import DisconnectFromCarTwist, DisconnectFromCarTwistEasy
 
 # typing
 from typing import Type
@@ -34,9 +34,9 @@ class ProcessFactory:
 manipulation_action_processor = ProcessFactory()
 
 manipulation_action_processor.register('connect_to_car_twist', ConnectToCarTwist)
-manipulation_action_processor.register('connect_to_car_electric', ConnectToCarElectric)
+# manipulation_action_processor.register('connect_to_car_electric', ConnectToCarElectric)
 manipulation_action_processor.register('connect_to_car_twist_easy', ConnectToCarTwistEasy)
 
 manipulation_action_processor.register('disconnect_from_car_twist', DisconnectFromCarTwist)
-manipulation_action_processor.register('disconnect_from_car_electric', DisconnectFromCarElectric)
+# manipulation_action_processor.register('disconnect_from_car_electric', DisconnectFromCarElectric)
 manipulation_action_processor.register('disconnect_from_car_twist_easy', DisconnectFromCarTwistEasy)

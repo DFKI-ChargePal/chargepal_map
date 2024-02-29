@@ -75,7 +75,7 @@ class MoveArmToBatteryPreGrasp(State):
 class GraspPlugOnBattery(State):
 
     _T_socket2fpi = sm.SE3().Trans([0.0, 0.0, 0.034])
-    _T_socket2fpi_twist = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0, 0.0, 0.034))
+    _T_socket2fpi_twist = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(-0.005, 0.0, 0.034))
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
@@ -124,7 +124,7 @@ class GraspPlugOnBattery(State):
             T_base2fpi_meas = self.pilot.robot.tcp_pose
             T_fpi_meas2fpi_est = T_base2fpi_meas.inv() * T_base2fpi_est
             lin_error = np.linalg.norm(T_fpi_meas2fpi_est.t)
-            ang_error = T_fpi_meas2fpi_est.angdist()
+            ang_error = T_base2fpi_est.angdist(T_base2fpi_meas)
             if lin_error > 0.0075:
                 raise RuntimeError(f"Remaining linear error {lin_error} is to large. "
                                    f"Robot is probably in an undefined condition.")

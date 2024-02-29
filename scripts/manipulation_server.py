@@ -34,7 +34,7 @@ class ManipulationActionServer:
         # Setting up ur-pilot
         arm_dir = dir_config.joinpath('ur_arm')
         self.ur_pilot = ur_pilot.Pilot(config_dir=arm_dir)
-        self.ur_pilot.robot.register_ee_cam(cam, cam_dir)
+        self.ur_pilot.register_ee_cam(cam, cam_dir)
         # Create detector directory path
         dtt_path = dir_config.joinpath('cv_detector')
         # Create action processors
