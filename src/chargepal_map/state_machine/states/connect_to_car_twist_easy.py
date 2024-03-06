@@ -112,8 +112,9 @@ class GraspPlugOnBattery(State):
             _ = self.pilot.tcp_force_mode(
                     wrench=np.array([0.0, 0.0, 30.0, 0.0, 0.0, 0.0]),
                     compliant_axes=[0, 0, 1, 0, 0, 0],
-                    distance=0.02,  # 1cm
+                    distance=0.02,  # 2cm
                     time_out=3.0)
+            time.sleep(0.5)
             # Fix plug via twisting end-effector
             success = self.pilot.screw_ee_force_mode(4.0, np.pi / 2, 12.0)
             if not success:
@@ -195,7 +196,6 @@ class ObserveSocketOnCar(State):
         if self.pilot.cam is None:
             raise RuntimeError(f"No camera in ur-pilot registered. Observation not possible.")
         dtt.register_camera(self.pilot.cam)
-
         # Search for ArUco pattern
         found = False
         # Use time out to exit loop
@@ -238,13 +238,14 @@ class MovePlugToCarPreConnect(State):
         T_base2socket = ud.T_base2socket
         T_socket2pre_connect = self._T_socket2pre_connect
         # Apply transformation chain
-        T_base2pre_connect = T_base2socket * T_base2pre_connect
+        T_base2pre_connect = T_base2socket * T_socket2pre_connect
         # Perform actions
         with self.pilot.context.position_control():
             # Move to pre-pose to hook up to plug
             self.pilot.move_to_tcp_pose(T_base2pre_connect)
         rospy.loginfo(f"Plug ended in pre-insert pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
+        ud.T_base2socket = T_base2socket
         return self.uc.request_action(out.ConnectToCarTwist.plug_in_car_pre_connect, out.Common.stop)
 
 
@@ -259,14 +260,15 @@ class InsertPlugToCar(State):
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.Common.stop, out.ConnectToCarTwist.plug_in_car_connect],
-                       input_keys=['T_base2socket'])
+                       input_keys=['T_base2socket'],
+                       output_keys=['T_base2socket'])
 
-    def execute(self, ud: Any) -> str:
+    def execute(self, ud) -> str:
         print(), rospy.loginfo('Start inserting the plug to the car')
         # Get transformation matrices
+        T_base2socket = sm.SE3(ud.T_base2socket)
         T_socket2fpi = self._T_socket2fpi
         T_socket2junction = self._T_socket2junction
-        T_base2socket: sm.SE3 = ud.T_base2socket
         # Apply transformation chain
         T_base2fpi = T_base2socket * T_socket2fpi
         T_base2junction = T_base2socket * T_socket2junction
@@ -283,7 +285,7 @@ class InsertPlugToCar(State):
         # Start to apply some force
         with self.pilot.context.force_control():
             # Try to fully plug in
-            self.pilot.plug_in_force_ramp(f_axis='z', f_start=60.0, f_end=120, duration=3.0)
+            self.pilot.plug_in_force_ramp(f_axis='z', f_start=30.0, f_end=60, duration=2.0)
             # Check if robot is in target area
             xyz_base2fpi_base_est = T_base2fpi.t
             xyz_base2fpi_base_meas = self.pilot.robot.tcp_pos
@@ -305,7 +307,7 @@ class ReleasePlugOnCar(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start releasing the arm from the plug on the car')
-        with self.pilot.force_control():
+        with self.pilot.context.force_control():
             # Release plug via twisting end-effector
             success = self.pilot.screw_ee_force_mode(4.0, -np.pi / 2, 12.0)
             if not success:
