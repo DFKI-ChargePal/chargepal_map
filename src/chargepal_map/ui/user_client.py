@@ -12,7 +12,8 @@ class UserClient:
 
     def __init__(self, enable: bool):
         self.step_by_user = enable
-        rospy.wait_for_service('user')
+        if self.step_by_user:
+            rospy.wait_for_service('user')
 
     def request_action(self, continue_res: str, stop_res: str) -> str:
         if self.step_by_user:

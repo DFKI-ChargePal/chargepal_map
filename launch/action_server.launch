@@ -1,7 +1,7 @@
 <launch>
 
 	<arg name="gui" default="true" doc="Option to bringup a GUI"/>
-	<arg name="config_file" default="$(find chargepal_bringup)/config/er_flex_00040_twist/config.yaml"/>
+	<arg name="config_file" default="$(find chargepal_bringup)/config/er_flex_00041_twist/config.yaml"/>
 	<!-- <arg name="config_file" default="$(find chargepal_map)/config/config.yaml"/> -->
 
 	<node pkg="chargepal_map" type="manipulation_server.py" name="manipulation_server" 

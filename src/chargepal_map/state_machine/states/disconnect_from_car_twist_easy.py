@@ -35,9 +35,8 @@ class MoveArmToCar(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the arm to car observation pose')
-        rospy.logdebug(f"Car observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.2, 0.1)
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.4, 0.1)
         rospy.loginfo(f"Arm ended in car observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.DisconnectFromCarTwist.arm_in_car_pre_obs, out.Common.stop)
@@ -87,7 +86,7 @@ class ObservePlugOnCar(State):
 
 class MoveArmToCarPreGrasp(State):
 
-    _T_socket2pre_grasp = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.005, 0.0, 0.034 - 0.02))
+    _T_socket2pre_grasp = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0035, 0.0, 0.034 - 0.02))
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
@@ -139,8 +138,8 @@ class GraspPlugOnCar(State):
             # Move further to apply better connection
             _ = self.pilot.tcp_force_mode(
                     wrench=np.array([0.0, 0.0, 30.0, 0.0, 0.0, 0.0]),
-                    compliant_axes=[0, 0, 1, 0, 0, 0],
-                    distance=0.02,  # 2cm
+                    compliant_axes=[1, 1, 1, 0, 0, 0],
+                    distance=0.03,  # 2cm
                     time_out=3.0)
             time.sleep(0.5)
             # Fix plug via twisting end-effector
@@ -198,9 +197,8 @@ class MovePlugToBattery(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the plug to the battery')
-        rospy.logdebug(f"Battery observation joint positions: {self.cfg.data['observation_joint_position']}")
         with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.4, 0.1)
         rospy.loginfo(f"Plug ended in battery observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.DisconnectFromCarTwist.plug_in_bat_post_obs, out.Common.stop)
@@ -298,7 +296,7 @@ class ReleasePlugOnBattery(State):
             success = self.pilot.screw_ee_force_mode(4.0, -np.pi / 2, 12.0)
             if not success:
                 raise RuntimeError(f"Robot did not succeed in opening the twist lock. "
-                                    f"Robot is probably in an undefined condition.")
+                                   f"Robot is probably in an undefined condition.")
             release_ft = np.array([0.0, 0.0, -25.0, 0.0, 0.0, 0.0])
             success = self.pilot.frame_force_mode(
                 wrench=release_ft,
@@ -324,7 +322,6 @@ class MoveArmToDrivePos(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the arm to drive configuration')
-        rospy.logdebug(f"Driving joint positions: {self.cfg.data['drive_joint_position']}")
         with self.pilot.context.position_control():
             self.pilot.move_to_joint_pos(self.cfg.data['drive_joint_position'])
         rospy.loginfo(f"Arm ended in drive pose: "

@@ -42,6 +42,7 @@ class ManipulationActionServer:
         # Create action processors
         proc_cfg_dir = dir_config.joinpath('process')
         for proc_name, proc_fp in config_raw['process'].items():
+            rospy.loginfo(f"Create Process: {proc_name}")
             manipulation_action_processor.create(proc_name, proc_cfg_dir.joinpath(proc_fp), self.ur_pilot, dtt_path)
 
 

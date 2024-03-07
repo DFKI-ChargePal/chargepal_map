@@ -171,7 +171,7 @@ class MovePlugToCar(State):
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the plug to the car')
         with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.4, 0.1)
         rospy.loginfo(f"Plug ended in car observation pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.ConnectToCarTwist.plug_in_car_pre_obs, out.Common.stop)
@@ -340,7 +340,7 @@ class MoveArmToDrivePos(State):
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the arm to drive configuration')
         with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.1, 0.1)
+            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], 0.4, 0.1)
         rospy.loginfo(f"Arm ended in drive pose: "
                       f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.ConnectToCarTwist.arm_in_driving_pose, out.Common.stop)
