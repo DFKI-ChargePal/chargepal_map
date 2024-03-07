@@ -17,9 +17,10 @@ from chargepal_map.state_machine.utils import state_name
 
 # actions
 from chargepal_actions.msg import (
+    ConnectPlugToCarGoal,
     ConnectPlugToCarAction, 
-    ConnectPlugToCarActionGoal,
-    ConnectPlugToCarActionFeedback
+    ConnectPlugToCarResult,
+    ConnectPlugToCarFeedback
 )
 
 # typing
@@ -35,21 +36,24 @@ class ConnectToCar(ProcessABC):
                                                           ConnectPlugToCarAction, self.action_callback, False)
         self.action_server.start()
 
-    def action_callback(self, goal: ConnectPlugToCarActionGoal) -> None:
+    def action_callback(self, goal: ConnectPlugToCarGoal) -> None:
         rospy.loginfo(f"Approach connect plug to car process")
+        res_msg = ConnectPlugToCarResult()
         try:
             rospy.loginfo(f"Process connect task step by step")
             # Execute SMACH plan
             outcome = self.state_machine.execute()
-            self.action_server.set_succeeded()
+            res_msg.connect_to_car = True
+            self.action_server.set_succeeded(res_msg)
             rospy.loginfo(f"Finish connect process successfully.")
         except Exception as e:
             rospy.logwarn(f"Error while plugging process: {e}")
-            self.action_server.set_aborted()
+            res_msg.connect_to_car = False
+            self.action_server.set_aborted(res_msg)
         rospy.loginfo(f"Leaving connect plug to car process")
 
     def wait_for_usr_feedback(self) -> None:
-        feedback = ConnectPlugToCarActionFeedback()
+        feedback = ConnectPlugToCarFeedback()
         feedback.status = "wait_for_user"
         self.action_server.publish_feedback(feedback)
 

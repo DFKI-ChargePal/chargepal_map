@@ -17,8 +17,9 @@ import chargepal_map.state_machine.states.disconnect_from_car_electric as dfc_e
 
 # actions
 from chargepal_actions.msg import (
+    DisconnectPlugFromCarGoal,
     DisconnectPlugFromCarAction,
-    DisconnectPlugFromCarActionGoal,
+    DisconnectPlugFromCarResult,
     DisconnectPlugFromCarFeedback,
 )
 
@@ -35,17 +36,20 @@ class DisconnectFromCar(ProcessABC):
                                                           DisconnectPlugFromCarAction, self.action_callback, False)
         self.action_server.start()
 
-    def action_callback(self, goal: DisconnectPlugFromCarActionGoal) -> None:
+    def action_callback(self, goal: DisconnectPlugFromCarGoal) -> None:
         rospy.loginfo(f"Approach disconnect plug from car process")
+        res_msg = DisconnectPlugFromCarResult()
         try:
             rospy.loginfo(f"Process disconnect task step by step")
             # Execute SMACH plan
             outcome = self.state_machine.execute()
-            self.action_server.set_succeeded()
+            res_msg.disconnect_from_car = True
+            self.action_server.set_succeeded(res_msg)
             rospy.loginfo(f"Finish disconnect process successfully.")
         except Exception as e:
             rospy.logwarn(f"Error while plugging process: {e}")
-            self.action_server.set_aborted()
+            res_msg.disconnect_from_car = False
+            self.action_server.set_aborted(res_msg)
         rospy.loginfo(f"Leaving disconnect plug from car process")
 
     def wait_for_usr_feedback(self) -> None:
