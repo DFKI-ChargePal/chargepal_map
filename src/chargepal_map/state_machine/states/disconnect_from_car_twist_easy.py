@@ -86,7 +86,7 @@ class ObservePlugOnCar(State):
 
 class MoveArmToCarPreGrasp(State):
 
-    _T_socket2pre_grasp = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0035, 0.0, 0.034 - 0.02))
+    _T_socket2pre_grasp = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(-0.0035, 0.0, 0.034 - 0.02))
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
