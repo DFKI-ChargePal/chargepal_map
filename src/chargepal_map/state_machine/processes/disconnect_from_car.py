@@ -12,7 +12,7 @@ import chargepal_map.state_machine.states.common as com
 from chargepal_map.state_machine.utils import state_name
 from chargepal_map.state_machine.processes.process import ProcessABC
 import chargepal_map.state_machine.states.disconnect_from_car_twist as dfc_t
-import chargepal_map.state_machine.states.disconnect_from_car_twist_easy as dfc_te
+import chargepal.chargepal_map.src.chargepal_map.state_machine.states.disconnect_from_car_twist as dfc_te
 import chargepal_map.state_machine.states.disconnect_from_car_electric as dfc_e
 
 # actions

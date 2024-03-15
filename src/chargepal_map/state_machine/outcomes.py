@@ -1,3 +1,29 @@
+class Outcomes:
+
+    # Outcome mapping to avoid typos
+    start = 'start'
+    stop = 'stop'
+
+    arm_in_ws_ls = 'arm_in_work_space_left_side'
+    arm_in_ws_rs = 'arm_in_work_space_right_side'
+
+    socket_pre_obs = 'socket_pre_observed'
+    socket_obs = 'socket_observed'
+
+    plug_pre_obs = 'plug_pre_observed'
+    plug_obs = 'plug_observed'
+
+    plug_pre_connect = 'plug_pre_connect'
+    plug_connect = 'plug_connect'
+
+    plug_pre_attached = 'plug_pre_attached'
+    plug_attached = 'plug_attached'
+    
+    plug_removed = 'plug_removed'
+    plug_released = 'plug_released'
+
+
+
 # Common process outcomes
 class Common:
 

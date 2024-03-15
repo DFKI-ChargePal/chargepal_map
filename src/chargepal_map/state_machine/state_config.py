@@ -28,9 +28,6 @@ class StateConfig:
         state_data = copy.deepcopy(config.get(self.name))
         if state_data is None:
             state_data = {}
-        # Set default values if not already exists
-        # self.state.setdefault()
-
         # Set configuration data
         common_data.update(state_data)
         self.data = common_data
