@@ -1,6 +1,6 @@
 """ This file implements the state >>ReleasePlug<< """
-
 from __future__ import annotations
+
 # libs
 import rospy
 import numpy as np
@@ -21,7 +21,7 @@ class ReleasePlug(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.Common.stop, out.ConnectToCarTwist.arm_in_car_post_connect])
+        State.__init__(self, outcomes=[out.stop, out.plug_released])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start releasing the arm from the plug on the car')
@@ -44,4 +44,4 @@ class ReleasePlug(State):
                     f"Error while trying to release the lock. Robot end-effector is probably still connected.")
 
         rospy.loginfo(f"Arm successfully released from the plug on the car.")
-        return self.uc.request_action(out.ConnectToCarTwist.arm_in_car_post_connect, out.Common.stop)
+        return self.uc.request_action(out.plug_released, out.stop)

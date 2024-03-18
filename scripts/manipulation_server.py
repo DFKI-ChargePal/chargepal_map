@@ -8,15 +8,15 @@ import logging
 import ur_pilot
 import camera_kit as ck
 from pathlib import Path
-
-from chargepal_map import manipulation_action_processor
+from chargepal_map import manipulation_action_server
+from chargepal_map import ManipulationStateMachine
 
 # typing
 from typing import Any
 
 
 
-class ManipulationActionServer:
+class ManipulationActionProcess:
 
     def __init__(self, fp_config: Path) -> None:
         # Create robot interface
@@ -39,19 +39,21 @@ class ManipulationActionServer:
         self.ur_pilot.register_ee_cam(cam, cam_dir)
         # Create detector directory path
         dtt_path = dir_config.joinpath('cv_detector')
-        # Create action processors
+        # Create manipulation state machine / process
         proc_cfg_dir = dir_config.joinpath('process')
-        for proc_name, proc_fp in config_raw['process'].items():
-            rospy.loginfo(f"Create Process: {proc_name}")
-            manipulation_action_processor.create(proc_name, proc_cfg_dir.joinpath(proc_fp), self.ur_pilot, dtt_path)
-
+        sm =  ManipulationStateMachine(proc_cfg_dir)
+        sm.build(self.ur_pilot)
+        # Create action servers
+        for job_name in config_raw['process'].keys():
+            rospy.loginfo(f"Start action server: {job_name}")
+            manipulation_action_server.create(job_name, sm)
 
 if __name__ == '__main__':
     rospy.init_node('manipulation_action_server')
     rospy.loginfo(f"Starting manipulation action servers")
     sys_cfg_path = Path(sys.argv[1])
     if sys_cfg_path.exists() and sys_cfg_path.is_file():
-        ManipulationActionServer(sys_cfg_path)
+        ManipulationActionProcess(sys_cfg_path)
     else:
         raise FileNotFoundError(f"Can not find configuration file '{sys_cfg_path}'")
     rospy.loginfo(f"Ready to receive action goal")

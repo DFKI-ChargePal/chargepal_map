@@ -21,10 +21,8 @@ class RemovePlug(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[
-            out.stop, 
-            out.plug_removed
-        ])
+        State.__init__(self, 
+                       outcomes=[out.stop, out.plug_removed_do, out.plug_removed_no])
 
     def execute(self, user_data: Any) -> str:
         print(), rospy.loginfo('Start removing the plug from battery')
