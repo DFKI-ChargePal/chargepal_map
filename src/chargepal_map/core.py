@@ -66,6 +66,11 @@ class ManipulationActionServer:
         self.act_srv.start()
 
     def action_callback(self, goal: Message) -> None:
+        """ Callback function for the ROS ActionServer class. Is called when publishing to the action goal topic
+
+        Args:
+            goal: Specific action goal message
+        """
         rospy.loginfo(f"Launch the plug-in process to the adapter station with AC plug")
         result_msg = self.res_msg()
         try:
@@ -145,7 +150,7 @@ class JobNames:
         """ Get all jobs which refer to the plug-in process
 
         Returns:
-            List with job names
+            List with valid job names
         """
         return [JobNames.plug_in_ads_ac, JobNames.plug_in_ads_dc, JobNames.plug_in_bcs_ac]
     
@@ -153,7 +158,7 @@ class JobNames:
         """ Get all jobs which refer to the plug-out process
 
         Returns:
-            List with job names
+            List with valid job names
         """
         return [JobNames.plug_out_ads_ac, JobNames.plug_out_ads_dc, JobNames.plug_out_bcs_ac]
 
@@ -161,20 +166,40 @@ class JobNames:
         """ Get all jobs which have to be executed in the left workspace
 
         Returns:
-            List with job names
+            List with valid job names
         """
         return [JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac]
     
     def workspace_right() -> list[str]:
+        """ Get all jobs which have to be executed in the right workspace
+
+        Returns:
+            List with valid job names
+        """
         return [JobNames.plug_in_ads_dc, JobNames.plug_out_ads_dc]
 
     def type2_female() -> list[str]:
+        """ Get all jobs which uses the 'Type2' (AC) plug with female inlet
+
+        Returns:
+            List with valid job names
+        """
         return [JobNames.plug_in_ads_ac, JobNames.plug_out_ads_ac]
     
     def type2_male() -> list[str]:
+        """ Get all jobs which uses the 'Type2' (AC) plug with male inlet
+
+        Returns:
+            List with valid job names
+        """
         return [JobNames.plug_in_bcs_ac, JobNames.plug_out_bcs_ac]
     
     def ccs_female() -> list[str]:
+        """ Get all jobs which uses the 'CCS' (DC) plug with female inlet
+
+        Returns:
+            List with valid job names
+        """
         return [JobNames.plug_in_ads_dc, JobNames.plug_out_ads_dc]
 
 
