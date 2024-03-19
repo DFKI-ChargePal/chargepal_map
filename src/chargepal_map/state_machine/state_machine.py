@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # libs
-import ur_pilot
 import yaml
 import rospy
 from pathlib import Path
@@ -82,13 +81,28 @@ class ManipulationStateMachine:
                 remapping={'job': 'job'}
             )
             StateMachine.add(
+                label=state_name(s.ObservePlug),
+                state=s.ObservePlug(self.config, pilot),
+                transitions={
+                    out.plug_obs: state_name(s.MoveToPlugPreAttached),
+                    out.stop:     state_name(s.Stop)
+                },
+                remapping={
+                    'job': 'job',
+                    'T_base2plug': 'T_base2plug',
+                }
+            )
+            StateMachine.add(
                 label=state_name(s.MoveToPlugPreAttached),
                 state=s.MoveToPlugPreAttached(self.config, pilot),
                 transitions={
                     out.plug_pre_attached: state_name(s.AttachPlug),
                     out.stop:              state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={
+                    'job': 'job',
+                    'T_base2plug': 'T_base2plug',
+                }
             )
             StateMachine.add(
                 label=state_name(s.AttachPlug),
@@ -125,7 +139,10 @@ class ManipulationStateMachine:
                     out.socket_obs: state_name(s.MoveToPlugPreConnected),
                     out.stop:       state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={
+                    'job': 'job',
+                    'T_base2socket': 'T_base2socket',
+                }
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPreConnected),
@@ -134,7 +151,10 @@ class ManipulationStateMachine:
                     out.plug_pre_connected: state_name(s.InsertPlug),
                     out.stop:               state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={
+                    'job': 'job',
+                    'T_base2socket': 'T_base2socket',
+                }
             )
             StateMachine.add(
                 label=state_name(s.InsertPlug),

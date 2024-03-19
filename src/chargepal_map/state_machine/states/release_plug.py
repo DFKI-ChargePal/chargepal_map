@@ -21,10 +21,13 @@ class ReleasePlug(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.stop, out.plug_released])
+        State.__init__(self, 
+                       outcomes=[out.stop, out.plug_released], 
+                       input_keys=['job_id'],
+                       output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start releasing the arm from the plug on the car')
+        print(), rospy.loginfo('Start releasing the arm from the plug')
         with self.pilot.context.force_control():
             # Release plug via twisting end-effector
             success = self.pilot.screw_ee_force_mode(4.0, -np.pi / 2, 12.0)
@@ -43,5 +46,5 @@ class ReleasePlug(State):
                 raise RuntimeError(
                     f"Error while trying to release the lock. Robot end-effector is probably still connected.")
 
-        rospy.loginfo(f"Arm successfully released from the plug on the car.")
+        rospy.loginfo(f"Arm successfully released from the plug.")
         return self.uc.request_action(out.plug_released, out.stop)

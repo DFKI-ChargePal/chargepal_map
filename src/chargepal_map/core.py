@@ -142,15 +142,39 @@ class JobNames:
     plug_out_bcs_ac = 'plug_out_bcs_ac'
 
     def plug_in() -> list[str]:
+        """ Get all jobs which refer to the plug-in process
+
+        Returns:
+            List with job names
+        """
         return [JobNames.plug_in_ads_ac, JobNames.plug_in_ads_dc, JobNames.plug_in_bcs_ac]
     
     def plug_out() -> list[str]:
+        """ Get all jobs which refer to the plug-out process
+
+        Returns:
+            List with job names
+        """
         return [JobNames.plug_out_ads_ac, JobNames.plug_out_ads_dc, JobNames.plug_out_bcs_ac]
 
     def workspace_left() -> list[str]:
+        """ Get all jobs which have to be executed in the left workspace
+
+        Returns:
+            List with job names
+        """
         return [JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac]
     
     def workspace_right() -> list[str]:
+        return [JobNames.plug_in_ads_dc, JobNames.plug_out_ads_dc]
+
+    def type2_female() -> list[str]:
+        return [JobNames.plug_in_ads_ac, JobNames.plug_out_ads_ac]
+    
+    def type2_male() -> list[str]:
+        return [JobNames.plug_in_bcs_ac, JobNames.plug_out_bcs_ac]
+    
+    def ccs_female() -> list[str]:
         return [JobNames.plug_in_ads_dc, JobNames.plug_out_ads_dc]
 
 

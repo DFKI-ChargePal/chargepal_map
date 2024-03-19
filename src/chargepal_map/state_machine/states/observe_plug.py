@@ -9,6 +9,7 @@ import cvpd as pd
 from smach import State
 from time import perf_counter as _t_now
 
+from chargepal_map.core import job_ids
 from chargepal_map.ui.user_client import UserClient
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
@@ -24,10 +25,14 @@ class ObservePlug(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.stop, out.plug_obs], output_keys=['T_base2socket'])
+        State.__init__(self, 
+                       outcomes=[out.stop, out.plug_obs], 
+                       input_keys=['job_id'], 
+                       output_keys=['job_id', 'T_base2plug'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start observing the socket with plug on car')
+        print(), rospy.loginfo('Start observing the socket with plug')
+        job_id = ud.job_id
         # Create detector
         dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg'])
         dtt = pd.factory.create(dtt_cfg_fp)
@@ -49,10 +54,19 @@ class ObservePlug(State):
                 T_flange2cam = self.pilot.cam_mdl.T_flange2camera
                 T_base2flange = self.pilot.get_pose('flange')
                 T_base2socket = T_base2flange * T_flange2cam * T_cam2socket
+                # TODO: Get T_base2plug instead of T_base2socket depending on the plug model
+                if job_id == job_ids.plug_out_ads_ac:
+                    T_base2plug = T_base2socket
+                elif job_id == job_ids.plug_out_ads_dc:
+                    T_base2plug = T_base2socket
+                elif job_id == job_ids.plug_out_bcs_ac:
+                    T_base2plug = T_base2socket
+                else:
+                    raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         if found:
-            ud.T_base2socket = T_base2socket
+            ud.T_base2plug = T_base2plug
         else:
-            raise RuntimeError(f"Can't find socket."
+            raise RuntimeError(f"Can't find socket. "
                                f"Make sure detector is proper set up and pattern is in camera view")
-        rospy.loginfo(f"Found socket pose: Base-Socket = {ur_pilot.utils.se3_to_str(T_base2socket)}")
+        rospy.loginfo(f"Found plug pose: Base-Plug = {ur_pilot.utils.se3_to_str(T_base2plug)}")
         return self.uc.request_action(out.plug_obs, out.stop)

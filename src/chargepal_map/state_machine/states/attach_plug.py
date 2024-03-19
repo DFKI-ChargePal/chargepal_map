@@ -25,7 +25,10 @@ class AttachPlug(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self,  outcomes=[out.stop, out.plug_attached])
+        State.__init__(self,
+                       outcomes=[out.stop, out.plug_attached],
+                       input_keys=['job_id'],
+                       output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start grasping the plug on battery')

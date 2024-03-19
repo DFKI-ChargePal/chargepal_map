@@ -6,6 +6,7 @@ import numpy as np
 from smach import State
 import spatialmath as sm
 
+from chargepal_map.core import job_ids
 from chargepal_map.ui.user_client import UserClient
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
@@ -26,11 +27,21 @@ class InsertPlug(State):
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.plug_connected],
-                       input_keys=['T_base2socket'],
-                       output_keys=['T_base2socket'])
+                       input_keys=['job_id', 'T_base2socket'],
+                       output_keys=['job_id', 'T_base2socket'])
 
-    def execute(self, ud) -> str:
+    def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start inserting the plug to the car')
+        job_id = ud.job_id
+        # TODO: Get plug_tip length depending on the plug model
+        if job_id == job_ids.plug_out_ads_ac:
+            pass
+        elif job_id == job_ids.plug_out_ads_dc:
+            pass
+        elif job_id == job_ids.plug_out_bcs_ac:
+            pass
+        else:
+            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get transformation matrices
         T_base2socket = sm.SE3(ud.T_base2socket)
         T_socket2fpi = self._T_socket2fpi

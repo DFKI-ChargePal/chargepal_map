@@ -24,10 +24,14 @@ class ObserveSocket(State):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
-        State.__init__(self, outcomes=[out.stop, out.socket_obs], output_keys=['T_base2socket'])
+        State.__init__(self, 
+                       outcomes=[out.stop, out.socket_obs], 
+                       input_keys=['job_id'],
+                       output_keys=['job_id', 'T_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start observing the socket on the car')
+        print(), rospy.loginfo('Start observing the socket')
+        job_id = ud.job_id
         # Create detector
         dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg'])
         dtt = pd.factory.create(dtt_cfg_fp)

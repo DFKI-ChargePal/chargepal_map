@@ -27,7 +27,7 @@ class Start(State):
                        output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
-        rospy.loginfo(f"Check robot state against action conditions.")
+        print(), rospy.loginfo(f"Check robot state against action conditions.")
         job_id = ud.job_id
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
