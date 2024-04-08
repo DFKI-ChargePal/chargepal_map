@@ -89,7 +89,7 @@ class ManipulationStateMachine:
                 },
                 remapping={
                     'job': 'job',
-                    'T_base2plug': 'T_base2plug',
+                    'T_base2socket': 'T_base2socket',
                 }
             )
             StateMachine.add(
@@ -101,7 +101,7 @@ class ManipulationStateMachine:
                 },
                 remapping={
                     'job': 'job',
-                    'T_base2plug': 'T_base2plug',
+                    'T_base2socket': 'T_base2socket',
                 }
             )
             StateMachine.add(
@@ -111,7 +111,10 @@ class ManipulationStateMachine:
                     out.plug_attached: state_name(s.RemovePlug),
                     out.stop:          state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={
+                    'job': 'job',
+                    'T_base2socket': 'T_base2socket',
+                }
             )
             StateMachine.add(
                 label=state_name(s.RemovePlug),
@@ -163,7 +166,10 @@ class ManipulationStateMachine:
                     out.plug_connected: state_name(s.ReleasePlug),
                     out.stop:           state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={
+                    'job': 'job',
+                    'T_base2socket': 'T_base2socket',
+                }
             )
             StateMachine.add(
                 label=state_name(s.ReleasePlug),

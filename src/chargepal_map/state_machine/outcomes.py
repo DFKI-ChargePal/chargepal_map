@@ -2,8 +2,9 @@
 class Outcomes:
 
     # Outcome mapping to avoid typos
-    start = 'start'
     stop = 'stop'
+    start = 'start'
+    failure = 'failure'
     completed = 'completed'
 
     arm_in_wrong_ws = 'arm_in_wrong_workspace'

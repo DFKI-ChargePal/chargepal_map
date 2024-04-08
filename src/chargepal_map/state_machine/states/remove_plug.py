@@ -3,7 +3,6 @@
 from __future__ import annotations
 # libs
 import rospy
-import numpy as np
 from smach import State
 
 from chargepal_map.core import job_ids
@@ -28,24 +27,31 @@ class RemovePlug(State):
                        output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
+        print(), rospy.loginfo('Start removing the plug from the socket')
         # Check for job ID
         job_id = ud.job_id
+        # Get next output
         if job_id in job_ids.plug_in():
             new_out = out.plug_removed_do
         elif job_id in job_ids.plug_out():
             new_out = out.plug_removed_no
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
-        # Perform action
-        print(), rospy.loginfo('Start removing the plug from battery')
-        plug_out_ft = np.array([0.0, 0.0, -abs(self.cfg.data['force']), 0.0, 0.0, 0.0])
-        with self.pilot.context.force_control():
-            success = self.pilot.tcp_force_mode(
-                wrench=plug_out_ft,
-                compliant_axes=[0, 0, 1, 0, 0, 0],
-                distance=self.cfg.data['moving_distance'],
-                time_out=self.cfg.data['force_mode_time_out'])
-        if not success:
+        # Get plug type
+        if job_id in job_ids.type2_female():
+            plug_type = 'type2_female'
+        elif job_id in job_ids.type2_male():
+            plug_type = 'type2_male'
+        elif job_id in job_ids.ccs_female():
+            plug_type = 'ccs_female'
+        else:
+            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+        # Start removing procedure
+        with self.pilot.plug_model.context(plug_type):
+            sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug()
+            rospy.loginfo(f"Removing plug from socket successfully: {sus_rm_plug}")
+            rospy.logdebug(f"Final error after removing plug from socket: "
+                           f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
+        if not sus_rm_plug:
             raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
-        rospy.loginfo(f"Plug successfully removed from the battery socket.")
         return self.uc.request_action(new_out, out.stop)

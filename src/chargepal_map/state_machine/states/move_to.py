@@ -112,38 +112,40 @@ class MoveToSocketPreObs(State):
 
 class MoveToPlugPreAttached(State):
 
-    _T_plug2pre_attach = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0, 0.0, -0.02))
-
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
         self.uc = UserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.plug_pre_attached], 
-                       input_keys=['job_id', 'T_base2plug'], output_keys=['job_id', 'T_base2plug'])
+                       input_keys=['job_id', 'T_base2socket'], output_keys=['job_id', 'T_base2socket'])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start moving the arm to plug pre-attach pose')
         job_id = ud.job_id
         # Get transformation matrices
-        if job_id in job_ids.plug_in():
-            T_base2plug = sm.SE3().Rt(
-                R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2plug']), 
-                t=self.cfg.data['trans_base2plug']
-            )
+        if job_id in job_ids.plug_out():
+            T_base2socket = ud.T_base2socket
         elif job_id in job_ids.plug_out():
-            T_base2plug = ud.T_base2plug
+            T_base2socket = sm.SE3().Rt(
+                R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2socket']), 
+                t=self.cfg.data['trans_base2socket']
+            )
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
-        T_plug2pre_attach = self._T_plug2pre_attach
-        # Apply transformation chain
-        T_base2pre_attach = T_base2plug * T_plug2pre_attach
-        # Perform actions
-        with self.pilot.context.position_control():
-            # Move to the plug pre-attach pose
-            self.pilot.move_to_tcp_pose(T_base2pre_attach)
-        rospy.loginfo(f"Arm ended in pre-attach pose: "
-                      f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
+        # Get plug type key
+        if job_id in job_ids.type2_female():
+            plug_type = 'type2_female'
+        elif job_id in job_ids.type2_male():
+            plug_type = 'type2_male'
+        elif job_id in job_ids.ccs_female():
+            plug_type = 'ccs_female'
+        else:
+            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+        with self.pilot.plug_model.context(plug_type):
+            sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
+        rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
+        rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.plug_pre_attached, out.stop)
 
 
@@ -172,12 +174,17 @@ class MoveToPlugPreConnected(State):
             )
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
-        T_socket2pre_connect = self._T_socket2pre_connect
-        # Apply transformation chain
-        T_base2pre_connect = T_base2socket * T_socket2pre_connect
-        # Performe actions
-        with self.pilot.context.position_control():
-            self.pilot.move_to_tcp_pose(T_base2pre_connect)
-        rospy.loginfo(f"Plug ended in pre-insert pose: "
-                      f"Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
+        # Get plug type key
+        if job_id in job_ids.type2_female():
+            plug_type = 'type2_female'
+        elif job_id in job_ids.type2_male():
+            plug_type = 'type2_male'
+        elif job_id in job_ids.ccs_female():
+            plug_type = 'ccs_female'
+        else:
+            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+        with self.pilot.plug_model.context(plug_type):
+            sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
+        rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
+        rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         return self.uc.request_action(out.plug_pre_connected, out.stop)
