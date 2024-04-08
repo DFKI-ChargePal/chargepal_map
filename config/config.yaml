@@ -12,8 +12,8 @@ cv_detector:
   flange_eye_calibration: charuco_calibration.yaml
 
 process:
-  connect_to_car_twist: connect_to_car_twist.yaml
-  disconnect_from_car_twist: disconnect_from_car_twist.yaml
+  plug_in_ads_ac: plug_in_ads_ac.yaml
+  plug_out_ads_ac: plug_out_ads_ac.yaml
 
 ur_arm:
   flange_eye_calibration: viewpoints_records.json
