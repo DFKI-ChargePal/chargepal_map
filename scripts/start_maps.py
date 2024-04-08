@@ -24,34 +24,31 @@ def start_maps(fp_cfg: Path) -> None:
         RuntimeError: If configuration is not readable
     """
     # Create robot interface
-    dir_config = fp_cfg.parent
+    config_dir = fp_cfg.parent
     with fp_cfg.open('r') as fp:
         try:
-            config_raw: dict[str, Any] = yaml.safe_load(fp)
+            config_dict: dict[str, Any] = yaml.safe_load(fp)
         except Exception as e:
             raise RuntimeError(f"Error while reading {fp_cfg} configuration with error msg: {e}")
 
     # Setting up end-effector camera
-    cam_dir = dir_config.joinpath('camera_info')
-    cam_cc_path = cam_dir.joinpath(config_raw['camera']['cc'])
-    cam = ck.camera_factory.create(config_raw['camera']['name'])
+    cam_dir = config_dir.joinpath('camera_info')
+    cam_cc_path = cam_dir.joinpath(config_dict['camera']['cc'])
+    cam = ck.camera_factory.create(config_dict['camera']['name'])
     cam.load_coefficients(cam_cc_path)
     # Setting up ur-pilot
-    arm_dir = dir_config.joinpath('ur_arm')
+    arm_dir = config_dir.joinpath('ur_arm')
     ur_pilot.logger.set_logging_level(logging.DEBUG)
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
-    # Create detector directory path
-    dtt_cfg_dir = dir_config.joinpath('cv_detector')
     # Create manipulation state machine / process
-    proc_cfg_dir = dir_config.joinpath('process')
-    sm =  mp.ManipulationStateMachine(proc_cfg_dir, dtt_cfg_dir)
+    sm =  mp.ManipulationStateMachine(config_dir, config_dict['state_machine'])
     sm.build(pilot)
     # Create action servers
-    for job_name in config_raw['process'].keys():
+    for job in config_dict['state_machine']['jobs']:
+        job_name = job.split('.')[0]
         rospy.loginfo(f"Start action server: {job_name}")
         mp.manipulation_action_server.create(job_name, sm)
-
 
 
 if __name__ == '__main__':

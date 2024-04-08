@@ -1,0 +1,7 @@
+common:
+  step_by_user: true
+
+start:
+  sd_pan_ws_ls: 0.0
+  sd_pan_ws_rs: 3.14
+

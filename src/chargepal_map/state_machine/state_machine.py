@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 # libs
+import copy
 import yaml
 import rospy
 from pathlib import Path
@@ -18,34 +19,28 @@ from ur_pilot import Pilot
 
 class ManipulationStateMachine:
 
-    def __init__(self, cfg_fp: Path, dtt_dir: Path):
+    def __init__(self, config_dir: Path, base_cfg: dict[str, Any]):
         """ Base class of a manipulation process
 
         Args:
-            name:    Name of the Process
-            cfg_fp:  File path to the process configuration file
-            dtt_dir: Directory path to the vision detector configurations
+            config_dir: Path pointing to the configuration folder
+            base_cfg:   Top-level configuration dictionary
 
-        Raises:
-            FileNotFoundError: _description_
-            RuntimeError: _description_
         """
         silent_smach()
-        if not cfg_fp.exists():
-            raise FileNotFoundError(f"Can't find configuration file under: {cfg_fp}")
-        # load configuration file
-        with cfg_fp.open('r') as file_stream:
-            try:
-                self.config: dict[str, dict[str, Any]] = yaml.safe_load(file_stream)
-            except Exception as e:
-                raise RuntimeError(f"Error while reading {cfg_fp.name} configuration. {e}")
-        if self.config is None:
-            rospy.logwarn(f"Empty configuration file: {cfg_fp.name}")
-            self.config = {}
-        self.config.setdefault('common', {})
-        if not dtt_dir.exists():
-            raise NotADirectoryError(f"Can't find detector directory under: {dtt_dir}")
-        self.config['common']['detector_dir'] = dtt_dir
+        # Get available configuration files
+        job_configs = {cfg_fp.stem for cfg_fp in config_dir.joinpath('state_machine').glob('*.yaml')}
+        detector_configs = {cfg_fp.stem for cfg_fp in config_dir.joinpath('cv_detector').glob('*.yaml')}
+        self.config = copy.deepcopy(base_cfg['state_machine'])
+        for dtt in base_cfg['state_machine']['detector']:
+            det_cfg_dict = {}
+            for cfg_key in dtt['detector_cfg']:
+                det_cfg_dict[cfg_key] = detector_configs[cfg_key]
+            self.config['detector'][dtt] = copy.deepcopy(det_cfg_dict)
+        job_cfg_dict = {}
+        for job_key in base_cfg['state_machine']['jobs']:
+            job_cfg_dict[job_key] = job_configs[job_key]
+        self.config['jobs'] = job_cfg_dict
         self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job'])
 
     def build(self, pilot: Pilot) -> None:
