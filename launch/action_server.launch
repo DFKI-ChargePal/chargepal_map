@@ -4,7 +4,7 @@
 	<arg name="config_file" default="$(find chargepal_map)/config/config.yaml"/>
 	<!-- <arg name="config_file" default="$(find chargepal_bringup)/config/er_flex_00041_twist/config.yaml"/> -->
 
-	<node pkg="chargepal_map" type="manipulation_server.py" name="manipulation_server" 
+	<node pkg="chargepal_map" type="start_maps.py" name="manipulation_action_servers" 
 			args="$(arg config_file)" output="screen"/>
 
 	<group if="$(eval arg('gui'))">

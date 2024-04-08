@@ -42,10 +42,10 @@ def start_maps(fp_cfg: Path) -> None:
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
     # Create detector directory path
-    dtt_path = dir_config.joinpath('cv_detector')
+    dtt_cfg_dir = dir_config.joinpath('cv_detector')
     # Create manipulation state machine / process
     proc_cfg_dir = dir_config.joinpath('process')
-    sm =  mp.ManipulationStateMachine(proc_cfg_dir)
+    sm =  mp.ManipulationStateMachine(proc_cfg_dir, dtt_cfg_dir)
     sm.build(pilot)
     # Create action servers
     for job_name in config_raw['process'].keys():
