@@ -2,8 +2,6 @@ from __future__ import annotations
 
 # libs
 import copy
-import yaml
-import rospy
 from pathlib import Path
 from smach import StateMachine
 
@@ -34,7 +32,7 @@ class ManipulationStateMachine:
         # Match detector file names with configuration file paths
         self.config['detector']['files'] = {
             cfg_fp.stem: cfg_fp
-            for cfg_fp in config_dir.joinpath(self.config['detector']['folder_name'].glob('*.yaml'))
+            for cfg_fp in config_dir.joinpath(self.config['detector']['folder_name']).glob('*.yaml')
             }
         # Match state file names with configuration file paths
         self.config['states']['files'] = {
@@ -44,7 +42,9 @@ class ManipulationStateMachine:
         self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job'])
 
     def build(self, pilot: Pilot) -> None:
+        print(f"Hello state machine")
         with self.state_machine:
+            print(f"Add state Start")
             StateMachine.add(
                 label=state_name(s.Start),
                 state=s.Start(self.config, pilot),
@@ -56,6 +56,7 @@ class ManipulationStateMachine:
                 },
                 remapping={'job': 'job'}
             )
+            print(f"Add state Flip arm")
             StateMachine.add(
                 label=state_name(s.FlipArm),
                 state=s.FlipArm(self.config, pilot),

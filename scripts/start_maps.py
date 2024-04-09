@@ -42,7 +42,7 @@ def start_maps(fp_cfg: Path) -> None:
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
     # Create manipulation state machine / process
-    sm =  mp.ManipulationStateMachine(config_dir, config_dict['state_machine'])
+    sm =  mp.ManipulationStateMachine(config_dir, config_dict)
     sm.build(pilot)
     # Create action servers
     for job_name in config_dict['jobs']:

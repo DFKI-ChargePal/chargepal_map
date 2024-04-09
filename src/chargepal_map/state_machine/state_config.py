@@ -27,6 +27,8 @@ class StateConfig:
                 state_config_dict: dict[str, Any] = yaml.safe_load(fp)
             except Exception as e:
                 raise RuntimeError(f"Error while reading {fp_config} configuration with error msg: {e}")
+        if state_config_dict is None:
+            state_config_dict = {}
         self.data.update(state_config_dict)
 
     def dump(self) -> str:

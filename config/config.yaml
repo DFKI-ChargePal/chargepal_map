@@ -17,7 +17,7 @@ jobs:
 
 state_machine:
 
-  step_by_user: true
+  step_by_user: false
 
   detector:
     folder_name: cv_detector
