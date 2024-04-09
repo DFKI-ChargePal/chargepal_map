@@ -11,24 +11,16 @@ calibration:
   flange_eye_config: charuco_calibration.yaml
   flange_eye_records: viewpoints_records.json
 
+jobs:
+  - plug_in_ads_ac
+  - plug_out_ads_ac
 
 state_machine:
-  detector:
-    ads_ac:
-      two_step_approach: true
-      detector_cfg:
-        - aruco_marker_ads_ac_adj
-        - aruco_pattern_ads_ac_adj
-    ads_dc: 
-      two_step_approach: true
-      detector_cfg:
-        - aruco_marker_ads_ac_adj
-        - aruco_pattern_ads_ac_adj
-    bcs_ac:
-      two_step_approach: false
-      detector_cfg:
-        - aruco_pattern_bcs_ac_adj
 
-  jobs:
-    - plug_in_ads_ac
-    - plug_out_ads_ac
+  step_by_user: true
+
+  detector:
+    folder_name: cv_detector
+
+  states:
+    folder_name: state_machine

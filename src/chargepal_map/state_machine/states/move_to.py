@@ -34,7 +34,7 @@ class MoveToWs(State):
         wps = self.cfg.data[job_id]['joint_waypoints']
         rospy.loginfo(f"Start moving the arm to a save driving position.")
         with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(self.cfg.data['joint_waypoints'], self.cfg.data['vel'], self.cfg.data['acc'])
+            self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         return self.uc.request_action(out.completed, out.stop)
 

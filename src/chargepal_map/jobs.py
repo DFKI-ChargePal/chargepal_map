@@ -11,6 +11,27 @@ class JobNames:
     plug_out_ads_dc = 'plug_out_ads_dc'
     plug_out_bcs_ac = 'plug_out_bcs_ac'
 
+    def is_valid(job_name: str) -> bool:
+        """ Check if given job name is valid or not
+        
+        Returns:
+            True if valid - False otherwise
+        """
+        if job_name in [
+            JobNames.plug_in_ads_ac, 
+            JobNames.plug_in_ads_dc, 
+            JobNames.plug_in_ads_ac, 
+            
+            JobNames.plug_out_ads_ac,
+            JobNames.plug_out_ads_dc,
+            JobNames.plug_out_bcs_ac,
+            ]:
+            valid = True
+        else:
+            valid = False
+        return valid
+
+
     def plug_in() -> list[str]:
         """ Get all jobs which refer to the plug-in process
 

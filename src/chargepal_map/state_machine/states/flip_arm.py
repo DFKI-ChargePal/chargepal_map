@@ -16,6 +16,7 @@ from chargepal_map.state_machine.state_config import StateConfig
 from typing import Any
 from ur_pilot import Pilot
 
+
 class FlipArm(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot):
@@ -32,7 +33,7 @@ class FlipArm(State):
         job_id = ud.job_id
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
-        shoulder_pan_ws_ls, shoulder_pan_ws_rs = self.cfg.date.sd_pan_ws_ls, self.cfg.data.sd_pan_ws_rs
+        shoulder_pan_ws_ls, shoulder_pan_ws_rs = self.cfg.data.sd_pan_ws_ls, self.cfg.data.sd_pan_ws_rs
         is_ws_ls = True if shoulder_pan_ws_ls - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_ls + np.pi/2 else False
         is_ws_rs = True if shoulder_pan_ws_rs - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_rs + np.pi/2 else False
 

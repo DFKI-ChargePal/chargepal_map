@@ -45,10 +45,12 @@ def start_maps(fp_cfg: Path) -> None:
     sm =  mp.ManipulationStateMachine(config_dir, config_dict['state_machine'])
     sm.build(pilot)
     # Create action servers
-    for job in config_dict['state_machine']['jobs']:
-        job_name = job.split('.')[0]
-        rospy.loginfo(f"Start action server: {job_name}")
-        mp.manipulation_action_server.create(job_name, sm)
+    for job_name in config_dict['jobs']:
+        if mp.job_ids.is_valid(job_name):
+            rospy.loginfo(f"Start action server: {job_name}")
+            mp.manipulation_action_server.create(job_name, sm)
+        else:
+            raise ValueError(f"Invalid job with name: {job_name}.")
 
 
 if __name__ == '__main__':

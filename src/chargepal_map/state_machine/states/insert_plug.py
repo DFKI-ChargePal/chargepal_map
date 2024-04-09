@@ -56,6 +56,6 @@ class InsertPlug(State):
 
             rospy.loginfo(f"Engaging plug to socket successfully: {sus_eng_plug}")
             rospy.loginfo(f"Inserting plug to socket successfully: {sus_ins_plug}")
-            if not sus_eng_plug or not sus_ins_plug:
-                raise RuntimeError(f"Spatial error to large. Robot is probably in an undefined condition.")
-            return self.uc.request_action(out.plug_connected, stop_res=out.stop)
+        if not sus_eng_plug or not sus_ins_plug:
+            raise RuntimeError(f"Spatial error to large. Robot is probably in an undefined condition.")
+        return self.uc.request_action(out.plug_connected, stop_res=out.stop)

@@ -29,18 +29,18 @@ class ManipulationStateMachine:
         """
         silent_smach()
         # Get available configuration files
-        job_configs = {cfg_fp.stem for cfg_fp in config_dir.joinpath('state_machine').glob('*.yaml')}
-        detector_configs = {cfg_fp.stem for cfg_fp in config_dir.joinpath('cv_detector').glob('*.yaml')}
         self.config = copy.deepcopy(base_cfg['state_machine'])
-        for dtt in base_cfg['state_machine']['detector']:
-            det_cfg_dict = {}
-            for cfg_key in dtt['detector_cfg']:
-                det_cfg_dict[cfg_key] = detector_configs[cfg_key]
-            self.config['detector'][dtt] = copy.deepcopy(det_cfg_dict)
-        job_cfg_dict = {}
-        for job_key in base_cfg['state_machine']['jobs']:
-            job_cfg_dict[job_key] = job_configs[job_key]
-        self.config['jobs'] = job_cfg_dict
+        self.config.setdefault('step_by_user', False)
+        # Match detector file names with configuration file paths
+        self.config['detector']['files'] = {
+            cfg_fp.stem: cfg_fp
+            for cfg_fp in config_dir.joinpath(self.config['detector']['folder_name'].glob('*.yaml'))
+            }
+        # Match state file names with configuration file paths
+        self.config['states']['files'] = {
+            cfg_fp.stem: cfg_fp 
+            for cfg_fp in config_dir.joinpath(self.config['states']['folder_name']).glob('*.yaml')
+            }
         self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job'])
 
     def build(self, pilot: Pilot) -> None:
