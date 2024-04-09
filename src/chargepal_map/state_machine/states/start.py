@@ -29,9 +29,11 @@ class Start(State):
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo(f"Check robot state against action conditions.")
         job_id = ud.job_id
+        # Connect to robot arm
+        self.pilot.connect()
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
-        shoulder_pan_ws_ls, shoulder_pan_ws_rs = self.cfg.date.sd_pan_ws_ls, self.cfg.data.sd_pan_ws_rs
+        shoulder_pan_ws_ls, shoulder_pan_ws_rs = self.cfg.data['sd_pan_ws_ls'], self.cfg.data['sd_pan_ws_rs']
         is_ws_ls = True if shoulder_pan_ws_ls - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_ls + np.pi/2 else False
         is_ws_rs = True if shoulder_pan_ws_rs - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_rs + np.pi/2 else False
         # Get desired workspace

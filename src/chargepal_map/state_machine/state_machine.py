@@ -3,7 +3,7 @@ from __future__ import annotations
 # libs
 import copy
 from pathlib import Path
-from smach import StateMachine
+from smach import StateMachine, UserData
 
 import chargepal_map.state_machine.states as s
 from chargepal_map.state_machine.outcomes import out
@@ -40,12 +40,13 @@ class ManipulationStateMachine:
             for cfg_fp in config_dir.joinpath(self.config['states']['folder_name']).glob('*.yaml')
             }
         self.usr_srv = StepByUserServer()
-        self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job'])
+        self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job_id'])
+
+    def execute(self, ud: UserData) -> str:
+        self.state_machine.execute(ud)
 
     def build(self, pilot: Pilot) -> None:
-        print(f"Hello state machine")
         with self.state_machine:
-            print(f"Add state Start")
             StateMachine.add(
                 label=state_name(s.Start),
                 state=s.Start(self.config, pilot),
@@ -55,9 +56,8 @@ class ManipulationStateMachine:
                     out.arm_ready_no:    state_name(s.MoveToPlugPreAttached),
                     out.stop:            state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={'job_id': 'job_id'}
             )
-            print(f"Add state Flip arm")
             StateMachine.add(
                 label=state_name(s.FlipArm),
                 state=s.FlipArm(self.config, pilot),
@@ -66,7 +66,7 @@ class ManipulationStateMachine:
                     out.arm_ready_no: state_name(s.MoveToPlugPreAttached),
                     out.stop:         state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPreObs),
@@ -75,7 +75,7 @@ class ManipulationStateMachine:
                     out.plug_pre_obs: state_name(s.ObservePlug),
                     out.stop:         state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlug),
@@ -85,7 +85,7 @@ class ManipulationStateMachine:
                     out.stop:     state_name(s.Stop)
                 },
                 remapping={
-                    'job': 'job',
+                    'job_id': 'job_id',
                     'T_base2socket': 'T_base2socket',
                 }
             )
@@ -97,7 +97,7 @@ class ManipulationStateMachine:
                     out.stop:              state_name(s.Stop)
                 },
                 remapping={
-                    'job': 'job',
+                    'job_id': 'job_id',
                     'T_base2socket': 'T_base2socket',
                 }
             )
@@ -109,7 +109,7 @@ class ManipulationStateMachine:
                     out.stop:          state_name(s.Stop)
                 },
                 remapping={
-                    'job': 'job',
+                    'job_id': 'job_id',
                     'T_base2socket': 'T_base2socket',
                 }
             )
@@ -121,7 +121,7 @@ class ManipulationStateMachine:
                     out.plug_removed_no: state_name(s.MoveToPlugPreConnected),
                     out.stop:            state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToSocketPreObs),
@@ -130,7 +130,7 @@ class ManipulationStateMachine:
                     out.socket_pre_obs: state_name(s.ObserveSocket),
                     out.stop:           state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
                 label=state_name(s.ObserveSocket),
@@ -140,7 +140,7 @@ class ManipulationStateMachine:
                     out.stop:       state_name(s.Stop)
                 },
                 remapping={
-                    'job': 'job',
+                    'job_id': 'job_id',
                     'T_base2socket': 'T_base2socket',
                 }
             )
@@ -152,7 +152,7 @@ class ManipulationStateMachine:
                     out.stop:               state_name(s.Stop)
                 },
                 remapping={
-                    'job': 'job',
+                    'job_id': 'job_id',
                     'T_base2socket': 'T_base2socket',
                 }
             )
@@ -164,7 +164,7 @@ class ManipulationStateMachine:
                     out.stop:           state_name(s.Stop)
                 },
                 remapping={
-                    'job': 'job',
+                    'job_id': 'job_id',
                     'T_base2socket': 'T_base2socket',
                 }
             )
@@ -175,7 +175,7 @@ class ManipulationStateMachine:
                     out.plug_released: state_name(s.MoveToWs),
                     out.stop:          state_name(s.Stop)
                 },
-                remapping={'job': 'job'}
+                remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToWs),

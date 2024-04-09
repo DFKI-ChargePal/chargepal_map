@@ -23,5 +23,6 @@ class Stop(State):
         State.__init__(self, outcomes=[out.stop])
 
     def execute(self, ud: Any) -> str:
+        self.pilot.disconnect()
         rospy.loginfo(f"Ended up in stop condition. Stop process...")
         return out.stop

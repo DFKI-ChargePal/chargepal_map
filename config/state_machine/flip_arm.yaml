@@ -1,5 +1,5 @@
-sd_pan_ws_ls: 0.0
-sd_pan_ws_rs: 3.14
+sd_pan_ws_ls: 3.14
+sd_pan_ws_rs: 0.0
 
 flip_to_rs_wps:
   [

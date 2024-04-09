@@ -3,23 +3,16 @@ description = "Configuration file for the ur_pilot package."
 author = "Georg John"
 email = "georg.john@dfki.de"
 
-[pilot.tool_model]
-mass = 0.5
-com = [0.00057, 0.00017, 0.0089]
-# linear plug
+[robot]
+
+[pilot.coupling]
+mass = 0.4  # including ft-sensor
+com = [0.0, 0.0, 0.03]
+link_frame = [0.0, 0.0, 0.061, 0.0, 0.0, 0.0]
+
+[pilot.tm_type2_female]
+mass = 0.3
+com = [0.0, 0.0, 0.110]
+lip_frame = [0.0, 0.0, 0.202, 0.0, 0.0, 0.0]
 tip_frame = [0.0, 0.0, 0.235, 0.0, 0.0, 0.0]
 sense_frame = [0.0, 0.0, 0.23417, 0.0, -0.2618, 0.0]
-
-[robot.motion_mode]
-error_scale = 30.0
-torque_limit = 0.0
-Kp = [1000.0, 1000.0, 1000.0, 1.0, 1.0, 1.0]
-Kd = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-
-[robot.hybrid_mode]
-error_scale = 150.0
-force_limit = 20.0
-Kp_force = [0.02, 0.02, 0.02, 0.02, 0.02, 0.02]
-Kd_force = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-Kp_motion = [150.0, 150.0, 150.0, 150.0, 150.0, 150.0]
-Kd_motion = [0.99, 0.99, 0.99, 0.99, 0.99, 0.99]

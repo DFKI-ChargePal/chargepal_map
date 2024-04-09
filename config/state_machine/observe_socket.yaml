@@ -1,17 +1,17 @@
 plug_in_ads_ac:
   two_step_approach: true
-      detector_cfg:
-        - aruco_marker_ads_ac_adj
-        - aruco_pattern_ads_ac_adj
+  detector_cfg:
+    - aruco_marker_ads_ac_adj.yaml
+    - aruco_pattern_ads_ac_adj.yaml
 
 plug_in_ads_dc:
   two_step_approach: true
-      detector_cfg:
-        - aruco_marker_ads_ac_adj
-        - aruco_pattern_ads_ac_adj
+  detector_cfg:
+    - aruco_marker_ads_ac_adj.yaml
+    - aruco_pattern_ads_ac_adj.yaml
 
 plug_in_bcs_ac:
   two_step_approach: true
-      detector_cfg:
-        - aruco_marker_ads_ac_adj
-        - aruco_pattern_ads_ac_adj
+  detector_cfg:
+    - aruco_marker_ads_ac_adj.yaml
+    - aruco_pattern_ads_ac_adj.yaml
