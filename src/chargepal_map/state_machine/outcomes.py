@@ -9,7 +9,7 @@ class Outcomes:
 
     arm_in_wrong_ws = 'arm_in_wrong_workspace'
     arm_ready_do = 'arm_ready_do_observation'
-    arm_ready_no = 'arm_reade_no_observation'
+    arm_ready_no = 'arm_ready_no_observation'
 
     socket_pre_obs = 'socket_pre_observed'
     socket_obs = 'socket_observed'
