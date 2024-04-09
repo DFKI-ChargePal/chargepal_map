@@ -3,14 +3,13 @@ from __future__ import annotations
 # libs
 import rospy
 import ur_pilot
-import numpy as np
 from smach import State
 import spatialmath as sm
 
 from chargepal_map.core import job_ids
-from chargepal_map.ui.user_client import UserClient
 from chargepal_map.state_machine.outcomes import out
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.step_by_user import StepByUserClient
 
 # typing
 from typing import Any
@@ -22,7 +21,7 @@ class MoveToWs(State):
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = UserClient(self.cfg.data['step_by_user'])
+        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.completed],
                        input_keys=['job_id'],
@@ -44,7 +43,7 @@ class MoveToPlugPreObs(State):
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = UserClient(self.cfg.data['step_by_user'])
+        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.stop, out.plug_pre_obs], input_keys=['job_id'], output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
@@ -78,7 +77,7 @@ class MoveToSocketPreObs(State):
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = UserClient(self.cfg.data['step_by_user'])
+        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.socket_pre_obs], 
                        input_keys=['job_id'], 
@@ -115,7 +114,7 @@ class MoveToPlugPreAttached(State):
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = UserClient(self.cfg.data['step_by_user'])
+        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.plug_pre_attached], 
                        input_keys=['job_id', 'T_base2socket'], output_keys=['job_id', 'T_base2socket'])
@@ -156,7 +155,7 @@ class MoveToPlugPreConnected(State):
     def __init__(self, config: dict[str, Any], pilot: Pilot):
         self.pilot = pilot
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = UserClient(self.cfg.data['step_by_user'])
+        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.stop, out.plug_pre_connected], 
                        input_keys=['job_id', 'T_base2socket'], 
                        output_keys=['job_id', 'T_base2socket'])

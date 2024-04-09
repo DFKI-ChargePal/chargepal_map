@@ -7,12 +7,12 @@ from smach import StateMachine
 
 import chargepal_map.state_machine.states as s
 from chargepal_map.state_machine.outcomes import out
+from chargepal_map.state_machine.step_by_user import StepByUserServer
 from chargepal_map.state_machine.utils import silent_smach, state_name
 
 # typing
 from typing import Any
 from ur_pilot import Pilot
-
 
 
 class ManipulationStateMachine:
@@ -39,6 +39,7 @@ class ManipulationStateMachine:
             cfg_fp.stem: cfg_fp 
             for cfg_fp in config_dir.joinpath(self.config['states']['folder_name']).glob('*.yaml')
             }
+        self.usr_srv = StepByUserServer()
         self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job'])
 
     def build(self, pilot: Pilot) -> None:
