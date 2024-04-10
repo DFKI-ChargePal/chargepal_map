@@ -23,14 +23,17 @@ class StepByUser:
     def request_action(self, continue_res: str, stop_res: str) -> str:
         if self.enable:
             self.user_action = False
+            rospy.loginfo(f"Waiting for user action to continue or stop the state machine.")
             while not self.user_action:
                 rospy.sleep(0.1)
         else:
             self.continue_process = True
         if self.continue_process:
             res = continue_res
+            rospy.loginfo(f"Continue state machine with going to next state: {res}")
         else:
             res = stop_res
+            rospy.loginfo(f"Stopping state machine with going to final state: {res}")
         return res
 
     def _srv_handler(self, req: UserRequest) -> UserResponse:

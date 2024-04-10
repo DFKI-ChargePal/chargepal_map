@@ -131,11 +131,12 @@ class MoveToPlugPreAttached(State):
         # Get transformation matrices
         if job_id in job_ids.plug_out():
             T_base2socket = ud.T_base2socket
-        elif job_id in job_ids.plug_out():
+        elif job_id in job_ids.plug_in():
             T_base2socket = sm.SE3().Rt(
-                R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2socket']), 
-                t=self.cfg.data['trans_base2socket']
+                R=sm.SO3.EulerVec(self.cfg.data[job_id]['eulvec_base2socket']), 
+                t=self.cfg.data[job_id]['trans_base2socket']
             )
+            ud.T_base2socket = T_base2socket
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type key
@@ -148,7 +149,8 @@ class MoveToPlugPreAttached(State):
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
-            sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
+            with self.pilot.context.position_control():
+                sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         if self.user_cb is not None:
@@ -176,9 +178,10 @@ class MoveToPlugPreConnected(State):
             T_base2socket = ud.T_base2socket
         elif job_id in job_ids.plug_out():
             T_base2socket = sm.SE3().Rt(
-                R=sm.SO3.EulerVec(self.cfg.data['eulvec_base2socket']), 
-                t=self.cfg.data['trans_base2socket']
+                R=sm.SO3.EulerVec(self.cfg.data[job_id]['eulvec_base2socket']), 
+                t=self.cfg.data[job_id]['trans_base2socket']
             )
+            ud.T_base2socket = T_base2socket
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type key
@@ -191,7 +194,8 @@ class MoveToPlugPreConnected(State):
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
-            sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
+            with self.pilot.context.position_control():
+                sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         if self.user_cb is not None:
