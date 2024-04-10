@@ -6,9 +6,9 @@ import rospy
 from smach import State
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.step_by_user import StepByUserClient
 
 # typing
 from typing import Any
@@ -17,10 +17,10 @@ from ur_pilot import Pilot
 
 class RemovePlug(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.plug_removed_do, out.plug_removed_no], 
                        input_keys=['job_id'],
@@ -32,9 +32,9 @@ class RemovePlug(State):
         job_id = ud.job_id
         # Get next output
         if job_id in job_ids.plug_in():
-            new_out = out.plug_removed_do
+            outcome = out.plug_removed_do
         elif job_id in job_ids.plug_out():
-            new_out = out.plug_removed_no
+            outcome = out.plug_removed_no
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type
@@ -54,4 +54,6 @@ class RemovePlug(State):
                            f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
         if not sus_rm_plug:
             raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
-        return self.uc.request_action(new_out, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(outcome, out.stop)
+        return outcome

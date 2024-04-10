@@ -8,9 +8,9 @@ import numpy as np
 from smach import State
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.step_by_user import StepByUserClient
 
 # typing
 from typing import Any
@@ -19,10 +19,10 @@ from ur_pilot import Pilot
 
 class FlipArm(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.arm_ready_do, out.arm_ready_no],
                        input_keys=['job_id'],
@@ -59,4 +59,6 @@ class FlipArm(State):
             outcome = out.arm_ready_do
         else:
             raise ValueError(f"Invalid or unregistered job ID: {job_id}")
-        return self.uc.request_action(outcome, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(outcome, out.stop)
+        return outcome

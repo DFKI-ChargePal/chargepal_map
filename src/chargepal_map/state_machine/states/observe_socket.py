@@ -8,9 +8,9 @@ from smach import State
 import spatialmath as sm
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.step_by_user import StepByUserClient
 
 # typing
 from typing import Any
@@ -21,10 +21,10 @@ class ObserveSocket(State):
 
     _T_marker2obs_close = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.15, 0.0)), t=(0.1, -0.025, -0.1))
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.socket_obs], 
                        input_keys=['job_id'],
@@ -42,7 +42,7 @@ class ObserveSocket(State):
             plug_type = 'ccs_female'
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
-        
+
         with self.pilot.plug_model.context(plug_type):
             if self.cfg.data['two_step_approach']:
                 dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg_i'])
@@ -66,4 +66,6 @@ class ObserveSocket(State):
         else:
             raise RuntimeError(f"Can't find socket."
                                f"Make sure detector is proper set up and pattern is in camera view")
-        return self.uc.request_action(out.socket_obs, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.socket_obs, out.stop)
+        return outcome

@@ -5,9 +5,9 @@ from __future__ import annotations
 import rospy
 from smach import State
 
+from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.step_by_user import StepByUserClient
 
 # typing 
 from typing import Any
@@ -16,13 +16,16 @@ from ur_pilot import Pilot
 
 class Stop(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.stop])
 
     def execute(self, ud: Any) -> str:
         self.pilot.disconnect()
         rospy.loginfo(f"Ended up in stop condition. Stop process...")
-        return out.stop
+        outcome = out.stop
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(outcome, out.stop)
+        return outcome

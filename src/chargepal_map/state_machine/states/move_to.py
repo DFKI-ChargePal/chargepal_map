@@ -8,8 +8,8 @@ import spatialmath as sm
 
 from chargepal_map.core import job_ids
 from chargepal_map.state_machine.outcomes import out
+from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.step_by_user import StepByUserClient
 
 # typing
 from typing import Any
@@ -18,10 +18,10 @@ from ur_pilot import Pilot
 
 class MoveToWs(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.completed],
                        input_keys=['job_id'],
@@ -35,15 +35,17 @@ class MoveToWs(State):
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
-        return self.uc.request_action(out.completed, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.completed, out.stop)
+        return outcome
 
 
 class MoveToPlugPreObs(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.stop, out.plug_pre_obs], input_keys=['job_id'], output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
@@ -69,15 +71,17 @@ class MoveToPlugPreObs(State):
                                              self.cfg.data['acc'])
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
-        return self.uc.request_action(out.plug_pre_obs, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.plug_pre_obs, out.stop)
+        return outcome
 
 
 class MoveToSocketPreObs(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.socket_pre_obs], 
                        input_keys=['job_id'], 
@@ -106,15 +110,17 @@ class MoveToSocketPreObs(State):
                                              self.cfg.data['acc'])
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
-        return self.uc.request_action(out.socket_pre_obs, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.socket_pre_obs, out.stop)
+        return outcome
 
 
 class MoveToPlugPreAttached(State):
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, 
                        outcomes=[out.stop, out.plug_pre_attached], 
                        input_keys=['job_id', 'T_base2socket'], output_keys=['job_id', 'T_base2socket'])
@@ -145,17 +151,19 @@ class MoveToPlugPreAttached(State):
             sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
-        return self.uc.request_action(out.plug_pre_attached, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.plug_pre_attached, out.stop)
+        return outcome
 
 
 class MoveToPlugPreConnected(State):
 
     _T_socket2pre_connect = sm.SE3().Trans([0.0, 0.0, 0.0 - 0.02])
 
-    def __init__(self, config: dict[str, Any], pilot: Pilot):
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
+        self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        self.uc = StepByUserClient(self.cfg.data['step_by_user'])
         State.__init__(self, outcomes=[out.stop, out.plug_pre_connected], 
                        input_keys=['job_id', 'T_base2socket'], 
                        output_keys=['job_id', 'T_base2socket'])
@@ -186,4 +194,6 @@ class MoveToPlugPreConnected(State):
             sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
-        return self.uc.request_action(out.plug_pre_connected, out.stop)
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.plug_pre_connected, out.stop)
+        return outcome

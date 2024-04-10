@@ -7,7 +7,7 @@ from smach import StateMachine, UserData
 
 import chargepal_map.state_machine.states as s
 from chargepal_map.state_machine.outcomes import out
-from chargepal_map.state_machine.step_by_user import StepByUserServer
+from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.utils import silent_smach, state_name
 
 # typing
@@ -39,7 +39,7 @@ class ManipulationStateMachine:
             cfg_fp.stem: cfg_fp 
             for cfg_fp in config_dir.joinpath(self.config['states']['folder_name']).glob('*.yaml')
             }
-        self.usr_srv = StepByUserServer()
+        self.step_by_user = StepByUser(self.config['step_by_user'])
         self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job_id'])
 
     def execute(self, ud: UserData) -> str:
@@ -49,7 +49,7 @@ class ManipulationStateMachine:
         with self.state_machine:
             StateMachine.add(
                 label=state_name(s.Start),
-                state=s.Start(self.config, pilot),
+                state=s.Start(self.config, pilot, self.step_by_user),
                 transitions={
                     out.arm_in_wrong_ws: state_name(s.FlipArm),
                     out.arm_ready_do:    state_name(s.MoveToPlugPreObs),
@@ -60,7 +60,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.FlipArm),
-                state=s.FlipArm(self.config, pilot),
+                state=s.FlipArm(self.config, pilot, self.step_by_user),
                 transitions={
                     out.arm_ready_do: state_name(s.MoveToPlugPreObs),
                     out.arm_ready_no: state_name(s.MoveToPlugPreAttached),
@@ -70,7 +70,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPreObs),
-                state=s.MoveToPlugPreObs(self.config, pilot),
+                state=s.MoveToPlugPreObs(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_pre_obs: state_name(s.ObservePlug),
                     out.stop:         state_name(s.Stop)
@@ -79,7 +79,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.ObservePlug),
-                state=s.ObservePlug(self.config, pilot),
+                state=s.ObservePlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_obs: state_name(s.MoveToPlugPreAttached),
                     out.stop:     state_name(s.Stop)
@@ -91,7 +91,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPreAttached),
-                state=s.MoveToPlugPreAttached(self.config, pilot),
+                state=s.MoveToPlugPreAttached(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_pre_attached: state_name(s.AttachPlug),
                     out.stop:              state_name(s.Stop)
@@ -103,7 +103,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.AttachPlug),
-                state=s.AttachPlug(self.config, pilot),
+                state=s.AttachPlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_attached: state_name(s.RemovePlug),
                     out.stop:          state_name(s.Stop)
@@ -115,7 +115,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.RemovePlug),
-                state=s.RemovePlug(self.config, pilot),
+                state=s.RemovePlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_removed_do: state_name(s.MoveToSocketPreObs),
                     out.plug_removed_no: state_name(s.MoveToPlugPreConnected),
@@ -125,7 +125,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.MoveToSocketPreObs),
-                state=s.MoveToSocketPreObs(self.config, pilot),
+                state=s.MoveToSocketPreObs(self.config, pilot, self.step_by_user),
                 transitions={
                     out.socket_pre_obs: state_name(s.ObserveSocket),
                     out.stop:           state_name(s.Stop)
@@ -134,7 +134,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.ObserveSocket),
-                state=s.ObserveSocket(self.config, pilot),
+                state=s.ObserveSocket(self.config, pilot, self.step_by_user),
                 transitions={
                     out.socket_obs: state_name(s.MoveToPlugPreConnected),
                     out.stop:       state_name(s.Stop)
@@ -146,7 +146,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPreConnected),
-                state=s.MoveToPlugPreConnected(self.config, pilot),
+                state=s.MoveToPlugPreConnected(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_pre_connected: state_name(s.InsertPlug),
                     out.stop:               state_name(s.Stop)
@@ -158,7 +158,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.InsertPlug),
-                state=s.InsertPlug(self.config, pilot),
+                state=s.InsertPlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_connected: state_name(s.ReleasePlug),
                     out.stop:           state_name(s.Stop)
@@ -170,7 +170,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.ReleasePlug),
-                state=s.ReleasePlug(self.config, pilot),
+                state=s.ReleasePlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_released: state_name(s.MoveToWs),
                     out.stop:          state_name(s.Stop)
@@ -179,7 +179,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.MoveToWs),
-                state=s.MoveToWs(self.config, pilot),
+                state=s.MoveToWs(self.config, pilot, self.step_by_user),
                 transitions={
                     out.completed: out.completed
                 },
