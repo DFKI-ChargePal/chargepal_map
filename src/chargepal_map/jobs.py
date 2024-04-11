@@ -3,6 +3,9 @@ from __future__ import annotations
 
 class JobNames:
 
+    move_home_arm = 'move_home_arm'
+    free_drive_arm = 'free_drive_arm'
+
     plug_in_ads_ac = 'plug_in_ads_ac'
     plug_in_ads_dc = 'plug_in_ads_dc'
     plug_in_bcs_ac = 'plug_in_bcs_ac'
@@ -19,9 +22,12 @@ class JobNames:
             True if valid - False otherwise
         """
         if job_name in [
-            JobNames.plug_in_ads_ac, 
-            JobNames.plug_in_ads_dc, 
-            JobNames.plug_in_ads_ac, 
+            JobNames.move_home_arm,
+            JobNames.free_drive_arm,
+
+            JobNames.plug_in_ads_ac,
+            JobNames.plug_in_ads_dc,
+            JobNames.plug_in_ads_ac,
             
             JobNames.plug_out_ads_ac,
             JobNames.plug_out_ads_dc,
@@ -57,7 +63,9 @@ class JobNames:
         Returns:
             List with valid job names
         """
-        return [JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac]
+        return [JobNames.move_home_arm, JobNames.free_drive_arm, 
+                JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, 
+                JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac]
     
     @staticmethod
     def workspace_right() -> list[str]:
@@ -66,7 +74,8 @@ class JobNames:
         Returns:
             List with valid job names
         """
-        return [JobNames.plug_in_ads_dc, JobNames.plug_out_ads_dc]
+        return [JobNames.move_home_arm, JobNames.free_drive_arm, 
+                JobNames.plug_in_ads_dc, JobNames.plug_out_ads_dc]
 
     @staticmethod
     def type2_female() -> list[str]:

@@ -1,5 +1,8 @@
+from enum import auto
+from strenum import StrEnum
 
-class Outcomes:
+
+class Outcomes(StrEnum):
 
     # Outcome mapping to avoid typos
     stop = 'stop'
@@ -8,6 +11,14 @@ class Outcomes:
     completed = 'completed'
 
     arm_in_wrong_ws = 'arm_in_wrong_workspace'
+    arm_ready_to_plug = 'arm_ready_to_plug'
+    arm_ready_to_free = 'arm_ready_to_free'
+    arm_ready_to_move_ls = 'arm_ready_to_move_within_left_workspace'
+    arm_ready_to_move_rs = 'arm_ready_to_move_within_right_workspace'
+
+    arm_ready_to_plug_in = 'arm_ready_to_plug_in'
+    arm_ready_to_plug_out = 'arm_ready_to_plug_out'
+
     arm_ready_do = 'arm_ready_do_observation'
     arm_ready_no = 'arm_ready_no_observation'
 

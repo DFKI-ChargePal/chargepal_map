@@ -3,6 +3,7 @@ from __future__ import annotations
 # libs
 import rospy
 import ur_pilot
+import numpy as np
 from smach import State
 import spatialmath as sm
 
@@ -16,7 +17,69 @@ from typing import Any
 from ur_pilot import Pilot
 
 
-class MoveToWs(State):
+class MoveToStartLS(State):
+
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
+        self.pilot = pilot
+        self.user_cb = user_cb
+        self.cfg = StateConfig(type(self), config=config)
+        State.__init__(self, 
+                       outcomes=[out.stop, out.completed], 
+                       input_keys=['job_id'],
+                       output_keys=['job_id'])
+
+    def execute(self, ud: Any) -> str:
+        # Check job id
+        job_id = ud.job_id
+        if job_id != job_ids.move_home_arm:
+             raise ValueError(f"Not a proper job ID '{job_id}'")
+        start_pos = self.pilot.robot.joint_pos
+        home_pos = self.cfg.data['home_joint_pos']
+        # Try to avoid dangerous movements
+        error_pos = np.abs(np.array(home_pos) - start_pos)
+        if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
+            raise RuntimeError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
+        with self.pilot.context.position_control():
+            self.pilot.robot.movej(home_pos, self.cfg.data['vel'], self.cfg.data['acc'])
+        rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
+        outcome = out.completed
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.completed, out.stop)
+        return outcome
+
+
+class MoveToStartRS(State): 
+
+    def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
+        self.pilot = pilot
+        self.user_cb = user_cb
+        self.cfg = StateConfig(type(self), config=config)
+        State.__init__(self, 
+                       outcomes=[out.stop, out.completed], 
+                       input_keys=['job_id'],
+                       output_keys=['job_id'])
+        
+    def execute(self, ud: Any) -> str:
+        # Check job id
+        job_id = ud.job_id
+        if job_id != job_ids.move_home_arm:
+             raise ValueError(f"Not a proper job ID '{job_id}'")
+        start_pos = self.pilot.robot.joint_pos
+        home_pos = self.cfg.data['home_joint_pos']
+        # Try to avoid dangerous movements
+        error_pos = np.abs(np.array(home_pos) - start_pos)
+        if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
+            raise RuntimeError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
+        with self.pilot.context.position_control():
+            self.pilot.robot.movej(home_pos, self.cfg.data['vel'], self.cfg.data['acc'])
+        rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
+        outcome = out.completed
+        if self.user_cb is not None:
+            outcome = self.user_cb.request_action(out.completed, out.stop)
+        return outcome
+
+
+class MoveToCompletion(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
@@ -28,13 +91,14 @@ class MoveToWs(State):
                        output_keys=['job_id'])
 
     def execute(self, ud: Any) -> str:
-        print() 
+        print()
         job_id = ud.job_id
         wps = self.cfg.data[job_id]['joint_waypoints']
         rospy.loginfo(f"Start moving the arm to a save driving position.")
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
+        outcome = out.completed
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.completed, out.stop)
         return outcome

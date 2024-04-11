@@ -48,8 +48,30 @@ class ManipulationStateMachine:
     def build(self, pilot: Pilot) -> None:
         with self.state_machine:
             StateMachine.add(
-                label=state_name(s.Start),
-                state=s.Start(self.config, pilot, self.step_by_user),
+                label=state_name(s.ArrangeJob),
+                state=s.ArrangeJob(self.config, pilot, None),
+                transitions={
+                    out.arm_in_wrong_ws:      state_name(s.FlipArm),
+                    out.arm_ready_to_plug:    state_name(s.StartPlugging),
+                    out.arm_ready_to_free:    state_name(s.FreeArm),
+                    out.arm_ready_to_move_ls: state_name(s.MoveToStartRS),
+                    out.arm_ready_to_move_rs: state_name(s.MoveToStartLS),
+                    out.stop:                 state_name(s.Stop)
+                },
+                remapping={'job_id': 'job_id'}
+            )
+            StateMachine.add(
+                label=state_name(s.MoveToStartLS),
+                state=s.MoveToStartLS(self.config, pilot, None),
+                transitions={
+                    out.stop:      state_name(s.Stop),
+                    out.completed: state_name(s.Completion),
+                }
+            )
+
+            StateMachine.add(
+                label=state_name(s.StartPlugging),
+                state=s.StartPlugging(self.config, pilot, self.step_by_user),
                 transitions={
                     out.arm_in_wrong_ws: state_name(s.FlipArm),
                     out.arm_ready_do:    state_name(s.MoveToPlugPreObs),
@@ -172,14 +194,14 @@ class ManipulationStateMachine:
                 label=state_name(s.ReleasePlug),
                 state=s.ReleasePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_released: state_name(s.MoveToWs),
+                    out.plug_released: state_name(s.MoveToCompletion),
                     out.stop:          state_name(s.Stop)
                 },
                 remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
-                label=state_name(s.MoveToWs),
-                state=s.MoveToWs(self.config, pilot, self.step_by_user),
+                label=state_name(s.MoveToCompletion),
+                state=s.MoveToCompletion(self.config, pilot, self.step_by_user),
                 transitions={
                     out.completed: out.completed
                 },
@@ -187,5 +209,10 @@ class ManipulationStateMachine:
             StateMachine.add(
                 label=state_name(s.Stop),
                 state=s.Stop(self.config, pilot),
+                transitions={out.completed: out.completed}
+            )
+            StateMachine.add(
+                label=state_name(s.Completion),
+                state=s.Completion(self.config, pilot),
                 transitions={out.stop: out.stop}
             )
