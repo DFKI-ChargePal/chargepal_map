@@ -64,29 +64,42 @@ class ManipulationStateMachine:
                 label=state_name(s.MoveToStartLS),
                 state=s.MoveToStartLS(self.config, pilot, None),
                 transitions={
-                    out.stop:      state_name(s.Stop),
                     out.completed: state_name(s.Completion),
+                    out.stop:      state_name(s.Stop),
                 }
             )
-
             StateMachine.add(
-                label=state_name(s.StartPlugging),
-                state=s.StartPlugging(self.config, pilot, self.step_by_user),
+                label=state_name(s.MoveToStartRS),
+                state=s.MoveToStartRS(self.config, pilot, None),
                 transitions={
-                    out.arm_in_wrong_ws: state_name(s.FlipArm),
-                    out.arm_ready_do:    state_name(s.MoveToPlugPreObs),
-                    out.arm_ready_no:    state_name(s.MoveToPlugPreAttached),
-                    out.stop:            state_name(s.Stop)
-                },
-                remapping={'job_id': 'job_id'}
+                    out.completed: state_name(s.Completion),
+                    out.stop:      state_name(s.Stop),
+                }
+            )
+            StateMachine.add(
+                label=state_name(s.DriveFree),
+                state=s.DriveFree(self.config, pilot, None),
+                transitions={
+                    out.completed: state_name(s.Completion),
+                    out.stop:      state_name(s.Stop),
+                }
             )
             StateMachine.add(
                 label=state_name(s.FlipArm),
                 state=s.FlipArm(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.arm_ready_do: state_name(s.MoveToPlugPreObs),
-                    out.arm_ready_no: state_name(s.MoveToPlugPreAttached),
-                    out.stop:         state_name(s.Stop)
+                    out.arm_ready_to_plug: state_name(s.StartPlugging),
+                    out.stop:              state_name(s.Stop)
+                },
+                remapping={'job_id': 'job_id'}
+            )
+            StateMachine.add(
+                label=state_name(s.StartPlugging),
+                state=s.StartPlugging(self.config, pilot, self.step_by_user),
+                transitions={
+                    out.arm_ready_to_plug_out: state_name(s.MoveToPlugPreObs),
+                    out.arm_ready_to_plug_in:  state_name(s.MoveToPlugPreAttached),
+                    out.stop:                  state_name(s.Stop)
                 },
                 remapping={'job_id': 'job_id'}
             )
@@ -209,10 +222,10 @@ class ManipulationStateMachine:
             StateMachine.add(
                 label=state_name(s.Stop),
                 state=s.Stop(self.config, pilot),
-                transitions={out.completed: out.completed}
+                transitions={out.stop: out.stop}
             )
             StateMachine.add(
                 label=state_name(s.Completion),
                 state=s.Completion(self.config, pilot),
-                transitions={out.stop: out.stop}
+                transitions={out.completed: out.completed}
             )

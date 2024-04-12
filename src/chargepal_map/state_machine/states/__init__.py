@@ -1,5 +1,6 @@
 from chargepal_map.state_machine.states.stop import Stop
 from chargepal_map.state_machine.states.flip_arm import FlipArm
+from chargepal_map.state_machine.states.drive_free import DriveFree
 from chargepal_map.state_machine.states.completion import Completion
 from chargepal_map.state_machine.states.arrange_job import ArrangeJob
 from chargepal_map.state_machine.states.attach_plug import AttachPlug
@@ -20,6 +21,7 @@ __all__ = [
     'StartPlugging',
     'Stop',
     'FlipArm',
+    'DriveFree',
     'Completion',
     'ArrangeJob',
     'AttachPlug',
