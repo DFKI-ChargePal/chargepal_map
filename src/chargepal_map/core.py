@@ -18,13 +18,21 @@ from chargepal_actions.msg import (
     PlugOutAdsAcAction,
     PlugOutAdsDcAction,
     PlugOutBcsAcAction,
-    
+    MoveHomeArmAction,
+    FreeDriveArmAction,
+    MarkerSocketCalibAdsAction,
+    MarkerSocketCalibBcsAction,
+
     PlugInAdsAcGoal,
     PlugInAdsDcGoal,
     PlugInBcsAcGoal,
     PlugOutAdsAcGoal,
     PlugOutAdsDcGoal,
     PlugOutBcsAcGoal,
+    FreeDriveArmGoal,
+    MoveHomeArmGoal,
+    MarkerSocketCalibAdsGoal,
+    MarkerSocketCalibBcsGoal,
 
     PlugInAdsAcResult,
     PlugInAdsDcResult,
@@ -32,6 +40,10 @@ from chargepal_actions.msg import (
     PlugOutAdsAcResult,
     PlugOutAdsDcResult,
     PlugOutBcsAcResult,
+    FreeDriveArmResult,
+    MoveHomeArmResult,
+    MarkerSocketCalibAdsResult,
+    MarkerSocketCalibBcsResult,
 
     PlugInAdsAcFeedback,
     PlugInAdsDcFeedback,
@@ -39,6 +51,10 @@ from chargepal_actions.msg import (
     PlugOutAdsAcFeedback,
     PlugOutAdsDcFeedback,
     PlugOutBcsAcFeedback,
+    FreeDriveArmFeedback,
+    MoveHomeArmFeedback,
+    MarkerSocketCalibAdsFeedback,
+    MarkerSocketCalibBcsFeedback,
 )
 
 # typing
@@ -179,3 +195,27 @@ manipulation_action_server.register(job_ids.plug_out_bcs_ac,
                                     PlugOutBcsAcGoal,
                                     PlugOutBcsAcResult,
                                     PlugOutBcsAcFeedback)
+
+manipulation_action_server.register(job_ids.free_drive_arm,
+                                    FreeDriveArmAction,
+                                    FreeDriveArmGoal,
+                                    FreeDriveArmResult, 
+                                    FreeDriveArmFeedback)
+
+manipulation_action_server.register(job_ids.move_home_arm, 
+                                    MoveHomeArmAction, 
+                                    MoveHomeArmGoal,
+                                    MoveHomeArmResult,
+                                    MoveHomeArmFeedback)
+
+manipulation_action_server.register(job_ids.marker_socket_calib_ads,
+                                    MarkerSocketCalibAdsAction,
+                                    MarkerSocketCalibAdsGoal,
+                                    MarkerSocketCalibAdsResult,
+                                    MarkerSocketCalibAdsFeedback)
+
+manipulation_action_server.register(job_ids.marker_socket_calib_bcs,
+                                    MarkerSocketCalibBcsAction,
+                                    MarkerSocketCalibBcsGoal,
+                                    MarkerSocketCalibBcsResult,
+                                    MarkerSocketCalibBcsFeedback)

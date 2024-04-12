@@ -6,6 +6,9 @@ class JobNames:
     move_home_arm = 'move_home_arm'
     free_drive_arm = 'free_drive_arm'
 
+    marker_socket_calib_ads = 'marker_to_socket_calibration_ads'
+    marker_socket_calib_bcs = 'marker_to_socket_calibration_bcs'
+
     plug_in_ads_ac = 'plug_in_ads_ac'
     plug_in_ads_dc = 'plug_in_ads_dc'
     plug_in_bcs_ac = 'plug_in_bcs_ac'

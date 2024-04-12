@@ -40,7 +40,7 @@ class DriveFree(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.arm_ready_to_plug],
+                       outcomes=[out.stop, out.completed],
                        input_keys=['job_id'],
                        output_keys=['job_id'])
 

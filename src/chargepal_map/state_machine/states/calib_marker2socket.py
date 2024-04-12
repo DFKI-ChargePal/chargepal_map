@@ -14,18 +14,18 @@ from typing import Any
 from ur_pilot import Pilot
 
 
-class Completion(State):
+class CalibMarker2Socket(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.completed])
+        State.__init__(self, outcomes=[out.stop, out.completed])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Complete process in finale state.")
-        self.pilot.disconnect()
-        rospy.loginfo(f"Disconnect from robot.")
+        print(), rospy.loginfo(f"Calibrate offset between Marker and Socket.")
+        
+        dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg'])
         outcome = out.completed
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.stop)
