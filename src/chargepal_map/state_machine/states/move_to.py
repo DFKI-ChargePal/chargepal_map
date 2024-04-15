@@ -224,8 +224,6 @@ class MoveToPlugPreAttached(State):
 
 class MoveToPlugPreConnected(State):
 
-    _T_socket2pre_connect = sm.SE3().Trans([0.0, 0.0, 0.0 - 0.02])
-
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
         self.user_cb = user_cb
@@ -246,6 +244,28 @@ class MoveToPlugPreConnected(State):
                 t=self.cfg.data[job_id]['trans_base2socket']
             )
             ud.T_base2socket = T_base2socket
+            # Move in a save path to the battery
+            if job_id == job_ids.plug_out_ads_ac:
+                rospy.loginfo(f"Start moving the arm to the battery comming from the adapter station on the left side")
+                with self.pilot.context.position_control():
+                    self.pilot.robot.move_path_j(self.cfg.data[job_id]['joint_waypoints'],
+                                                self.cfg.data['vel'],
+                                                self.cfg.data['acc'])
+            elif job_id == job_ids.plug_out_ads_dc:
+                rospy.loginfo(f"Start moving the arm to the battery comming from the adapter station on the right side")
+                with self.pilot.context.position_control():
+                    self.pilot.robot.move_path_j(self.cfg.data[job_id]['joint_waypoints'],
+                                                self.cfg.data['vel'],
+                                                self.cfg.data['acc'])
+            elif job_id == job_ids.plug_out_bcs_ac:
+                rospy.loginfo(f"Start moving the arm to the battery comming from the battery charging station on the left side")
+                with self.pilot.context.position_control():
+                    self.pilot.robot.move_path_j(self.cfg.data[job_id]['joint_waypoints'],
+                                                self.cfg.data['vel'],
+                                                self.cfg.data['acc'])
+            else:
+                raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+
         else:
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type key
