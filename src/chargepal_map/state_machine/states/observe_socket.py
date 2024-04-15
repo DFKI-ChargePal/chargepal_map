@@ -44,21 +44,21 @@ class ObserveSocket(State):
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
 
         with self.pilot.plug_model.context(plug_type):
-            if self.cfg.data['two_step_approach']:
-                dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg_i'])
+            if self.cfg.data[job_id]['two_step_approach']:
+                dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data[job_id]['detector_cfg_i'])
                 for _ in range(2):
                     found, T_base2marker = self.pilot.find_target_pose(
                         detector_fp=dtt_cfg_fp,
-                        time_out=self.cfg.data['time_out'])
+                        time_out=self.cfg.data[job_id]['time_out'])
                     if found:
                         with self.pilot.context.position_control():
                             self.pilot.set_tcp(ur_pilot.EndEffectorFrames.PLUG_SAFETY)
                             T_base2obs_close = T_base2marker * self._T_marker2obs_close
                             self.pilot.move_to_tcp_pose(T_base2obs_close)
-            dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data['detector_cfg_ii'])
+            dtt_cfg_fp = self.cfg.data['detector_dir'].joinpath(self.cfg.data[job_id]['detector_cfg_ii'])
             found, T_base2socket = self.pilot.find_target_pose(
                 detector_fp=dtt_cfg_fp,
-                time_out=self.cfg.data['time_out'])
+                time_out=self.cfg.data[job_id]['time_out'])
         rospy.loginfo(f"Finding socket pose successfully: {found}")
         if found:
             rospy.logdebug(f"Transformation: Base-Socket = {ur_pilot.utils.se3_to_str(T_base2socket)}")
