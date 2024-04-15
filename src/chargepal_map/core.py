@@ -71,8 +71,7 @@ class ManipulationActionServer:
                  res_msg: Type[Message],
                  fb_msg: Type[Message],
                  state_machine: ManipulationStateMachine) -> None:
-        """Base class of a Manipulation Action Server 
-        """
+        """ Base class of a Manipulation Action Server """
         self.name = name
         self.sm = state_machine
         self.act_msg = act_msg
@@ -89,7 +88,7 @@ class ManipulationActionServer:
         Args:
             goal: Specific action goal message
         """
-        rospy.loginfo(f"Launch the plug-in process to the adapter station with AC plug")
+        rospy.loginfo(f"Launch a new process.")
         result_msg = self.res_msg()
         try:
             ud = UserData()
@@ -98,13 +97,13 @@ class ManipulationActionServer:
             if outcome == out.completed:
                 result_msg.success = True
                 self.act_srv.set_succeeded(result=result_msg)
-                rospy.loginfo(f"Finish plug-in process successfully.")
+                rospy.loginfo(f"Finish process successfully with outcome {outcome}.")
             else:
                 result_msg.success = False
                 self.act_srv.set_preempted(result=result_msg)
-                rospy.loginfo(f"Stop plug-in process prematurely.")
+                rospy.loginfo(f"Stop process prematurely with outcome {outcome}.")
         except Exception as e:
-            rospy.logwarn(f"Error while plug-in process: {e}")
+            rospy.logwarn(f"Error while executing the process: {e}")
             result_msg.success = False
             self.act_srv.set_aborted(result=result_msg)
 

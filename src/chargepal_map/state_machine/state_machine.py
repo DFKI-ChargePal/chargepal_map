@@ -43,7 +43,7 @@ class ManipulationStateMachine:
         self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job_id'])
 
     def execute(self, ud: UserData) -> str:
-        self.state_machine.execute(ud)
+        return self.state_machine.execute(ud)
 
     def build(self, pilot: Pilot) -> None:
         with self.state_machine:
@@ -53,24 +53,24 @@ class ManipulationStateMachine:
                 transitions={
                     out.arm_in_wrong_ws:      state_name(s.FlipArm),
                     out.arm_ready_to_plug:    state_name(s.StartPlugging),
-                    out.arm_ready_to_free:    state_name(s.FreeArm),
-                    out.arm_ready_to_move_ls: state_name(s.MoveToStartRS),
-                    out.arm_ready_to_move_rs: state_name(s.MoveToStartLS),
+                    out.arm_ready_to_free:    state_name(s.DriveFree),
+                    out.arm_ready_to_move_ls: state_name(s.MoveToStartRs),
+                    out.arm_ready_to_move_rs: state_name(s.MoveToStartLs),
                     out.stop:                 state_name(s.Stop)
                 },
                 remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
-                label=state_name(s.MoveToStartLS),
-                state=s.MoveToStartLS(self.config, pilot, None),
+                label=state_name(s.MoveToStartLs),
+                state=s.MoveToStartLs(self.config, pilot, None),
                 transitions={
                     out.completed: state_name(s.Completion),
                     out.stop:      state_name(s.Stop),
                 }
             )
             StateMachine.add(
-                label=state_name(s.MoveToStartRS),
-                state=s.MoveToStartRS(self.config, pilot, None),
+                label=state_name(s.MoveToStartRs),
+                state=s.MoveToStartRs(self.config, pilot, None),
                 transitions={
                     out.completed: state_name(s.Completion),
                     out.stop:      state_name(s.Stop),

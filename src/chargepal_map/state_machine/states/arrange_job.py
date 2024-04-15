@@ -44,7 +44,7 @@ class ArrangeJob(State):
         shoulder_pan_ws_ls, shoulder_pan_ws_rs = self.cfg.data['sd_pan_ws_ls'], self.cfg.data['sd_pan_ws_rs']
         is_ws_ls = True if shoulder_pan_ws_ls - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_ls + np.pi/2 else False
         is_ws_rs = True if shoulder_pan_ws_rs - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_rs + np.pi/2 else False
-        
+
         if job_id == job_ids.free_drive_arm:
             outcome = out.arm_ready_to_free
         elif job_id == job_ids.move_home_arm:

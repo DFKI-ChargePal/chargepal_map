@@ -13,7 +13,7 @@ from chargepal_map.state_machine.states.start_plugging import StartPlugging
 from chargepal_map.state_machine.states.move_to import (
     MoveToPlugPreObs, MoveToSocketPreObs,
     MoveToPlugPreAttached, MoveToPlugPreConnected,
-    MoveToStartLS, MoveToStartRS, MoveToCompletion,
+    MoveToStartLs, MoveToStartRs, MoveToCompletion,
 )
 
 
@@ -30,8 +30,8 @@ __all__ = [
     'ReleasePlug',
     'ObservePlug',
     'ObserveSocket',
-    'MoveToStartLS',
-    'MoveToStartRS',
+    'MoveToStartLs',
+    'MoveToStartRs',
     'MoveToCompletion', 
     'MoveToPlugPreObs',
     'MoveToSocketPreObs',

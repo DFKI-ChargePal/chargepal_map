@@ -17,7 +17,7 @@ from typing import Any
 from ur_pilot import Pilot
 
 
-class MoveToStartLS(State):
+class MoveToStartLs(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
@@ -48,7 +48,7 @@ class MoveToStartLS(State):
         return outcome
 
 
-class MoveToStartRS(State): 
+class MoveToStartRs(State): 
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot

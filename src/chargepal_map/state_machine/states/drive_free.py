@@ -50,7 +50,7 @@ class DriveFree(State):
         usr_srv = DriveFree.StopService()
         with self.pilot.context.teach_in_control():
             _t_ref = time.perf_counter()
-            while not usr_srv.stop():
+            while not usr_srv.stop:
                 if time.perf_counter() - _t_ref > self._log_rate:
                     rospy.logdebug(f"Call service 'robot_arm/stop_free_drive_arm' to stop free drive mode")
                     _t_ref = time.perf_counter()

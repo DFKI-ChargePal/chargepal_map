@@ -1,8 +1,5 @@
-from enum import auto
-from strenum import StrEnum
 
-
-class Outcomes(StrEnum):
+class Outcomes:
 
     # Outcome mapping to avoid typos
     stop = 'stop'

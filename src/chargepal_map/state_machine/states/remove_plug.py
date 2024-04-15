@@ -48,10 +48,11 @@ class RemovePlug(State):
             raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Start removing procedure
         with self.pilot.plug_model.context(plug_type):
-            sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug()
-            rospy.loginfo(f"Removing plug from socket successfully: {sus_rm_plug}")
-            rospy.logdebug(f"Final error after removing plug from socket: "
-                           f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
+            with self.pilot.context.force_control():
+                sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug()
+                rospy.loginfo(f"Removing plug from socket successfully: {sus_rm_plug}")
+                rospy.logdebug(f"Final error after removing plug from socket: "
+                               f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
         if not sus_rm_plug:
             raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
         if self.user_cb is not None:
