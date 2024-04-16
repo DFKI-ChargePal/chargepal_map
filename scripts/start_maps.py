@@ -58,7 +58,7 @@ def start_maps(fp_cfg: Path) -> list[ManipulationActionServer]:
 
 
 if __name__ == '__main__':
-    rospy.init_node('manipulation_action_process', log_level=rospy.DEBUG)
+    rospy.init_node('manipulation_action_process', log_level=rospy.INFO, disable_signals=True)
     rospy.loginfo(f"Starting manipulation action process servers")
     sys_cfg_path = Path(sys.argv[1])
     if sys_cfg_path.exists() and sys_cfg_path.is_file():
@@ -71,3 +71,4 @@ if __name__ == '__main__':
         if not all([not mas.shutdown for mas in maps]):
             rospy.loginfo(f"Stop running node 'manipulation_action_process'")
             break
+    rospy.signal_shutdown("Error with robot hardware")

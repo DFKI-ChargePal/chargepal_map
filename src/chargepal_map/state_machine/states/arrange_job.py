@@ -69,6 +69,8 @@ class ArrangeJob(State):
                 outcome = out.arm_ready_to_plug
         else:
             raise ValueError(f"Not treated job ID: {job_id}")
+        rospy.loginfo(f"Choosen state machine job is: {job_id}")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.stop)
+        rospy.logdebug(f"Continue with outcome: {outcome}")
         return outcome
