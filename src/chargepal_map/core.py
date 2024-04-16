@@ -106,7 +106,6 @@ class ManipulationActionServer:
             rospy.logwarn(f"Error while executing the process: {e}")
             result_msg.success = False
             self.act_srv.set_aborted(result=result_msg)
-            raise RuntimeError(e)
 
     def wait_for_usr_feedback(self) -> None:
         feedback = self.fb_msg()
