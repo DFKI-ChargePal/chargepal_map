@@ -1,0 +1,5 @@
+# Configuration file for state >>ArrangeJob<<
+
+sd_pan_ws_ls: 3.142
+
+sd_pan_ws_rs: 6.283

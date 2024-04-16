@@ -1,2 +1,18 @@
+# Configuration file for state >>MoveToPlugPreConnected<<
+
 acc: 0.2
+
 vel: 0.2
+
+max_moving_tolerance: 1.6
+
+plug_out_ads_ac:
+
+  trans_base2socket: [0.5721, 0.2223, 0.2176]
+  eulvec_base2socket: [0.0335, 2.0917, 0.0116]
+
+  joint_waypoints:
+    - [4.4412, -1.6029, 2.1985, -0.5575, 1.2531, -1.5636]
+    - [3.9935, -1.8182, 2.2300, -0.1557, 1.3669, -1.5636]
+    - [3.3624, -1.8854, 2.1727, -0.0712, 1.3669, -1.5636]
+    - [3.3132, -1.8537, 2.2179, 0.2790, 1.6765, -1.5394]

@@ -1,0 +1,4 @@
+marker_size: 19
+marker_type: 'DICT_4X4_100'
+checker_size: 25
+checker_grid_size: [10, 7]

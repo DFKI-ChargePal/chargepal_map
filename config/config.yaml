@@ -1,4 +1,3 @@
-
 camera:
   cc: coefficients.toml
   chessboard_size:
@@ -12,12 +11,14 @@ calibration:
   flange_eye_records: viewpoints_records.json
 
 jobs:
+  - move_home_arm
+  - free_drive_arm
   - plug_in_ads_ac
   - plug_out_ads_ac
 
 state_machine:
 
-  step_by_user: true
+  step_by_user: false
 
   detector:
     folder_name: cv_detector

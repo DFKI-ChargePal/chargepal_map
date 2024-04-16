@@ -7,12 +7,12 @@ email = "georg.john@dfki.de"
 
 [pilot.coupling]
 mass = 0.4  # including ft-sensor
-com = [0.0, 0.0, 0.03]
-link_frame = [0.0, 0.0, 0.061, 0.0, 0.0, 0.0]
+com = [0.0, 0.0, 0.02]
+link_frame = [0.0, 0.0, 0.042, 0.0, 0.0, 0.0]
 
 [pilot.tm_type2_female]
 mass = 0.3
 com = [0.0, 0.0, 0.110]
-lip_frame = [0.0, 0.0, 0.202, 0.0, 0.0, 0.0]
-tip_frame = [0.0, 0.0, 0.235, 0.0, 0.0, 0.0]
-sense_frame = [0.0, 0.0, 0.23417, 0.0, -0.2618, 0.0]
+lip_frame = [0.0, 0.0, 0.182, 0.0, 0.0, 0.0]
+tip_frame = [0.0, 0.0, 0.216, 0.0, 0.0, 0.0]
+sense_frame = [0.0, 0.0, 0.21517, 0.0, -0.2618, 0.0]

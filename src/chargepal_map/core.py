@@ -8,6 +8,7 @@ from collections import namedtuple
 
 from chargepal_map.jobs import job_ids
 from chargepal_map.state_machine.outcomes import out
+from chargepal_map.state_machine.utils import StateMachineException
 from chargepal_map.state_machine.state_machine import ManipulationStateMachine
 
 # actions
@@ -73,6 +74,7 @@ class ManipulationActionServer:
                  state_machine: ManipulationStateMachine) -> None:
         """ Base class of a Manipulation Action Server """
         self.name = name
+        self.shutdown = False  # Flag to signal shutdown
         self.sm = state_machine
         self.act_msg = act_msg
         self.goal_msg, self.res_msg, self.fb_msg = goal_msg, res_msg, fb_msg
@@ -102,10 +104,16 @@ class ManipulationActionServer:
                 result_msg.success = False
                 self.act_srv.set_preempted(result=result_msg)
                 rospy.loginfo(f"Stop process prematurely with outcome {outcome}.")
-        except Exception as e:
-            rospy.logwarn(f"Error while executing the process: {e}")
-            result_msg.success = False
+        except StateMachineException as sme:
             self.act_srv.set_aborted(result=result_msg)
+            result_msg.success = False
+            rospy.logwarn(f"Error in state machine procedure: {sme}")
+        except Exception as e:
+            self.act_srv.set_aborted(result=result_msg)
+            result_msg.success = False
+            self.shutdown = True
+            rospy.logerr(f"Unknown error while executing manipulation process: {e}")
+            rospy.logerr(f"Shutdown manipulation node!")
 
     def wait_for_usr_feedback(self) -> None:
         feedback = self.fb_msg()

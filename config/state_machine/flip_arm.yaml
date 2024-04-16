@@ -1,8 +1,9 @@
-sd_pan_ws_ls: 3.14
-sd_pan_ws_rs: 0.0
+# Configuration file for state >>FlipArm<<
 
-flip_to_rs_wps:
+max_moving_tolerance: 1.6
+
+wps_flip_to_rs:
   - [3.4035, -1.6286, 2.1541, -0.4767, 1.8076, -1.5921]
 
-flip_to_ls_wps:
+wps_flip_to_ls:
   - [3.4035, -1.6286, 2.1541, -0.4767, 1.8076, -1.5921]

@@ -12,9 +12,10 @@ import chargepal_map as mp
 
 # typing
 from typing import Any
+from chargepal_map import ManipulationActionServer
 
 
-def start_maps(fp_cfg: Path) -> None:
+def start_maps(fp_cfg: Path) -> list[ManipulationActionServer]:
     """ Main function to start manipulation processes
 
     Args:
@@ -45,12 +46,15 @@ def start_maps(fp_cfg: Path) -> None:
     sm =  mp.ManipulationStateMachine(config_dir, config_dict)
     sm.build(pilot)
     # Create action servers
+    maps: list[ManipulationActionServer] = []
     for job_name in config_dict['jobs']:
         if mp.job_ids.is_valid(job_name):
             rospy.loginfo(f"Start action server: {job_name}")
-            mp.manipulation_action_server.create(job_name, sm)
+            mas = mp.manipulation_action_server.create(job_name, sm)
+            maps.append(mas)
         else:
             raise ValueError(f"Invalid job with name: {job_name}.")
+    return maps
 
 
 if __name__ == '__main__':
@@ -58,8 +62,12 @@ if __name__ == '__main__':
     rospy.loginfo(f"Starting manipulation action process servers")
     sys_cfg_path = Path(sys.argv[1])
     if sys_cfg_path.exists() and sys_cfg_path.is_file():
-        start_maps(sys_cfg_path)
+        maps = start_maps(sys_cfg_path)
     else:
         raise FileNotFoundError(f"Can not find configuration file '{sys_cfg_path}'")
     rospy.loginfo(f"Ready to receive action goal commands")
-    rospy.spin()
+    while not rospy.is_shutdown():
+        rospy.sleep(0.02)
+        if not all([not mas.shutdown for mas in maps]):
+            rospy.loginfo(f"Stop running node 'manipulation_action_process'")
+            break

@@ -1,10 +1,12 @@
-plug_in_ads_ac:
-  joint_waypoints:
-    - [3.4518, -2.0271, 2.1351, -0.0672, 1.8260, -1.5651]
+# Configuration file for state >>MoveToPlugPreObs<<
+
+acc: 0.2
+
+vel: 0.2
+
+max_moving_tolerance: 1.6
 
 plug_out_ads_ac:
   joint_waypoints:
-    - [3.4518, -2.0271, 2.1351, -0.0672, 1.8260, -1.5651]
-
-vel: 0.2
-acc: 0.2
+    - [3.2667, -2.1580, 2.3126, -0.1559, 1.3627, -1.6028]
+    - [4.2676, -2.1498, 2.3811, -0.1550, 1.2891, -2.4084]

@@ -5,8 +5,8 @@ email = "georg.john@dfki.de"
 
 [robot]
 tool = "None"
-home_radians = [3.429, -1.371, 2.127, -0.747, 1.869, -1.565]
-ip_address = "192.168.13.42"  # Table setup with rigid UR10e
+home_radians = [3.014, -2.159, 2.258, -0.118, 1.362, -1.604]
+ip_address = "192.168.11.40"  # Mobile robot with id 00040
 
 [robot.joints]
 vel = 0.35

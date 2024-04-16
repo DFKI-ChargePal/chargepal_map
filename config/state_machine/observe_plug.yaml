@@ -1,17 +1,19 @@
+# Configuration file for state >>ObservePlug<<
+
 plug_out_ads_ac:
   two_step_approach: true
-  detector_cfg:
-    - aruco_marker_ads_ac_adj.yaml
-    - aruco_pattern_ads_ac_adj.yaml
+  time_out: 5.0
+  detector_i: aruco_marker_ads
+  detector_ii: aruco_pattern_ads_adj
 
 plug_out_ads_dc:
   two_step_approach: true
-  detector_cfg:
-    - aruco_marker_ads_ac_adj.yaml
-    - aruco_pattern_ads_ac_adj.yaml
+  time_out: 5.0
+  detector_i: aruco_marker_ads
+  detector_ii: aruco_pattern_ads_adj
 
 plug_out_bcs_ac:
   two_step_approach: true
-  detector_cfg:
-    - aruco_marker_ads_ac_adj.yaml
-    - aruco_pattern_ads_ac_adj.yaml
+  time_out: 5.0
+  detector_i: aruco_marker_ads
+  detector_ii: aruco_pattern_ads_adj

@@ -1,2 +1,11 @@
+# Configuration file for state >>MoveToPlugPreAttached<<
+
 acc: 0.2
+
 vel: 0.2
+
+max_moving_tolerance: 1.6
+
+plug_in_ads_ac:
+  trans_base2socket: [0.5721, 0.2223, 0.2176]
+  eulvec_base2socket: [0.0335, 2.0917, 0.0116]
