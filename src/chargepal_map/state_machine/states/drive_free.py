@@ -34,6 +34,9 @@ class DriveFree(State):
             self.stop = True
             res.success = True
             return res
+        
+        def destroy(self) -> None:
+            self._usr_srv.shutdown(f"Shutdown service since job is down.")
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
@@ -55,6 +58,7 @@ class DriveFree(State):
                     rospy.logdebug(f"Call service 'robot_arm/stop_free_drive_arm' to stop free drive mode")
                     _t_ref = time.perf_counter()
         rospy.loginfo(f"Free drive mode stopped.")
+        usr_srv.destroy()
         outcome = out.completed
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.completed, out.stop)
