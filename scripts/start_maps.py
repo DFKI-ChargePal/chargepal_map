@@ -42,6 +42,9 @@ def start_maps(fp_cfg: Path) -> list[ManipulationActionServer]:
     ur_pilot.logger.set_logging_level(logging.DEBUG)
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
+    # Connect to arm just for test
+    pilot.connect()
+    pilot.disconnect()
     # Create manipulation state machine / process
     sm =  mp.ManipulationStateMachine(config_dir, config_dict)
     sm.build(pilot)
@@ -68,6 +71,7 @@ if __name__ == '__main__':
     rospy.loginfo(f"Ready to receive action goal commands")
     while not rospy.is_shutdown():
         rospy.sleep(0.02)
+        # pilot.is_running()
         if not all([not mas.shutdown for mas in maps]):
             rospy.loginfo(f"Stop running node 'manipulation_action_process'")
             break

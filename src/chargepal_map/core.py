@@ -8,7 +8,7 @@ from collections import namedtuple
 
 from chargepal_map.jobs import job_ids
 from chargepal_map.state_machine.outcomes import out
-from chargepal_map.state_machine.utils import StateMachineException
+from chargepal_map.state_machine.utils import StateMachineError
 from chargepal_map.state_machine.state_machine import ManipulationStateMachine
 
 # actions
@@ -104,7 +104,7 @@ class ManipulationActionServer:
                 result_msg.success = False
                 self.act_srv.set_preempted(result=result_msg)
                 rospy.loginfo(f"Stop process prematurely with outcome {outcome}.")
-        except StateMachineException as sme:
+        except StateMachineError as sme:
             self.act_srv.set_aborted(result=result_msg)
             result_msg.success = False
             rospy.logwarn(f"Error in state machine procedure: {sme}")

@@ -11,6 +11,7 @@ from chargepal_map.core import job_ids
 from chargepal_map.state_machine.outcomes import out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import StateMachineError
 
 # typing
 from typing import Any
@@ -32,15 +33,21 @@ class MoveToStartLs(State):
         # Check job id
         job_id = ud.job_id
         if job_id != job_ids.move_home_arm:
-             raise ValueError(f"Not a proper job ID '{job_id}'")
+             raise StateMachineError(f"Not a proper job ID '{job_id}'")
         start_pos = self.pilot.robot.joint_pos
         home_pos = self.cfg.data['home_joint_pos']
         # Try to avoid dangerous movements
         error_pos = np.abs(np.array(home_pos) - start_pos)
         if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
-            raise RuntimeError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
+            raise StateMachineError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
         with self.pilot.context.position_control():
             self.pilot.robot.movej(home_pos, self.cfg.data['vel'], self.cfg.data['acc'])
+        # Get finale position and check remaining error to target
+        finale_pos = self.pilot.robot.joint_pos
+        error_pos = np.abs(np.array(home_pos) - finale_pos)
+        if np.all(error_pos > 1e-2):
+            raise StateMachineError(f"Remaining distance to home position is to large: {error_pos}. "
+                                    f"Is the robot is running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.completed
         if self.user_cb is not None:
@@ -63,15 +70,21 @@ class MoveToStartRs(State):
         # Check job id
         job_id = ud.job_id
         if job_id != job_ids.move_home_arm:
-             raise ValueError(f"Not a proper job ID '{job_id}'")
+             raise StateMachineError(f"Not a proper job ID '{job_id}'")
         start_pos = self.pilot.robot.joint_pos
         home_pos = self.cfg.data['home_joint_pos']
         # Try to avoid dangerous movements
         error_pos = np.abs(np.array(home_pos) - start_pos)
         if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
-            raise RuntimeError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
+            raise StateMachineError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
         with self.pilot.context.position_control():
             self.pilot.robot.movej(home_pos, self.cfg.data['vel'], self.cfg.data['acc'])
+        # Get finale position and check remaining error to target
+        finale_pos = self.pilot.robot.joint_pos
+        error_pos = np.abs(np.array(home_pos) - finale_pos)
+        if np.all(error_pos > 1e-2):
+            raise StateMachineError(f"Remaining distance to home position is to large: {error_pos}. "
+                                    f"Is the robot is running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.completed
         if self.user_cb is not None:
@@ -134,7 +147,7 @@ class MoveToPlugPreObs(State):
                                              self.cfg.data['vel'],
                                              self.cfg.data['acc'])
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.plug_pre_obs, out.stop)
         return outcome
@@ -173,7 +186,7 @@ class MoveToSocketPreObs(State):
                                              self.cfg.data['vel'],
                                              self.cfg.data['acc'])
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_pre_obs, out.stop)
         return outcome
@@ -202,7 +215,7 @@ class MoveToPlugPreAttached(State):
             )
             ud.T_base2socket = T_base2socket
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type key
         if job_id in job_ids.type2_female():
             plug_type = 'type2_female'
@@ -211,7 +224,7 @@ class MoveToPlugPreAttached(State):
         elif job_id in job_ids.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.position_control():
                 sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
@@ -264,10 +277,10 @@ class MoveToPlugPreConnected(State):
                                                 self.cfg.data['vel'],
                                                 self.cfg.data['acc'])
             else:
-                raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+                raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
 
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type key
         if job_id in job_ids.type2_female():
             plug_type = 'type2_female'
@@ -276,7 +289,7 @@ class MoveToPlugPreConnected(State):
         elif job_id in job_ids.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.position_control():
                 sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)

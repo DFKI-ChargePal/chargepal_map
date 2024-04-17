@@ -11,6 +11,7 @@ from chargepal_map.core import job_ids
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import StateMachineError
 
 # typing
 from typing import Any
@@ -41,7 +42,7 @@ class ObservePlug(State):
         elif job_id in job_ids.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
             if self.cfg.data[job_id]['two_step_approach']:
                 dtt_cfg_fp = self.cfg.data['detector'][self.cfg.data[job_id]['detector_i']]
@@ -63,8 +64,8 @@ class ObservePlug(State):
             rospy.logdebug(f"Transformation: Base-Socket = {ur_pilot.utils.se3_to_str(T_base2socket)}")
             ud.T_base2socket = T_base2socket
         else:
-            raise RuntimeError(f"Can't find socket. "
-                               f"Make sure detector is proper set up and pattern is in camera view")
+            raise StateMachineError(f"Can't find socket. "
+                                    f"Make sure detector is proper set up and pattern is in camera view")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.plug_obs, out.stop)
         return outcome

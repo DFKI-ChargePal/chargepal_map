@@ -9,6 +9,7 @@ from chargepal_map.core import job_ids
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import StateMachineError
 
 # typing
 from typing import Any
@@ -39,7 +40,7 @@ class AttachPlug(State):
         elif job_id in job_ids.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Start attaching procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():
@@ -53,7 +54,7 @@ class AttachPlug(State):
                     rospy.logdebug(f"Final error after locking robot with plug: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
         if not sus_cup_plug or not sus_lock_plug:
-            raise RuntimeError(f"Spatial error to large. Robot is probably in an undefined condition.")
+            raise StateMachineError(f"Spatial error to large. Robot is probably in an undefined condition.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.plug_attached, out.stop)
         return outcome

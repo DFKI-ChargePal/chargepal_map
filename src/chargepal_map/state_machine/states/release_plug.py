@@ -10,6 +10,7 @@ from chargepal_map.core import job_ids
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import StateMachineError
 
 # typing
 from typing import Any
@@ -40,7 +41,7 @@ class ReleasePlug(State):
         elif job_id in job_ids.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Start releasing procedure
         with self.pilot.plug_model.context(plug_type):
             sus_unl_plug, sus_dec_plug = False, False
@@ -55,7 +56,7 @@ class ReleasePlug(State):
         rospy.loginfo(f"Unlock robot from plug successfully: {sus_unl_plug}")
         rospy.loginfo(f"Decoupling robot and plug successfully: {sus_dec_plug}")
         if not sus_unl_plug or not sus_dec_plug:
-            raise RuntimeError(f"Spatial error to large. Robot is probably in an undefined condition.")
+            raise StateMachineError(f"Spatial error to large. Robot is probably in an undefined condition.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.plug_released, out.stop)
         return outcome

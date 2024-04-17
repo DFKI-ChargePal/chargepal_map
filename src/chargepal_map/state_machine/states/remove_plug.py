@@ -9,6 +9,7 @@ from chargepal_map.core import job_ids
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import StateMachineError
 
 # typing
 from typing import Any
@@ -36,7 +37,7 @@ class RemovePlug(State):
         elif job_id in job_ids.plug_out():
             outcome = out.plug_removed_no
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Get plug type
         if job_id in job_ids.type2_female():
             plug_type = 'type2_female'
@@ -45,7 +46,7 @@ class RemovePlug(State):
         elif job_id in job_ids.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise ValueError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         # Start removing procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():
@@ -54,7 +55,7 @@ class RemovePlug(State):
                 rospy.logdebug(f"Final error after removing plug from socket: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
         if not sus_rm_plug:
-            raise RuntimeError(f"Error while trying to unplug. Plug is probably still connected.")
+            raise StateMachineError(f"Error while trying to unplug. Plug is probably still connected.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.stop)
         return outcome

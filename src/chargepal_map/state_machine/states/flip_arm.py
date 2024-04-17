@@ -11,6 +11,7 @@ from chargepal_map.core import job_ids
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import StateMachineError
 
 # typing
 from typing import Any
@@ -36,12 +37,12 @@ class FlipArm(State):
         elif job_id in job_ids.type2_female() + job_ids.type2_male():
             wps = self.cfg.data['wps_flip_to_ls']
         else:
-            raise RuntimeError(f"Can't match job id '{job_id}' to state action.")
+            raise StateMachineError(f"Can't match job id '{job_id}' to state action.")
         start_pos = self.pilot.robot.joint_pos
         first_pos = np.array(wps[1])
         error_pos = np.abs(first_pos - start_pos)
         if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
-            raise RuntimeError(f"Distance to first way points is to large: {error_pos}. To dangerous to move ;)")
+            raise StateMachineError(f"Distance to first way points is to large: {error_pos}. To dangerous to move ;)")
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(wps)
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
