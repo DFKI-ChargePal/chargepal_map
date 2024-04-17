@@ -58,7 +58,7 @@ def start_maps(fp_cfg: Path) -> None:
     pilot.connect()
     if pilot.is_connected:
         rospy.loginfo(f"Ready to receive action goal commands")
-        while not rospy.is_shutdown():
+        while not rospy.is_shutdown() and pilot.robot.is_in_running_mode:
             rospy.sleep(0.02)
             # pilot.is_running()
             if not all([not mas.shutdown for mas in maps]):
