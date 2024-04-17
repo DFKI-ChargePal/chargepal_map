@@ -2,7 +2,7 @@
 
 acc: 0.2
 
-vel: 0.2
+vel: 0.5
 
 max_moving_tolerance: 1.6
 

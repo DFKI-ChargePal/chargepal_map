@@ -1,5 +1,9 @@
 # Configuration file for state >>ObservePlug<<
 
+acc: 0.2
+
+vel: 0.5
+
 plug_out_ads_ac:
   two_step_approach: true
   time_out: 5.0
