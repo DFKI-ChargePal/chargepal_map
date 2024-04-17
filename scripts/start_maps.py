@@ -15,7 +15,7 @@ from typing import Any
 from chargepal_map import ManipulationActionServer
 
 
-def start_maps(fp_cfg: Path) -> list[ManipulationActionServer]:
+def start_maps(fp_cfg: Path) -> None:
     """ Main function to start manipulation processes
 
     Args:
@@ -42,9 +42,6 @@ def start_maps(fp_cfg: Path) -> list[ManipulationActionServer]:
     ur_pilot.logger.set_logging_level(logging.DEBUG)
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
-    # Connect to arm just for test
-    pilot.connect()
-    pilot.disconnect()
     # Create manipulation state machine / process
     sm =  mp.ManipulationStateMachine(config_dir, config_dict)
     sm.build(pilot)
@@ -57,7 +54,18 @@ def start_maps(fp_cfg: Path) -> list[ManipulationActionServer]:
             maps.append(mas)
         else:
             raise ValueError(f"Invalid job with name: {job_name}.")
-    return maps
+    # Connect to arm just for test
+    pilot.connect()
+    if pilot.is_connected:
+        rospy.loginfo(f"Ready to receive action goal commands")
+        while not rospy.is_shutdown():
+            rospy.sleep(0.02)
+            # pilot.is_running()
+            if not all([not mas.shutdown for mas in maps]):
+                rospy.loginfo(f"Stop running node 'manipulation_action_process'")
+                break
+    pilot.disconnect()
+    rospy.signal_shutdown("Error with robot hardware")
 
 
 if __name__ == '__main__':
@@ -68,11 +76,3 @@ if __name__ == '__main__':
         maps = start_maps(sys_cfg_path)
     else:
         raise FileNotFoundError(f"Can not find configuration file '{sys_cfg_path}'")
-    rospy.loginfo(f"Ready to receive action goal commands")
-    while not rospy.is_shutdown():
-        rospy.sleep(0.02)
-        # pilot.is_running()
-        if not all([not mas.shutdown for mas in maps]):
-            rospy.loginfo(f"Stop running node 'manipulation_action_process'")
-            break
-    rospy.signal_shutdown("Error with robot hardware")
