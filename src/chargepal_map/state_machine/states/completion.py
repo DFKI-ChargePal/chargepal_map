@@ -24,7 +24,7 @@ class Completion(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo(f"Complete process in finale state.")
-        self.pilot.disconnect()
+        # self.pilot.disconnect()
         rospy.loginfo(f"Disconnect from robot.")
         outcome = out.completed
         if self.user_cb is not None:

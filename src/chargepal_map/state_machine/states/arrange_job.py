@@ -40,7 +40,7 @@ class ArrangeJob(State):
         if not job_ids.is_valid(job_id):
             raise StateMachineError(f"Invalid job ID: {job_id}")
         # Connect to robot arm
-        self.pilot.connect()
+        # self.pilot.connect()
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
         shoulder_pan_ws_ls= self.cfg.data['workspace_left']['shoulder_pan_pos']
