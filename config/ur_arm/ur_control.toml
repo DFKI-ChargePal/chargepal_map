@@ -5,6 +5,7 @@ email = "georg.john@dfki.de"
 
 [robot]
 tool = "None"
+connect_timeout = 5.0
 home_radians = [3.014, -2.159, 2.258, -0.118, 1.362, -1.604]
 ip_address = "192.168.11.40"  # Mobile robot with id 00040
 
