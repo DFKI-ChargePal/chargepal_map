@@ -68,8 +68,9 @@ def start_maps(fp_cfg: Path) -> None:
                     break
     except RuntimeError as re:
         rospy.logwarn(f"Error when trying to connect to robot: {re}")
+    finally:
         rospy.signal_shutdown("Error with robot hardware")
-    pilot.disconnect()
+        pilot.disconnect()
 
 
 if __name__ == '__main__':
