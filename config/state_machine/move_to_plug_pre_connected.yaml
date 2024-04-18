@@ -8,8 +8,8 @@ max_moving_tolerance: 1.6
 
 plug_out_ads_ac:
 
-  trans_base2socket: [0.5721, 0.2223, 0.2176]
-  eulvec_base2socket: [0.0335, 2.0917, 0.0116]
+  trans_base2socket: [0.5714, 0.2215, 0.2183]
+  eulvec_base2socket: [0.0405, 2.0756, 0.0196]  # [0.0335, 2.0917, 0.0116]
 
   joint_waypoints:
     - [4.4412, -1.6029, 2.1985, -0.5575, 1.2531, -1.5636]
