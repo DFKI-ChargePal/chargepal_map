@@ -1,9 +1,9 @@
 # Configuration file for state >>ArrangeJob<<
 
 workspace_left:
-  shoulder_pan_pos: 3.142
-  home_joint_pos: [3.014, -2.159, 2.258, -0.118, 1.362, -1.604]
+  shoulder_pan_pos: -3.142
+  home_joint_pos: [-3.3832, -2.0250, 2.3969, -0.3814, 1.3428, 3.9543]
 
 workspace_right:
-  shoulder_pan_pos: 6.283
-  home_joint_pos: [3.014, -2.159, 2.258, -0.118, 1.362, -1.604]
+  shoulder_pan_pos: 0.000
+  home_joint_pos: [-3.3832, -2.0250, 2.3969, -0.3814, 1.3428, 3.9543]
