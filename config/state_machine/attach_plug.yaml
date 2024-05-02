@@ -1,1 +1,9 @@
 # Configuration file for state >>AttachPlug<<
+couple_time_out: 10.0
+couple_max_force: 50.0
+couple_max_torque: 4.0
+couple_tolerance: 5e-3
+
+lock_time_out: 12.0
+lock_max_torque: 4.0
+lock_angle: 1.5472

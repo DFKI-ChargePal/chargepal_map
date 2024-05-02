@@ -50,7 +50,11 @@ class RemovePlug(State):
         # Start removing procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():
-                sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug()
+                sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug(
+                    time_out=self.cfg.data['remove_time_out'],
+                    max_force=self.cfg.data['remove_max_force'],
+                    remove_tolerance=self.cfg.data['remove_tolerance']
+                    )
                 rospy.loginfo(f"Removing plug from socket successfully: {sus_rm_plug}")
                 rospy.logdebug(f"Final error after removing plug from socket: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")

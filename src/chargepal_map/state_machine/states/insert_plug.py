@@ -46,11 +46,23 @@ class InsertPlug(State):
         with self.pilot.plug_model.context(plug_type): 
             sus_eng_plug, sus_ins_plug = False, False
             with self.pilot.context.force_control():
-                sus_eng_plug, lin_ang_err = self.pilot.try2_engage_with_socket(T_base2socket)
+                sus_eng_plug, lin_ang_err = self.pilot.try2_engage_with_socket(
+                    T_base2socket=T_base2socket,
+                    time_out=self.cfg.data['engage_time_out'],
+                    max_force=self.cfg.data['engage_max_force'],
+                    engage_depth=self.cfg.data['engage_depth'],
+                    engage_tolerance=self.cfg.data['engage_tolerance']
+                    )
                 rospy.logdebug(f"Final error after engaging between plug and socket: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                 if sus_eng_plug:
-                    sus_ins_plug, lin_ang_err = self.pilot.try2_insert_plug(T_base2socket)
+                    sus_ins_plug, lin_ang_err = self.pilot.try2_insert_plug(
+                        T_base2socket=T_base2socket,
+                        time_out=self.cfg.data['insert_time_out'],
+                        start_force=self.cfg.data['insert_start_force'],
+                        end_force=self.cfg.data['insert_end_force'],
+                        insert_tolerance=self.cfg.data['insert_tolerance']
+                        )
                     rospy.logdebug(f"Final error after inserting plug to socket: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
 

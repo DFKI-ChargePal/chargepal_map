@@ -1,5 +1,6 @@
 """ This file implements the state >>ReleasePlug<< """
 from __future__ import annotations
+from calendar import c
 
 # libs
 import rospy
@@ -46,11 +47,21 @@ class ReleasePlug(State):
         with self.pilot.plug_model.context(plug_type):
             sus_unl_plug, sus_dec_plug = False, False
             with self.pilot.context.force_control():
-                sus_unl_plug, lin_ang_err = self.pilot.try2_unlock_plug(T_base2socket)
+                sus_unl_plug, lin_ang_err = self.pilot.try2_unlock_plug(
+                    T_base2socket=T_base2socket,
+                    time_out=self.cfg.data['unlock_time_out'],
+                    max_torque=self.cfg.data['unlock_max_torque'],
+                    unlock_angle=self.cfg.data['unlock_angle']
+                    )
                 rospy.logdebug(f"Final error after unlocking robot from plug: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                 if sus_unl_plug:
-                    sus_dec_plug, lin_ang_err = self.pilot.try2_decouple_to_plug()
+                    sus_dec_plug, lin_ang_err = self.pilot.try2_decouple_to_plug(
+                        time_out=self.cfg.data['decouple_time_out'],
+                        max_force=self.cfg.data['decouple_max_force'],
+                        max_torque=self.cfg.data['decouple_max_torque'],
+                        decoupling_tolerance=self.cfg.data['decouple_tolerance']
+                        )
                     rospy.logdebug("Final error after decoupling robot from plug: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
         rospy.loginfo(f"Unlock robot from plug successfully: {sus_unl_plug}")

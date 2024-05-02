@@ -2,7 +2,6 @@
 from __future__ import annotations
 # libs
 import rospy
-import numpy as np
 from smach import State
 
 from chargepal_map.core import job_ids

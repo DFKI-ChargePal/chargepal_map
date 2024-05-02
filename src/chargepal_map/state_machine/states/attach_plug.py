@@ -44,12 +44,23 @@ class AttachPlug(State):
         # Start attaching procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():
-                sus_cup_plug, lin_ang_err = self.pilot.try2_couple_to_plug(T_base2socket)
+                sus_cup_plug, lin_ang_err = self.pilot.try2_couple_to_plug(
+                    T_base2socket=T_base2socket,
+                    time_out=self.cfg.data['couple_time_out'],
+                    max_force=self.cfg.data['couple_max_force'],
+                    max_torque=self.cfg.data['couple_max_torque'],
+                    couple_tolerance=self.cfg.data['couple_tolerance']
+                    )
                 rospy.loginfo(f"Coupling robot and plug successfully: {sus_cup_plug}")
                 rospy.logdebug(f"Final error after coupling robot and plug: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                 if sus_cup_plug:
-                    sus_lock_plug, lin_ang_err = self.pilot.try2_lock_plug(T_base2socket)
+                    sus_lock_plug, lin_ang_err = self.pilot.try2_lock_plug(
+                        T_base2socket=T_base2socket,
+                        time_out=self.cfg.data['lock_time_out'],
+                        max_torque=self.cfg.data['lock_max_torque'],
+                        lock_angle=self.cfg.data['lock_angle']
+                        )
                     rospy.loginfo(f"Lock robot with plug successfully: {sus_lock_plug}")
                     rospy.logdebug(f"Final error after locking robot with plug: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
