@@ -227,7 +227,7 @@ class MoveToPlugPreAttached(State):
             raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.position_control():
-                sus, _ = self.pilot.try2_move_to_plug_id_observation(T_base2socket)
+                # sus, _ = self.pilot.try2_move_to_plug_id_observation(T_base2socket)
                 # Check with the ID whether the correct plug is in place or not.
                 dtt_cfg_fp = self.cfg.data['detector'][self.cfg.data[plug_type]]
                 # found, _ = self.pilot.find_target_pose(
