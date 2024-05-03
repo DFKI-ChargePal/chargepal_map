@@ -227,6 +227,12 @@ class MoveToPlugPreAttached(State):
             raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.position_control():
+                sus, _ = self.pilot.try2_move_to_plug_id_observation(T_base2socket)
+                # Check with the ID whether the correct plug is in place or not.
+                dtt_cfg_fp = self.cfg.data['detector'][self.cfg.data[plug_type]]
+                # found, _ = self.pilot.find_target_pose(
+                #     detector_fp=dtt_cfg_fp,
+                #     time_out=self.cfg.data['time_out'])
                 sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
