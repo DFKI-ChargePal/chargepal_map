@@ -229,7 +229,7 @@ class MoveToPlugPreAttached(State):
             with self.pilot.context.position_control():
                 # sus, _ = self.pilot.try2_move_to_plug_id_observation(T_base2socket)
                 # Check with the ID whether the correct plug is in place or not.
-                dtt_cfg_fp = self.cfg.data['detector'][self.cfg.data[plug_type]]
+                # dtt_cfg_fp = self.cfg.data['detector'][self.cfg.data['marker'][plug_type]]
                 # found, _ = self.pilot.find_target_pose(
                 #     detector_fp=dtt_cfg_fp,
                 #     time_out=self.cfg.data['time_out'])

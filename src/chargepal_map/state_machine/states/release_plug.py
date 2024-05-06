@@ -60,7 +60,7 @@ class ReleasePlug(State):
                         time_out=self.cfg.data['decouple_time_out'],
                         max_force=self.cfg.data['decouple_max_force'],
                         max_torque=self.cfg.data['decouple_max_torque'],
-                        decoupling_tolerance=self.cfg.data['decouple_tolerance']
+                        decouple_tolerance=self.cfg.data['decouple_tolerance']
                         )
                     rospy.logdebug("Final error after decoupling robot from plug: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
