@@ -1,9 +1,0 @@
-# Configuration file for state >>MoveToStartRS<<
-
-acc: 0.2
-
-vel: 0.2
-
-max_moving_tolerance: 1.6
-
-home_joint_pos: [-3.3832, -2.0250, 2.3969, -0.3814, 1.3428, 3.9543]

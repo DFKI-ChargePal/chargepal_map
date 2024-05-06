@@ -1,4 +1,0 @@
-# Configuration file for state >>RemovePlug<<
-remove_time_out: 10.0
-remove_max_force: 125.0
-remove_tolerance: 3e-3

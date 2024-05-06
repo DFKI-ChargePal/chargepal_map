@@ -1,9 +1,0 @@
-# Configuration file for state >>ReleasePlug<<
-unlock_time_out: 12.0
-unlock_max_torque: 4.0
-unlock_angle: 1.5315
-
-decouple_time_out: 6.0
-decouple_max_force: 50.0
-decouple_max_torque: 4.0
-decouple_tolerance: 3e-3
