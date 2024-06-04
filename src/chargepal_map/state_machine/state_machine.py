@@ -6,7 +6,7 @@ from pathlib import Path
 from smach import StateMachine, UserData
 
 import chargepal_map.state_machine.states as s
-from chargepal_map.state_machine.outcomes import out
+import chargepal_map.state_machine.outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.utils import silent_smach, state_name
 
@@ -40,7 +40,7 @@ class ManipulationStateMachine:
             for cfg_fp in config_dir.joinpath(self.config['states']['folder_name']).glob('*.yaml')
             }
         self.step_by_user = StepByUser(self.config['step_by_user'])
-        self.state_machine = StateMachine(outcomes=[out.stop, out.completed], input_keys=['job_id'])
+        self.state_machine = StateMachine(outcomes=[out.job_stopped, out.completed], input_keys=['job_id'])
 
     def execute(self, ud: UserData) -> str:
         return self.state_machine.execute(ud)
