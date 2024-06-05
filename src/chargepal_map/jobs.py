@@ -12,10 +12,12 @@ class JobNames:
     plug_in_ads_ac = 'plug_in_ads_ac'
     plug_in_ads_dc = 'plug_in_ads_dc'
     plug_in_bcs_ac = 'plug_in_bcs_ac'
+    plug_in_dsk_dm = 'plug_in_dsk_dm'
 
     plug_out_ads_ac = 'plug_out_ads_ac'
     plug_out_ads_dc = 'plug_out_ads_dc'
     plug_out_bcs_ac = 'plug_out_bcs_ac'
+    plug_out_dsk_dm = 'plug_out_dsk_dm'
 
     @staticmethod
     def is_valid(job_name: str) -> bool:
@@ -31,10 +33,12 @@ class JobNames:
             JobNames.plug_in_ads_ac,
             JobNames.plug_in_ads_dc,
             JobNames.plug_in_ads_ac,
+            JobNames.plug_in_dsk_dm,
             
             JobNames.plug_out_ads_ac,
             JobNames.plug_out_ads_dc,
             JobNames.plug_out_bcs_ac,
+            JobNames.plug_in_dsk_dm,
             ]:
             valid = True
         else:
@@ -48,7 +52,7 @@ class JobNames:
         Returns:
             List with valid job names
         """
-        return [JobNames.plug_in_ads_ac, JobNames.plug_in_ads_dc, JobNames.plug_in_bcs_ac]
+        return [JobNames.plug_in_ads_ac, JobNames.plug_in_ads_dc, JobNames.plug_in_bcs_ac, JobNames.plug_in_dsk_dm]
     
     @staticmethod
     def plug_out() -> list[str]:
@@ -57,7 +61,7 @@ class JobNames:
         Returns:
             List with valid job names
         """
-        return [JobNames.plug_out_ads_ac, JobNames.plug_out_ads_dc, JobNames.plug_out_bcs_ac]
+        return [JobNames.plug_out_ads_ac, JobNames.plug_out_ads_dc, JobNames.plug_out_bcs_ac, JobNames.plug_out_dsk_dm]
 
     @staticmethod
     def workspace_left() -> list[str]:
@@ -67,8 +71,8 @@ class JobNames:
             List with valid job names
         """
         return [JobNames.move_home_arm, JobNames.free_drive_arm, 
-                JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, 
-                JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac]
+                JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, JobNames.plug_in_dsk_dm,
+                JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac, JobNames.plug_out_dsk_dm,]
     
     @staticmethod
     def workspace_right() -> list[str]:
@@ -87,7 +91,8 @@ class JobNames:
         Returns:
             List with valid job names
         """
-        return [JobNames.plug_in_ads_ac, JobNames.plug_out_ads_ac]
+        return [JobNames.plug_in_ads_ac, JobNames.plug_out_ads_ac,
+                JobNames.plug_in_dsk_dm, JobNames.plug_out_dsk_dm,]
     
     @staticmethod
     def type2_male() -> list[str]:

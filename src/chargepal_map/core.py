@@ -16,9 +16,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcAction,
     PlugInAdsDcAction,
     PlugInBcsAcAction,
+    PlugInDskDmAction,
     PlugOutAdsAcAction,
     PlugOutAdsDcAction,
     PlugOutBcsAcAction,
+    PlugOutDskDmAction,
     MoveHomeArmAction,
     FreeDriveArmAction,
     MarkerSocketCalibAdsAction,
@@ -27,9 +29,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcGoal,
     PlugInAdsDcGoal,
     PlugInBcsAcGoal,
+    PlugInDskDmGoal,
     PlugOutAdsAcGoal,
     PlugOutAdsDcGoal,
     PlugOutBcsAcGoal,
+    PlugOutDskDmGoal,
     FreeDriveArmGoal,
     MoveHomeArmGoal,
     MarkerSocketCalibAdsGoal,
@@ -38,9 +42,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcResult,
     PlugInAdsDcResult,
     PlugInBcsAcResult,
+    PlugInDskDmResult,
     PlugOutAdsAcResult,
     PlugOutAdsDcResult,
     PlugOutBcsAcResult,
+    PlugOutDskDmResult,
     FreeDriveArmResult,
     MoveHomeArmResult,
     MarkerSocketCalibAdsResult,
@@ -49,9 +55,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcFeedback,
     PlugInAdsDcFeedback,
     PlugInBcsAcFeedback,
+    PlugInDskDmFeedback,
     PlugOutAdsAcFeedback,
     PlugOutAdsDcFeedback,
     PlugOutBcsAcFeedback,
+    PlugOutDskDmFeedback,
     FreeDriveArmFeedback,
     MoveHomeArmFeedback,
     MarkerSocketCalibAdsFeedback,
@@ -167,6 +175,7 @@ class ActSrvFactory:
 # Register all manipulation action servers
 manipulation_action_server = ActSrvFactory()
 
+# PLUG IN
 manipulation_action_server.register(job_ids.plug_in_ads_ac,
                                     PlugInAdsAcAction,
                                     PlugInAdsAcGoal,
@@ -185,6 +194,13 @@ manipulation_action_server.register(job_ids.plug_in_bcs_ac,
                                     PlugInBcsAcResult,
                                     PlugInBcsAcFeedback)
 
+manipulation_action_server.register(job_ids.plug_in_dsk_dm,
+                                    PlugInDskDmAction,
+                                    PlugInDskDmGoal,
+                                    PlugInDskDmResult,
+                                    PlugInDskDmFeedback)
+
+# PLUG OUT
 manipulation_action_server.register(job_ids.plug_out_ads_ac,
                                     PlugOutAdsAcAction,
                                     PlugOutAdsAcGoal,
@@ -203,6 +219,13 @@ manipulation_action_server.register(job_ids.plug_out_bcs_ac,
                                     PlugOutBcsAcResult,
                                     PlugOutBcsAcFeedback)
 
+manipulation_action_server.register(job_ids.plug_out_dsk_dm,
+                                    PlugOutDskDmAction,
+                                    PlugOutDskDmGoal,
+                                    PlugOutDskDmResult,
+                                    PlugOutDskDmFeedback)
+
+# MISCELLANEOUS
 manipulation_action_server.register(job_ids.free_drive_arm,
                                     FreeDriveArmAction,
                                     FreeDriveArmGoal,
