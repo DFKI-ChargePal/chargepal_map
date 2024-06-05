@@ -7,7 +7,7 @@ from smach import State
 import spatialmath as sm
 
 from chargepal_map.core import job_ids
-from chargepal_map.state_machine.outcomes import out
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
@@ -23,7 +23,7 @@ class MoveToPlugPrePos(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.stop, out.plug_pre_connected], 
+        State.__init__(self, outcomes=[out.arm_ready_to_attach, out.job_stopped], 
                        input_keys=['job_id', 'T_base2socket'], 
                        output_keys=['job_id', 'T_base2socket'])
 
@@ -78,5 +78,5 @@ class MoveToPlugPrePos(State):
         rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_pre_connected, out.stop)
+            outcome = self.user_cb.request_action(out.arm_ready_to_attach, out.job_stopped)
         return outcome

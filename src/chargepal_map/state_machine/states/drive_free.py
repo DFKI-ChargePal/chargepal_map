@@ -6,8 +6,8 @@ import time
 import rospy
 from smach import State
 
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 
 from chargepal_services.srv import stopFreeDriveArm, stopFreeDriveArmRequest, stopFreeDriveArmResponse
@@ -43,7 +43,7 @@ class DriveFree(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.completed],
+                       outcomes=[out.job_stopped, out.job_complete],
                        input_keys=['job_id'],
                        output_keys=['job_id'])
 
@@ -61,5 +61,5 @@ class DriveFree(State):
         usr_srv.destroy()
         outcome = out.completed
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.completed, out.stop)
+            outcome = self.user_cb.request_action(out.job_complete, out.job_stopped)
         return outcome

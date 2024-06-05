@@ -7,8 +7,8 @@ import numpy as np
 from smach import State
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
 
@@ -25,11 +25,11 @@ class ArrangeJob(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self,
                        outcomes=[out.arm_in_wrong_ws,
-                                 out.arm_ready_to_plug,
+                                 out.arm_ready_to_go,
                                  out.arm_ready_to_free,
                                  out.arm_ready_to_move_ls,
                                  out.arm_ready_to_move_rs,
-                                 out.stop],
+                                 out.job_stopped],
                        input_keys=['job_id'],
                        output_keys=['job_id'])
 
@@ -83,8 +83,8 @@ class ArrangeJob(State):
                 outcome = out.arm_ready_to_plug
         else:
             raise StateMachineError(f"Not treated job ID: {job_id}")
-        rospy.loginfo(f"Choosen state machine job is: {job_id}")
+        rospy.loginfo(f"Chosen state machine job is: {job_id}")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(outcome, out.stop)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         rospy.logdebug(f"Continue with outcome: {outcome}")
         return outcome

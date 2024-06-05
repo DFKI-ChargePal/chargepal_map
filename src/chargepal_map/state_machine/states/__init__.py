@@ -2,7 +2,6 @@ from chargepal_map.state_machine.states.arrange_job import ArrangeJob
 from chargepal_map.state_machine.states.attach_plug import AttachPlug
 from chargepal_map.state_machine.states.completion import Completion, Incompletion
 from chargepal_map.state_machine.states.drive_free import DriveFree
-from chargepal_map.state_machine.states.failure import Failure
 from chargepal_map.state_machine.states.flip_arm import FlipArm
 from chargepal_map.state_machine.states.insert_plug import InsertPlug
 from chargepal_map.state_machine.states.malfunction import Malfunction
@@ -27,7 +26,6 @@ __all__ = [
     'AttachPlug',
     'Completion',
     'DriveFree',
-    'Failure',
     'FlipArm',
     'Incompletion',
     'InsertPlug',

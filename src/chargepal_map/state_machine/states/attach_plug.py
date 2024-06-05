@@ -6,8 +6,8 @@ from smach import State
 import spatialmath as sm
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
 
@@ -23,7 +23,10 @@ class AttachPlug(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self,
-                       outcomes=[out.stop, out.plug_attached],
+                       outcomes=[out.plug_attached, 
+                                 out.err_arm_free, 
+                                 out.err_arm_not_free, 
+                                 out.job_stopped],
                        input_keys=['job_id', 'T_base2socket'],
                        output_keys=['job_id', 'T_base2socket'])
 
@@ -67,5 +70,5 @@ class AttachPlug(State):
         if not sus_cup_plug or not sus_lock_plug:
             raise StateMachineError(f"Spatial error to large. Robot is probably in an undefined condition.")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_attached, out.stop)
+            outcome = self.user_cb.request_action(out.plug_attached, out.job_stopped)
         return outcome

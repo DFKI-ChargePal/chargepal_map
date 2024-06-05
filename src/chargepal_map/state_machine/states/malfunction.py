@@ -5,7 +5,7 @@ from __future__ import annotations
 import rospy
 from smach import State
 
-import chargepal_map.state_machine.outcomes as out
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
 
@@ -23,10 +23,8 @@ class Malfunction(State):
         State.__init__(self, outcomes=[out.job_failed])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Malfunction during the process.")
+        print(), rospy.logwarn(f"Malfunction during the process.")
         # self.pilot.disconnect()
         rospy.loginfo(f"Unable to recover the robot arm by itself.")
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(outcome, out.stop)
+        outcome = out.job_failed
         return outcome

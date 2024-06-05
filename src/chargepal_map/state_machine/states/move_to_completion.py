@@ -5,7 +5,7 @@ import rospy
 import ur_pilot
 from smach import State
 
-from chargepal_map.state_machine.outcomes import out
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
 
@@ -21,7 +21,7 @@ class MoveToCompletion(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.completed],
+                       outcomes=[out.job_complete],
                        input_keys=['job_id'],
                        output_keys=['job_id'])
 
@@ -33,7 +33,5 @@ class MoveToCompletion(State):
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.completed, out.stop)
+        outcome = out.job_complete
         return outcome

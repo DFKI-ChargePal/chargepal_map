@@ -5,8 +5,8 @@ from __future__ import annotations
 import rospy
 from smach import State
 
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 
 # typing 
@@ -20,15 +20,11 @@ class Completion(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.completed])
+        State.__init__(self, outcomes=[out.job_complete])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Complete process in finale state.")
-        # self.pilot.disconnect()
-        rospy.loginfo(f"Disconnect from robot.")
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(outcome, out.stop)
+        print(), rospy.loginfo(f"Complete process successfully in its finale state.")
+        outcome = out.job_complete
         return outcome
 
 
@@ -38,13 +34,9 @@ class Incompletion(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.completed])
+        State.__init__(self, outcomes=[out.job_incomplete])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Complete process in finale state.")
-        # self.pilot.disconnect()
-        rospy.loginfo(f"Disconnect from robot.")
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(outcome, out.stop)
+        print(), rospy.logwarn(f"Complete process unsuccessfully! However, the robot ended in a safe state.")
+        outcome = out.job_incomplete
         return outcome

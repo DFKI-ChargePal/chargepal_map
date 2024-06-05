@@ -7,7 +7,7 @@ import numpy as np
 from smach import State
 
 from chargepal_map.core import job_ids
-from chargepal_map.state_machine.outcomes import out
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
@@ -24,7 +24,7 @@ class MoveToStartLs(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.completed], 
+                       outcomes=[out.job_complete], 
                        input_keys=['job_id'],
                        output_keys=['job_id'])
 
@@ -48,9 +48,7 @@ class MoveToStartLs(State):
             raise StateMachineError(f"Remaining distance to home position is to large: {error_pos}. "
                                     f"Is the robot is running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.completed, out.stop)
+        outcome = out.job_complete
         return outcome
 
 
@@ -61,7 +59,7 @@ class MoveToStartRs(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.completed], 
+                       outcomes=[out.job_complete], 
                        input_keys=['job_id'],
                        output_keys=['job_id'])
         
@@ -85,7 +83,5 @@ class MoveToStartRs(State):
             raise StateMachineError(f"Remaining distance to home position is to large: {error_pos}. "
                                     f"Is the robot is running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.completed, out.stop)
+        outcome = out.job_complete
         return outcome

@@ -45,7 +45,7 @@ class ManipulationStateMachine:
                 out.job_stopped, 
                 out.job_failed, 
                 out.job_incomplete, 
-                out.completed
+                out.job_complete,
             ],
             input_keys=['job_id'])
 
@@ -71,24 +71,21 @@ class ManipulationStateMachine:
                 label=state_name(s.MoveToStartLs),
                 state=s.MoveToStartLs(self.config, pilot, None),
                 transitions={
-                    out.completed:   state_name(s.Completion),
-                    out.job_stopped: state_name(s.Stop),
+                    out.job_complete: state_name(s.Completion),
                 }
             )
             StateMachine.add(
                 label=state_name(s.MoveToStartRs),
                 state=s.MoveToStartRs(self.config, pilot, None),
                 transitions={
-                    out.completed:   state_name(s.Completion),
-                    out.job_stopped: state_name(s.Stop),
+                    out.job_complete: state_name(s.Completion),
                 }
             )
             StateMachine.add(
                 label=state_name(s.DriveFree),
                 state=s.DriveFree(self.config, pilot, None),
                 transitions={
-                    out.completed:   state_name(s.Completion),
-                    out.job_stopped: state_name(s.Stop),
+                    out.job_complete: state_name(s.Completion),
                 }
             )
             StateMachine.add(
@@ -137,7 +134,7 @@ class ManipulationStateMachine:
                 label=state_name(s.ObservePlug),
                 state=s.ObservePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.stop:                 state_name(s.Stop),
+                    out.job_stopped:          state_name(s.Stop),
                     out.plug_obs:             state_name(s.MoveToPlugPrePos),
                     out.err_scene_incomplete: state_name(s.MoveToIncompletion),
                 },
@@ -224,7 +221,7 @@ class ManipulationStateMachine:
                     out.plug_connected:    state_name(s.ReleasePlug),
                     out.err_plug_free:     state_name(s.MoveToSocketObs),
                     out.err_plug_not_free: state_name(s.Malfunction),
-                    out.stop:              state_name(s.Stop),
+                    out.job_stopped:       state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -251,14 +248,13 @@ class ManipulationStateMachine:
             StateMachine.add(
                 label=state_name(s.Completion),
                 state=s.Completion(self.config, pilot),
-                transitions={out.completed: out.completed}
+                transitions={out.job_complete: out.job_complete}
             )
             StateMachine.add(
                 label=state_name(s.MoveToIncompletion),
                 state=s.MoveToIncompletion(self.config, pilot, self.step_by_user),
                 transitions={
                     out.job_incomplete: state_name(s.Incompletion),
-                    out.job_stopped:    state_name(s.Stop),
                 }
             )
             StateMachine.add(
@@ -274,5 +270,5 @@ class ManipulationStateMachine:
             StateMachine.add(
                 label=state_name(s.Stop),
                 state=s.Stop(self.config, pilot),
-                transitions={out.stop: out.stop}
+                transitions={out.job_stopped: out.job_stopped}
             )
