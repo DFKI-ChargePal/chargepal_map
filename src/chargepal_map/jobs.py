@@ -73,7 +73,7 @@ class JobNames:
         return [JobNames.move_home_arm, JobNames.free_drive_arm, 
                 JobNames.plug_in_ads_ac, JobNames.plug_in_bcs_ac, JobNames.plug_in_dsk_dm,
                 JobNames.plug_out_ads_ac, JobNames.plug_out_bcs_ac, JobNames.plug_out_dsk_dm,]
-    
+
     @staticmethod
     def workspace_right() -> list[str]:
         """ Get all jobs which have to be executed in the right workspace
