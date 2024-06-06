@@ -101,8 +101,8 @@ class ManipulationStateMachine:
                 label=state_name(s.MoveToSceneObs),
                 state=s.MoveToSceneObs(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.arm_in_scene: state_name(s.ObserveScene),
-                    out.job_stopped:  state_name(s.Stop),
+                    out.scene_pre_obs: state_name(s.ObserveScene),
+                    out.job_stopped:   state_name(s.Stop),
                 },
                 remapping={'job_id': 'job_id'}
             )
@@ -110,11 +110,10 @@ class ManipulationStateMachine:
                 label=state_name(s.ObserveScene),
                 state=s.ObserveScene(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.arm_ready_to_plug_out: state_name(s.MoveToPlugObs),
-                    out.arm_ready_to_plug_in:  state_name(s.MoveToSocketObs),
-                    out.arm_ready_to_go:       state_name(s.MoveToSceneObs),
-                    out.err_scene_incomplete:  state_name(s.MoveToIncompletion),
-                    out.job_stopped:           state_name(s.Stop),
+                    out.scene_obs:            state_name(s.MoveToPlugObs),
+                    out.arm_ready_to_go:      state_name(s.MoveToSceneObs),
+                    out.err_scene_incomplete: state_name(s.MoveToIncompletion),
+                    out.job_stopped:          state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -134,9 +133,9 @@ class ManipulationStateMachine:
                 label=state_name(s.ObservePlug),
                 state=s.ObservePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.job_stopped:          state_name(s.Stop),
                     out.plug_obs:             state_name(s.MoveToPlugPrePos),
                     out.err_scene_incomplete: state_name(s.MoveToIncompletion),
+                    out.job_stopped:          state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -147,8 +146,8 @@ class ManipulationStateMachine:
                 label=state_name(s.MoveToPlugPrePos),
                 state=s.MoveToPlugPrePos(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.arm_ready_to_attach: state_name(s.AttachPlug),
-                    out.job_stopped:         state_name(s.Stop),
+                    out.plug_pre_pos: state_name(s.AttachPlug),
+                    out.job_stopped:  state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -159,10 +158,11 @@ class ManipulationStateMachine:
                 label=state_name(s.AttachPlug),
                 state=s.AttachPlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_attached:    state_name(s.RemovePlug),
-                    out.err_arm_free:     state_name(s.MoveToPlugObs),
-                    out.err_arm_not_free: state_name(s.Malfunction),
-                    out.job_stopped:      state_name(s.Stop),
+                    out.plug_attached:        state_name(s.RemovePlug),
+                    out.err_plug_out_retry:   state_name(s.MoveToPlugObs),
+                    out.err_plug_out_recover: state_name(s.MoveToIncompletion),
+                    out.err_plug_out_stop:    state_name(s.Malfunction),
+                    out.job_stopped:          state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -173,10 +173,9 @@ class ManipulationStateMachine:
                 label=state_name(s.RemovePlug),
                 state=s.RemovePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_removed:            state_name(s.MoveToSceneObs),
-                    out.plug_removed_completion: state_name(s.MoveToCompletion),
-                    out.err_plug_not_free:       state_name(s.Malfunction),
-                    out.job_stopped:             state_name(s.Stop),
+                    out.plug_removed:      state_name(s.MoveToSceneObs),
+                    out.err_plug_out_stop: state_name(s.Malfunction),
+                    out.job_stopped:       state_name(s.Stop),
                 },
                 remapping={'job_id': 'job_id'}
             )
@@ -190,12 +189,21 @@ class ManipulationStateMachine:
                 remapping={'job_id': 'job_id'}
             )
             StateMachine.add(
+                label=state_name(s.MoveToSocketObsRecover),
+                state=s.MoveToSocketObsRecover(self.config, pilot, self.step_by_user),
+                transitions={
+                    out.socket_pre_obs: state_name(s.ObserveSocket),
+                    out.job_stopped:    state_name(s.Stop)
+                },
+                remapping={'job_id': 'job_id'}
+            )
+            StateMachine.add(
                 label=state_name(s.ObserveSocket),
                 state=s.ObserveSocket(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.socket_obs:           state_name(s.MoveToSocketPrePos),
-                    out.err_scene_incomplete: state_name(s.MoveToIncompletion),
-                    out.job_stopped:          state_name(s.Stop),
+                    out.socket_obs:          state_name(s.MoveToSocketPrePos),
+                    out.err_plug_in_recover: state_name(s.MoveToSocketObsRecover),
+                    out.job_stopped:         state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -206,8 +214,8 @@ class ManipulationStateMachine:
                 label=state_name(s.MoveToSocketPrePos),
                 state=s.MoveToSocketPrePos(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.arm_ready_to_insert: state_name(s.InsertPlug),
-                    out.job_stopped:         state_name(s.Stop)
+                    out.socket_pre_pos: state_name(s.InsertPlug),
+                    out.job_stopped:    state_name(s.Stop)
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -218,10 +226,11 @@ class ManipulationStateMachine:
                 label=state_name(s.InsertPlug),
                 state=s.InsertPlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_connected:    state_name(s.ReleasePlug),
-                    out.err_plug_free:     state_name(s.MoveToSocketObs),
-                    out.err_plug_not_free: state_name(s.Malfunction),
-                    out.job_stopped:       state_name(s.Stop),
+                    out.plug_connected:      state_name(s.ReleasePlug),
+                    out.err_plug_in_retry:   state_name(s.MoveToSocketObs),
+                    out.err_plug_in_recover: state_name(s.MoveToSocketObsRecover),
+                    out.err_plug_in_stop:    state_name(s.Malfunction),
+                    out.job_stopped:         state_name(s.Stop),
                 },
                 remapping={
                     'job_id': 'job_id',
@@ -233,7 +242,7 @@ class ManipulationStateMachine:
                 state=s.ReleasePlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_released:    state_name(s.MoveToCompletion),
-                    out.err_arm_not_free: state_name(s.Malfunction),
+                    out.err_plug_in_stop: state_name(s.Malfunction),
                     out.job_stopped:      state_name(s.Stop),
                 },
                 remapping={'job_id': 'job_id'}

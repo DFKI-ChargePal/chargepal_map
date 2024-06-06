@@ -10,6 +10,7 @@ from chargepal_map.state_machine.states.move_to_incompletion import MoveToIncomp
 from chargepal_map.state_machine.states.move_to_plug_obs import MoveToPlugObs
 from chargepal_map.state_machine.states.move_to_plug_pre_pos import MoveToPlugPrePos
 from chargepal_map.state_machine.states.move_to_scene_obs import MoveToSceneObs
+from chargepal_map.state_machine.states.move_to_socket_obs_recover import MoveToSocketObsRecover
 from chargepal_map.state_machine.states.move_to_socket_obs import MoveToSocketObs
 from chargepal_map.state_machine.states.move_to_socket_pre_pos import MoveToSocketPrePos
 from chargepal_map.state_machine.states.move_to_start import MoveToStartLs, MoveToStartRs
@@ -35,6 +36,7 @@ __all__ = [
     'MoveToPlugObs',
     'MoveToPlugPrePos',
     'MoveToSceneObs',
+    'MoveToSocketObsRecover',
     'MoveToSocketObs',
     'MoveToSocketPrePos',
     'MoveToStartLs',
