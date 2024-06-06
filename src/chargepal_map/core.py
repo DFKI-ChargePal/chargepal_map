@@ -6,7 +6,7 @@ import actionlib
 from smach import UserData
 from collections import namedtuple
 
-from chargepal_map.jobs import job_ids
+from chargepal.chargepal_map.src.chargepal_map.job import Job
 from chargepal_map.state_machine.outcomes import out
 from chargepal_map.state_machine.utils import StateMachineError
 from chargepal_map.state_machine.state_machine import ManipulationStateMachine
@@ -102,7 +102,7 @@ class ManipulationActionServer:
         result_msg = self.res_msg()
         try:
             ud = UserData()
-            ud.job_id = self.name
+            ud.job = Job(self.name)
             outcome = self.sm.execute(ud)
             if outcome == out.completed:
                 result_msg.success = True
@@ -176,75 +176,75 @@ class ActSrvFactory:
 manipulation_action_server = ActSrvFactory()
 
 # PLUG IN
-manipulation_action_server.register(job_ids.plug_in_ads_ac,
+manipulation_action_server.register(Job.ID.plug_in_ads_ac,
                                     PlugInAdsAcAction,
                                     PlugInAdsAcGoal,
                                     PlugInAdsAcResult,
                                     PlugInAdsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_in_ads_dc,
+manipulation_action_server.register(Job.ID.plug_in_ads_dc,
                                     PlugInAdsDcAction,
                                     PlugInAdsDcGoal,
                                     PlugInAdsDcResult,
                                     PlugInAdsDcFeedback)
 
-manipulation_action_server.register(job_ids.plug_in_bcs_ac,
+manipulation_action_server.register(Job.ID.plug_in_bcs_ac,
                                     PlugInBcsAcAction,
                                     PlugInBcsAcGoal,
                                     PlugInBcsAcResult,
                                     PlugInBcsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_in_dsk_dm,
+manipulation_action_server.register(Job.ID.plug_in_dsk_dm,
                                     PlugInDskDmAction,
                                     PlugInDskDmGoal,
                                     PlugInDskDmResult,
                                     PlugInDskDmFeedback)
 
 # PLUG OUT
-manipulation_action_server.register(job_ids.plug_out_ads_ac,
+manipulation_action_server.register(Job.ID.plug_out_ads_ac,
                                     PlugOutAdsAcAction,
                                     PlugOutAdsAcGoal,
                                     PlugOutAdsAcResult,
                                     PlugOutAdsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_out_ads_dc,
+manipulation_action_server.register(Job.ID.plug_out_ads_dc,
                                     PlugOutAdsDcAction,
                                     PlugOutAdsDcGoal,
                                     PlugOutAdsDcResult,
                                     PlugOutAdsDcFeedback)
 
-manipulation_action_server.register(job_ids.plug_out_bcs_ac,
+manipulation_action_server.register(Job.ID.plug_out_bcs_ac,
                                     PlugOutBcsAcAction,
                                     PlugOutBcsAcGoal,
                                     PlugOutBcsAcResult,
                                     PlugOutBcsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_out_dsk_dm,
+manipulation_action_server.register(Job.ID.plug_out_dsk_dm,
                                     PlugOutDskDmAction,
                                     PlugOutDskDmGoal,
                                     PlugOutDskDmResult,
                                     PlugOutDskDmFeedback)
 
 # MISCELLANEOUS
-manipulation_action_server.register(job_ids.free_drive_arm,
+manipulation_action_server.register(Job.ID.free_drive_arm,
                                     FreeDriveArmAction,
                                     FreeDriveArmGoal,
                                     FreeDriveArmResult, 
                                     FreeDriveArmFeedback)
 
-manipulation_action_server.register(job_ids.move_home_arm, 
+manipulation_action_server.register(Job.ID.move_home_arm, 
                                     MoveHomeArmAction, 
                                     MoveHomeArmGoal,
                                     MoveHomeArmResult,
                                     MoveHomeArmFeedback)
 
-manipulation_action_server.register(job_ids.marker_socket_calib_ads,
+manipulation_action_server.register(Job.ID.marker_socket_calib_ads,
                                     MarkerSocketCalibAdsAction,
                                     MarkerSocketCalibAdsGoal,
                                     MarkerSocketCalibAdsResult,
                                     MarkerSocketCalibAdsFeedback)
 
-manipulation_action_server.register(job_ids.marker_socket_calib_bcs,
+manipulation_action_server.register(Job.ID.marker_socket_calib_bcs,
                                     MarkerSocketCalibBcsAction,
                                     MarkerSocketCalibBcsGoal,
                                     MarkerSocketCalibBcsResult,

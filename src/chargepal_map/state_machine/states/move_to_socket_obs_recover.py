@@ -4,7 +4,7 @@ from __future__ import annotations
 import rospy
 from smach import State
 
-from chargepal_map.core import job_ids
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
@@ -23,32 +23,32 @@ class MoveToSocketObsRecover(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.socket_pre_obs, out.job_stopped], 
-                       input_keys=['job_id'], 
-                       output_keys=['job_id'])
+                       input_keys=['job'], 
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print()
-        job_id = ud.job_id
-        if job_id == job_ids.plug_in_ads_ac:
+        job: Job = ud.job
+        if job == job_ids.plug_in_ads_ac:
             rospy.loginfo(f"Start moving the plug to the adapter station on the left side")
             with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(self.cfg.data[job_id]['joint_waypoints'],
+                self.pilot.robot.move_path_j(self.cfg.data[job]['joint_waypoints'],
                                              self.cfg.data['vel'],
                                              self.cfg.data['acc'])
-        elif job_id == job_ids.plug_in_ads_dc:
+        elif job == job_ids.plug_in_ads_dc:
             rospy.loginfo(f"Start moving the plug to the adapter station on the right side")
             with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(self.cfg.data[job_id]['joint_waypoints'],
+                self.pilot.robot.move_path_j(self.cfg.data[job]['joint_waypoints'],
                                              self.cfg.data['vel'],
                                              self.cfg.data['acc'])
-        elif job_id == job_ids.plug_in_bcs_ac:
+        elif job == job_ids.plug_in_bcs_ac:
             rospy.loginfo(f"Start moving the plug to the battery charging station on the left side")
             with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(self.cfg.data[job_id]['joint_waypoints'],
+                self.pilot.robot.move_path_j(self.cfg.data[job]['joint_waypoints'],
                                              self.cfg.data['vel'],
                                              self.cfg.data['acc'])
         else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_pre_obs, out.job_stopped)
         return outcome

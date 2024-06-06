@@ -44,8 +44,8 @@ class DriveFree(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_stopped, out.job_complete],
-                       input_keys=['job_id'],
-                       output_keys=['job_id'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo(f"Start free drive mode."

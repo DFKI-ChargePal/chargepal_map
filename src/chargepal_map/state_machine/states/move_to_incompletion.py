@@ -5,7 +5,7 @@ import rospy
 import ur_pilot
 from smach import State
 
-from chargepal_map.core import job_ids
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
@@ -24,13 +24,13 @@ class MoveToIncompletion(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_incomplete],
-                       input_keys=['job_id'],
-                       output_keys=['job_id'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print()
-        job_id = ud.job_id
-        wps = self.cfg.data[job_id]['joint_waypoints']
+        job: Job = ud.job
+        wps = self.cfg.data[job.get_id()]['joint_waypoints']
         rospy.loginfo(f"Start moving the arm to a save driving position.")
         with self.pilot.context.position_control():
             self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])

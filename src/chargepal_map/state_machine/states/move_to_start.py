@@ -6,7 +6,7 @@ import ur_pilot
 import numpy as np
 from smach import State
 
-from chargepal_map.core import job_ids
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
@@ -25,14 +25,14 @@ class MoveToStartLs(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_complete], 
-                       input_keys=['job_id'],
-                       output_keys=['job_id'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         # Check job id
-        job_id = ud.job_id
-        if job_id != job_ids.move_home_arm:
-             raise StateMachineError(f"Not a proper job ID '{job_id}'")
+        job: Job = ud.job
+        if job != job_ids.move_home_arm:
+             raise StateMachineError(f"Not a proper job ID '{job}'")
         start_pos = self.pilot.robot.joint_pos
         home_pos = self.cfg.data['home_joint_pos']
         # Try to avoid dangerous movements
@@ -60,14 +60,14 @@ class MoveToStartRs(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_complete], 
-                       input_keys=['job_id'],
-                       output_keys=['job_id'])
+                       input_keys=['job'],
+                       output_keys=['job'])
         
     def execute(self, ud: Any) -> str:
         # Check job id
-        job_id = ud.job_id
-        if job_id != job_ids.move_home_arm:
-             raise StateMachineError(f"Not a proper job ID '{job_id}'")
+        job = ud.job
+        if job != job_ids.move_home_arm:
+             raise StateMachineError(f"Not a proper job ID '{job}'")
         start_pos = self.pilot.robot.joint_pos
         home_pos = self.cfg.data['home_joint_pos']
         # Try to avoid dangerous movements

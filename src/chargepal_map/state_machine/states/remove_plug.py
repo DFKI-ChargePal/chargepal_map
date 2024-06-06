@@ -5,7 +5,7 @@ from __future__ import annotations
 import rospy
 from smach import State
 
-from chargepal_map.core import job_ids
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
@@ -27,29 +27,22 @@ class RemovePlug(State):
                            out.plug_removed,
                            out.err_plug_out_stop,
                            out.job_stopped],
-                       input_keys=['job_id'],
-                       output_keys=['job_id'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start removing the plug from the socket')
         # Check for job ID
-        job_id = ud.job_id
+        job: Job = ud.job
         # Get next output
-        if job_id in job_ids.plug_in():
+        if job in job_ids.plug_in():
             outcome = out.plug_removed_do
-        elif job_id in job_ids.plug_out():
+        elif job in job_ids.plug_out():
             outcome = out.plug_removed_no
         else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         # Get plug type
-        if job_id in job_ids.type2_female():
-            plug_type = 'type2_female'
-        elif job_id in job_ids.type2_male():
-            plug_type = 'type2_male'
-        elif job_id in job_ids.ccs_female():
-            plug_type = 'ccs_female'
-        else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
+        plug_type = job.get_plug_type()
         # Start removing procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():

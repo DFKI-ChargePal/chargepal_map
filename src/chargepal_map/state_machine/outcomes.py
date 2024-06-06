@@ -1,5 +1,5 @@
+""" This file maps the outcome names to variables to avoid typos """
 
-# Outcome mapping to avoid typos
 job_failed = 'job_failed'
 job_stopped = 'job_stopped'
 job_complete = 'job_complete'

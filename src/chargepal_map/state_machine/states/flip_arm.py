@@ -7,7 +7,7 @@ import ur_pilot
 import numpy as np
 from smach import State
 
-from chargepal_map.core import job_ids
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
@@ -26,18 +26,18 @@ class FlipArm(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.arm_ready_to_go, out.job_stopped],
-                       input_keys=['job_id'],
-                       output_keys=['job_id'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo(f"Start flipping the arm into the other workspace.")
-        job_id = ud.job_id
-        if job_id in job_ids.ccs_female():
+        job: Job = ud.job
+        if job in job_ids.ccs_female():
             wps = self.cfg.data['wps_flip_to_rs']
-        elif job_id in job_ids.type2_female() + job_ids.type2_male():
+        elif job in job_ids.type2_female() + job_ids.type2_male():
             wps = self.cfg.data['wps_flip_to_ls']
         else:
-            raise StateMachineError(f"Can't match job id '{job_id}' to state action.")
+            raise StateMachineError(f"Can't match job id '{job}' to state action.")
         start_pos = self.pilot.robot.joint_pos
         first_pos = np.array(wps[1])
         error_pos = np.abs(first_pos - start_pos)

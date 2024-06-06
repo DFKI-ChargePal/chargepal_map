@@ -5,7 +5,7 @@ import rospy
 from smach import State
 import spatialmath as sm
 
-from chargepal_map.core import job_ids
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
@@ -28,23 +28,23 @@ class AttachPlug(State):
                                  out.err_plug_out_recover,
                                  out.err_plug_in_stop, 
                                  out.job_stopped],
-                       input_keys=['job_id', 'T_base2socket'],
-                       output_keys=['job_id', 'T_base2socket'])
+                       input_keys=['job', 'T_base2socket'],
+                       output_keys=['job', 'T_base2socket'])
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start attaching the robot to the plug')
-        job_id = ud.job_id
+        job = ud.job
         # Get transformation matrices
         T_base2socket = sm.SE3(ud.T_base2socket)
         # Get plug type key
-        if job_id in job_ids.type2_female():
+        if job in job.type2_female():
             plug_type = 'type2_female'
-        elif job_id in job_ids.type2_male():
+        elif job in job.type2_male():
             plug_type = 'type2_male'
-        elif job_id in job_ids.ccs_female():
+        elif job in job.ccs_female():
             plug_type = 'ccs_female'
         else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job_id}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         # Start attaching procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():
