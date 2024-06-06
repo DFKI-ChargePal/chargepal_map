@@ -23,7 +23,7 @@ class MoveToPlugPrePos(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.arm_ready_to_attach, out.job_stopped], 
+        State.__init__(self, outcomes=[out.plug_pre_pos, out.job_stopped], 
                        input_keys=['job_id', 'T_base2socket'], 
                        output_keys=['job_id', 'T_base2socket'])
 

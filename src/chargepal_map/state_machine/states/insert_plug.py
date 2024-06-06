@@ -26,8 +26,9 @@ class InsertPlug(State):
         State.__init__(self, 
                        outcomes=[
                            out.plug_connected,
-                           out.err_plug_free,
-                           out.err_plug_not_free,
+                           out.err_plug_in_retry,
+                           out.err_plug_in_recover,
+                           out.err_plug_in_stop,
                            out.job_stopped,
                            ],
                        input_keys=['job_id', 'T_base2socket'],

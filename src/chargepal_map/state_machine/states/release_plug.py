@@ -25,7 +25,10 @@ class ReleasePlug(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.plug_released], 
+                       outcomes=[
+                           out.plug_released, 
+                           out.err_plug_in_stop,
+                           out.job_stopped], 
                        input_keys=['job_id', 'T_base2socket'],
                        output_keys=['job_id', 'T_base2socket'])
 
@@ -69,5 +72,5 @@ class ReleasePlug(State):
         if not sus_unl_plug or not sus_dec_plug:
             raise StateMachineError(f"Spatial error to large. Robot is probably in an undefined condition.")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_released, out.stop)
+            outcome = self.user_cb.request_action(out.plug_released, out.job_stopped)
         return outcome

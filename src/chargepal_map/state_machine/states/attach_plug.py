@@ -23,9 +23,10 @@ class AttachPlug(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self,
-                       outcomes=[out.plug_attached, 
-                                 out.err_arm_free, 
-                                 out.err_arm_not_free, 
+                       outcomes=[out.plug_attached,
+                                 out.err_plug_out_retry,
+                                 out.err_plug_out_recover,
+                                 out.err_plug_in_stop, 
                                  out.job_stopped],
                        input_keys=['job_id', 'T_base2socket'],
                        output_keys=['job_id', 'T_base2socket'])

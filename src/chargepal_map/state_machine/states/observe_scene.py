@@ -27,8 +27,7 @@ class ObserveScene(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[
-                           out.arm_ready_to_plug_in,
-                           out.arm_ready_to_plug_out,
+                           out.scene_obs,
                            out.arm_ready_to_go, 
                            out.err_scene_incomplete,
                            out.job_stopped], 

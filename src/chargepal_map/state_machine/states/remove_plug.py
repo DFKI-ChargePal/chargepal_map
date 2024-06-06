@@ -25,8 +25,7 @@ class RemovePlug(State):
         State.__init__(self, 
                        outcomes=[
                            out.plug_removed,
-                           out.plug_removed_completion,
-                           out.err_plug_not_free,
+                           out.err_plug_out_stop,
                            out.job_stopped],
                        input_keys=['job_id'],
                        output_keys=['job_id'])

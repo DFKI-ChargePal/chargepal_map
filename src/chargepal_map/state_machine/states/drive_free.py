@@ -59,7 +59,5 @@ class DriveFree(State):
                     _t_ref = time.perf_counter()
         rospy.loginfo(f"Free drive mode stopped.")
         usr_srv.destroy()
-        outcome = out.completed
-        if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.job_complete, out.job_stopped)
+        outcome = out.job_complete
         return outcome

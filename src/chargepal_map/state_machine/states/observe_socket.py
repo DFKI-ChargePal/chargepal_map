@@ -27,7 +27,10 @@ class ObserveSocket(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.socket_obs, out.err_scene_incomplete, out.job_stopped], 
+                       outcomes=[
+                           out.socket_obs, 
+                           out.err_plug_in_recover, 
+                           out.job_stopped], 
                        input_keys=['job_id'],
                        output_keys=['job_id', 'T_base2socket'])
 
