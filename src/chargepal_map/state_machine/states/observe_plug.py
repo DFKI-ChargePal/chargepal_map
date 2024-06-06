@@ -8,8 +8,8 @@ from smach import State
 import spatialmath as sm
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
 
@@ -27,7 +27,7 @@ class ObservePlug(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.plug_obs], 
+                       outcomes=[out.plug_obs, out.err_scene_incomplete, out.job_stopped], 
                        input_keys=['job_id'], 
                        output_keys=['job_id', 'T_base2socket'])
 
@@ -67,5 +67,5 @@ class ObservePlug(State):
             raise StateMachineError(f"Can't find socket. "
                                     f"Make sure detector is proper set up and pattern is in camera view")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_obs, out.stop)
+            outcome = self.user_cb.request_action(out.plug_obs, out.job_stopped)
         return outcome

@@ -8,8 +8,8 @@ from smach import State
 import spatialmath as sm
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
 

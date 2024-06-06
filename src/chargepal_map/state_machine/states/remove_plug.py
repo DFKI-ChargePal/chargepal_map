@@ -6,8 +6,8 @@ import rospy
 from smach import State
 
 from chargepal_map.core import job_ids
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
-from chargepal_map.state_machine.outcomes import Outcomes as out
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import StateMachineError
 
@@ -23,7 +23,11 @@ class RemovePlug(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.stop, out.plug_removed_do, out.plug_removed_no], 
+                       outcomes=[
+                           out.plug_removed,
+                           out.plug_removed_completion,
+                           out.err_plug_not_free,
+                           out.job_stopped],
                        input_keys=['job_id'],
                        output_keys=['job_id'])
 
@@ -61,5 +65,5 @@ class RemovePlug(State):
         if not sus_rm_plug:
             raise StateMachineError(f"Error while trying to unplug. Plug is probably still connected.")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(outcome, out.stop)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         return outcome
