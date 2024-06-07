@@ -35,6 +35,13 @@ class Job:
         if not self._is_valid():
             raise ValueError(f"Given job id is invalid: {self._id}")
 
+    def __str__(self) -> str:
+        return f"{self._id} - {self._mode.name}"
+
+    def __repr__(self) -> str:
+        class_name = type(self).__name__
+        return f"{class_name}(id={self._id!r}, mode={self._mode!r})"
+
     def _is_valid(self) -> bool:
         """ Check if given job name is valid or not
         

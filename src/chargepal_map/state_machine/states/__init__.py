@@ -9,13 +9,15 @@ from chargepal_map.state_machine.states.move_to_completion import MoveToCompleti
 from chargepal_map.state_machine.states.move_to_incompletion import MoveToIncompletion
 from chargepal_map.state_machine.states.move_to_plug_obs import MoveToPlugObs
 from chargepal_map.state_machine.states.move_to_plug_pre_pos import MoveToPlugPrePos
-from chargepal_map.state_machine.states.move_to_scene_obs import MoveToSceneObs
+from chargepal_map.state_machine.states.move_to_plug_scene_obs import MoveToPlugSceneObs
 from chargepal_map.state_machine.states.move_to_socket_obs_recover import MoveToSocketObsRecover
 from chargepal_map.state_machine.states.move_to_socket_obs import MoveToSocketObs
 from chargepal_map.state_machine.states.move_to_socket_pre_pos import MoveToSocketPrePos
+from chargepal_map.state_machine.states.move_to_socket_scene_obs import MoveToSocketSceneObs
 from chargepal_map.state_machine.states.move_to_start import MoveToStartLs, MoveToStartRs
+from chargepal_map.state_machine.states.observe_plug_scene import ObservePlugScene
 from chargepal_map.state_machine.states.observe_plug import ObservePlug
-from chargepal_map.state_machine.states.observe_scene import ObserveScene
+from chargepal_map.state_machine.states.observe_socket_scene import ObserveSocketScene
 from chargepal_map.state_machine.states.observe_socket import ObserveSocket
 from chargepal_map.state_machine.states.release_plug import ReleasePlug
 from chargepal_map.state_machine.states.remove_plug import RemovePlug
@@ -35,14 +37,16 @@ __all__ = [
     'MoveToIncompletion',
     'MoveToPlugObs',
     'MoveToPlugPrePos',
-    'MoveToSceneObs',
+    'MoveToPlugSceneObs',
     'MoveToSocketObsRecover',
     'MoveToSocketObs',
     'MoveToSocketPrePos',
+    'MoveToSocketSceneObs',
     'MoveToStartLs',
     'MoveToStartRs',
+    'ObservePlugScene',
     'ObservePlug',
-    'ObserveScene',
+    'ObserveSocketScene',
     'ObserveSocket',
     'ReleasePlug',
     'RemovePlug',

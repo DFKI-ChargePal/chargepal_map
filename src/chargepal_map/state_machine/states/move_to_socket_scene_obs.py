@@ -1,4 +1,4 @@
-""" This file implements the state >>MoveToSceneObs<< """
+""" This file implements the state >>MoveToSocketSceneObs<< """
 from __future__ import annotations
 # libs
 import rospy
@@ -18,7 +18,7 @@ from typing import Any
 from ur_pilot import Pilot
 
 
-class MoveToSceneObs(State):
+class MoveToSocketSceneObs(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
@@ -32,6 +32,23 @@ class MoveToSceneObs(State):
     def execute(self, ud: Any) -> str:
         print()
         job: Job = ud.job
+        job_data = self.cfg.data.get(job)
+
+        if job_data is None:
+            raise KeyError(f"Can't find configuration data for the job: {job}")
+        rospy.loginfo(f"Start moving the arm to the job scene")
+
+
+        if job.is_part_of_plug_in():
+            if job.is_part_of_workspace_left():
+                rospy.loginfo(f"Start moving the arm to the battery station scene in the left workspace side") 
+                # TODO: Add functionality
+            elif job.is_part_of_workspace_right():
+                rospy.loginfo(f"Start moving the arm to the battery station scene in the right workspace side") 
+                # TODO: Add functionality
+            else:
+                raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        # elif job.is_part_of_
         # if job == job_ids.plug_out_ads_ac:
         #     rospy.loginfo(f"Start moving the arm to the adapter station on the left side")
         #     with self.pilot.context.position_control():

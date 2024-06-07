@@ -19,7 +19,7 @@ from ur_pilot import Pilot
 
 class DriveFree(State):
 
-    _log_rate = 10.0  # [sec.]
+    _log_rate = 10.0  # rate to output logging in seconds [sec.]
 
     class StopService:
 

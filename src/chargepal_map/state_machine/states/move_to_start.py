@@ -23,16 +23,13 @@ class MoveToStartLs(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, 
-                       outcomes=[out.job_complete], 
-                       input_keys=['job'],
-                       output_keys=['job'])
+        State.__init__(self, outcomes=[out.job_complete], input_keys=['job'], output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         # Check job id
         job: Job = ud.job
-        if job != job_ids.move_home_arm:
-             raise StateMachineError(f"Not a proper job ID '{job}'")
+        if job.get_id() != Job.ID.move_home_arm:
+            raise StateMachineError(f"This state doesn't support the job: {job}")
         start_pos = self.pilot.robot.joint_pos
         home_pos = self.cfg.data['home_joint_pos']
         # Try to avoid dangerous movements
@@ -46,7 +43,7 @@ class MoveToStartLs(State):
         error_pos = np.abs(np.array(home_pos) - finale_pos)
         if np.all(error_pos > 1e-2):
             raise StateMachineError(f"Remaining distance to home position is to large: {error_pos}. "
-                                    f"Is the robot is running properly?")
+                                    f"Is the robot running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.job_complete
         return outcome
@@ -65,9 +62,9 @@ class MoveToStartRs(State):
         
     def execute(self, ud: Any) -> str:
         # Check job id
-        job = ud.job
-        if job != job_ids.move_home_arm:
-             raise StateMachineError(f"Not a proper job ID '{job}'")
+        job: Job = ud.job
+        if job.get_id() != Job.ID.move_home_arm:
+            raise StateMachineError(f"This state doesn't support the job: {job}")
         start_pos = self.pilot.robot.joint_pos
         home_pos = self.cfg.data['home_joint_pos']
         # Try to avoid dangerous movements

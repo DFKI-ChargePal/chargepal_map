@@ -36,8 +36,6 @@ class ArrangeJob(State):
     def execute(self, ud) -> str:
         print(), rospy.loginfo(f"Arrange the start of the state machine with respect to the job ID")
         job: Job = ud.job
-        # Connect to robot arm
-        # self.pilot.connect()
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
         shoulder_pan_ws_ls= self.cfg.data['workspace_left']['shoulder_pan_pos']
@@ -54,7 +52,7 @@ class ArrangeJob(State):
                 outcome = out.arm_ready_to_move_rs
             else:
                 raise StateMachineError(f"Robot arm is in an undefined workspace. Shoulder pan position: {shoulder_pan_pos}")
-        elif job.is_part_of_plug_in() and job.is_part_of_plug_out():
+        elif job.is_part_of_plug_in() or job.is_part_of_plug_out():
             # Check if robot is close to its home pos
             act_joint_pos = self.pilot.robot.joint_pos
             if is_ws_ls:
@@ -72,17 +70,17 @@ class ArrangeJob(State):
             elif job.is_part_of_workspace_right():
                 target_ws = 'ws_rs'
             else:
-                raise StateMachineError(f"Not treated job ID: {job}")
+                raise StateMachineError(f"Not treated job: {job}")
             # Check if the robot arm has to be flipped
             if (is_ws_ls and target_ws == 'ws_rs') or (is_ws_rs and target_ws == 'ws_ls'):
                 outcome = out.arm_in_wrong_ws
             else:
-                outcome = out.arm_ready_to_plug
+                outcome = out.arm_ready_to_go
         else:
-            raise StateMachineError(f"Not treated job ID: {job}")
+            raise StateMachineError(f"Not treated job: {job}")
+        job.start()
         rospy.loginfo(f"Chosen state machine job is: {job}")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
-        job.start()
         rospy.logdebug(f"Continue with outcome: {outcome}")
         return outcome

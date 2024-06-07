@@ -32,12 +32,12 @@ class FlipArm(State):
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo(f"Start flipping the arm into the other workspace.")
         job: Job = ud.job
-        if job in job_ids.ccs_female():
+        if job.is_part_of_ccs_female():
             wps = self.cfg.data['wps_flip_to_rs']
-        elif job in job_ids.type2_female() + job_ids.type2_male():
+        elif job.is_part_of_type2_female() or job.is_part_of_type2_male():
             wps = self.cfg.data['wps_flip_to_ls']
         else:
-            raise StateMachineError(f"Can't match job id '{job}' to state action.")
+            raise StateMachineError(f"Can't match job '{job}' to state action.")
         start_pos = self.pilot.robot.joint_pos
         first_pos = np.array(wps[1])
         error_pos = np.abs(first_pos - start_pos)
