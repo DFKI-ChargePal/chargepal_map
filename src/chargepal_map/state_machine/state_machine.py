@@ -173,7 +173,7 @@ class ManipulationStateMachine:
                 label=state_name(s.RemovePlug),
                 state=s.RemovePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_removed:      state_name(s.MoveToPlugSceneObs),
+                    out.plug_removed:      state_name(s.MoveToSocketSceneObs),
                     out.err_plug_out_stop: state_name(s.Malfunction),
                     out.job_stopped:       state_name(s.Stop),
                 },

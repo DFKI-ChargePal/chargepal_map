@@ -27,9 +27,9 @@ class ObservePlugScene(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[
-                           out.scene_obs,
-                           out.arm_ready_to_go, 
-                           out.err_scene_incomplete,
+                           out.plug_scene_obs,
+                           out.err_obs_plug_retry, 
+                           out.err_obs_plug_recover,
                            out.job_stopped], 
                        input_keys=['job'],
                        output_keys=['job', 'T_base2socket'])
@@ -38,5 +38,5 @@ class ObservePlugScene(State):
         print(), rospy.loginfo('Start observing the scene')
         outcome = out.err_scene_incomplete
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(out.plug_scene_obs, out.job_stopped)
         return outcome

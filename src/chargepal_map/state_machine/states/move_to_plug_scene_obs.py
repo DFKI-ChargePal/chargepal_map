@@ -24,8 +24,8 @@ class MoveToPlugSceneObs(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, 
-                       outcomes=[out.scene_pre_obs, out.job_stopped],
+        State.__init__(self,
+                       outcomes=[out.plug_scene_pre_obs, out.job_stopped],
                        input_keys=['job'],
                        output_keys=['job'])
 
@@ -37,7 +37,6 @@ class MoveToPlugSceneObs(State):
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         rospy.loginfo(f"Start moving the arm to the job scene")
-
 
         if job.is_part_of_plug_in():
             if job.is_part_of_workspace_left():

@@ -25,7 +25,7 @@ class MoveToSocketSceneObs(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.scene_pre_obs, out.job_stopped],
+                       outcomes=[out.socket_scene_pre_obs, out.job_stopped],
                        input_keys=['job'],
                        output_keys=['job'])
 
@@ -70,5 +70,5 @@ class MoveToSocketSceneObs(State):
         # else:
         #     raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.scene_pre_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(out.socket_scene_pre_obs, out.job_stopped)
         return outcome

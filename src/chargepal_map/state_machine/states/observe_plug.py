@@ -27,7 +27,7 @@ class ObservePlug(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.plug_obs, out.err_scene_incomplete, out.job_stopped], 
+                       outcomes=[out.plug_obs, out.err_obs_plug_recover, out.job_stopped], 
                        input_keys=['job'], 
                        output_keys=['job', 'T_base2socket'])
 
