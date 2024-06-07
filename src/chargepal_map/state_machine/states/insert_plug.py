@@ -40,14 +40,7 @@ class InsertPlug(State):
         # Get transformation matrices
         T_base2socket = sm.SE3(ud.T_base2socket)
         # Get plug type
-        if job in job_ids.type2_female():
-            plug_type = 'type2_female'
-        elif job in job_ids.type2_male():
-            plug_type = 'type2_male'
-        elif job in job_ids.ccs_female():
-            plug_type = 'ccs_female'
-        else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        plug_type = job.get_plug_type()
         # Start inserting procedure
         with self.pilot.plug_model.context(plug_type): 
             sus_eng_plug, sus_ins_plug = False, False

@@ -33,18 +33,11 @@ class AttachPlug(State):
 
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo('Start attaching the robot to the plug')
-        job = ud.job
+        job: Job = ud.job
         # Get transformation matrices
         T_base2socket = sm.SE3(ud.T_base2socket)
         # Get plug type key
-        if job in job.type2_female():
-            plug_type = 'type2_female'
-        elif job in job.type2_male():
-            plug_type = 'type2_male'
-        elif job in job.ccs_female():
-            plug_type = 'ccs_female'
-        else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        plug_type = job.get_plug_type()
         # Start attaching procedure
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.force_control():

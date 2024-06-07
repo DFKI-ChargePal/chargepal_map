@@ -64,14 +64,7 @@ class MoveToPlugPrePos(State):
         else:
             raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         # Get plug type key
-        if job in job_ids.type2_female():
-            plug_type = 'type2_female'
-        elif job in job_ids.type2_male():
-            plug_type = 'type2_male'
-        elif job in job_ids.ccs_female():
-            plug_type = 'ccs_female'
-        else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        plug_type = job.get_plug_type()
         with self.pilot.plug_model.context(plug_type):
             with self.pilot.context.position_control():
                 sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
