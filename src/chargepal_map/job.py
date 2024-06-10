@@ -1,6 +1,9 @@
 from __future__ import annotations
 # libs
 from enum import Enum, auto
+from typing import Type
+
+from chargepal_map.state_machine.utils import state_name
 
 
 class Job:
@@ -31,6 +34,7 @@ class Job:
     def __init__(self, job_id: str) -> None:
         self._id = job_id
         self._mode = Job.Mode.STOP
+        self.state_history: list[str] = []
         self.retry_count = 0
         if not self._is_valid():
             raise ValueError(f"Given job id is invalid: {self._id}")
@@ -103,6 +107,21 @@ class Job:
         else:
             raise RuntimeError(f"Job ID {self._id} is not supposed to have a plug type")
         return plug_type
+
+    def track_state(self, obj: Type) -> None:
+        self.state_history.append(state_name(obj))
+
+    def latest_state(self) -> str:
+        if len(self.state_history) > 0:
+            ls = self.state_history[-1]
+        else:
+            ls = ""
+        return ls
+
+    def match_latest_state(self, obj: Type) -> bool:
+        req_state = state_name(obj)
+        lts_state = self.latest_state()
+        return req_state == lts_state
 
     def is_part_of_plug_in(self) -> bool:
         retval = self._id in [

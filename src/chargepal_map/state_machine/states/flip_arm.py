@@ -11,7 +11,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -30,7 +34,8 @@ class FlipArm(State):
                        output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Start flipping the arm into the other workspace.")
+        print(state_header(type(self)))
+        rospy.loginfo(f"Start flipping the arm into the other workspace.")
         job: Job = ud.job
         if not job.in_progress_mode():
             raise StateMachineError(f"Job is not in running mode. Interrupt process.")
@@ -51,4 +56,6 @@ class FlipArm(State):
         outcome = out.arm_ready_to_go
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

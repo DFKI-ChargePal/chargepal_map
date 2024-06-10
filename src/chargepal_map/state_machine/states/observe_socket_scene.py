@@ -12,7 +12,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -35,8 +39,12 @@ class ObserveSocketScene(State):
                        output_keys=['job', 'T_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start observing the scene')
+        print(state_header(type(self)))
+        job: Job = ud.job
+        rospy.loginfo('Start observing the scene')
         outcome = out.err_scene_incomplete
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_scene_obs, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

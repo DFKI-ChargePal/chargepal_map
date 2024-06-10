@@ -7,10 +7,18 @@ import rospy
 from smach import State
 
 from chargepal_map.state_machine import outcomes as out
+from chargepal.chargepal_map.src.chargepal_map.job import Job
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-
-from chargepal_services.srv import stopFreeDriveArm, stopFreeDriveArmRequest, stopFreeDriveArmResponse
+from chargepal_map.state_machine.utils import (
+    state_header, 
+    state_footer,
+)
+from chargepal_services.srv import (
+    stopFreeDriveArm, 
+    stopFreeDriveArmRequest, 
+    stopFreeDriveArmResponse,
+)
 
 # typing
 from typing import Any
@@ -48,8 +56,9 @@ class DriveFree(State):
                        output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Start free drive mode."
-                               f"Call service 'robot_arm/stop_free_drive_arm' to stop free drive mode")
+        print(state_header(type(self)))
+        rospy.loginfo(f"Call service 'robot_arm/stop_free_drive_arm' to stop free drive mode")
+        job: Job = ud.job
         usr_srv = DriveFree.StopService()
         with self.pilot.context.teach_in_control():
             _t_ref = time.perf_counter()
@@ -60,4 +69,6 @@ class DriveFree(State):
         rospy.loginfo(f"Free drive mode stopped.")
         usr_srv.destroy()
         outcome = out.job_complete
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

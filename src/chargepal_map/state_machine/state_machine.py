@@ -72,21 +72,24 @@ class ManipulationStateMachine:
                 state=s.MoveToStartLs(self.config, pilot, None),
                 transitions={
                     out.job_complete: state_name(s.Completion),
-                }
+                },
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToStartRs),
                 state=s.MoveToStartRs(self.config, pilot, None),
                 transitions={
                     out.job_complete: state_name(s.Completion),
-                }
+                },
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.DriveFree),
                 state=s.DriveFree(self.config, pilot, None),
                 transitions={
                     out.job_complete: state_name(s.Completion),
-                }
+                },
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.FlipArm),
@@ -276,6 +279,7 @@ class ManipulationStateMachine:
                 transitions={
                     out.job_complete: state_name(s.Completion),
                 },
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.Completion),
@@ -287,7 +291,8 @@ class ManipulationStateMachine:
                 state=s.MoveToIncompletion(self.config, pilot, self.step_by_user),
                 transitions={
                     out.job_incomplete: state_name(s.Incompletion),
-                }
+                },
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.Incompletion),

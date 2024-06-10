@@ -9,7 +9,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -31,7 +35,8 @@ class RemovePlug(State):
                        output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start removing the plug from the socket')
+        print(state_header(type(self)))
+        rospy.loginfo('Start removing the plug from the socket')
         # Check for job ID
         job: Job = ud.job
         # Get next output
@@ -58,4 +63,6 @@ class RemovePlug(State):
             raise StateMachineError(f"Error while trying to unplug. Plug is probably still connected.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

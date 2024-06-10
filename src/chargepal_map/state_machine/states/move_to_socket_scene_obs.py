@@ -11,7 +11,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -30,14 +34,13 @@ class MoveToSocketSceneObs(State):
                        output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print()
+        print(state_header(type(self)))
         job: Job = ud.job
         job_data = self.cfg.data.get(job)
 
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         rospy.loginfo(f"Start moving the arm to the job scene")
-
 
         if job.is_part_of_plug_in():
             if job.is_part_of_workspace_left():
@@ -71,4 +74,6 @@ class MoveToSocketSceneObs(State):
         #     raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_scene_pre_obs, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

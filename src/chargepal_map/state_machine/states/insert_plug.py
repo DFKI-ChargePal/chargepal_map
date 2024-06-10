@@ -10,7 +10,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -35,7 +39,8 @@ class InsertPlug(State):
                        output_keys=['job', 'T_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start inserting the plug to the socket')
+        print(state_header(type(self)))
+        rospy.loginfo('Start inserting the plug to the socket')
         job: Job = ud.job
         # Get transformation matrices
         T_base2socket = sm.SE3(ud.T_base2socket)
@@ -71,4 +76,6 @@ class InsertPlug(State):
             raise StateMachineError(f"Spatial error to large. Robot is probably in an undefined condition.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.plug_connected, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

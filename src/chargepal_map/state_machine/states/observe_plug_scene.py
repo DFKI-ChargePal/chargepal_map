@@ -12,7 +12,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError, state_header, state_footer
+from chargepal_map.state_machine.utils import (
+    state_header, 
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any

@@ -10,7 +10,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -28,7 +32,8 @@ class MoveToSocketPrePos(State):
                        output_keys=['job', 'T_base2socket'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start moving the plug to the pre connecting pose')
+        print(state_header(type(self)))
+        rospy.loginfo('Start moving the plug to the pre connecting pose')
         job: Job = ud.job
         # Get transformation matrices
         if job in job_ids.plug_in():
@@ -72,4 +77,6 @@ class MoveToSocketPrePos(State):
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_pre_pos, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

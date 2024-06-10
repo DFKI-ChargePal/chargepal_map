@@ -11,7 +11,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -30,10 +34,10 @@ class MoveToPlugSceneObs(State):
                        output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print()
+        print(state_header(type(self)))
+        # Try to find matching configuration
         job: Job = ud.job
         job_data = self.cfg.data.get(job.ID)
-
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         if job.in_stop_mode() or job.in_recover_mode():
@@ -78,4 +82,6 @@ class MoveToPlugSceneObs(State):
             raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.scene_pre_obs, out.job_stopped)
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

@@ -9,7 +9,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -28,7 +32,7 @@ class MoveToIncompletion(State):
                        output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print()
+        print(state_header(type(self)))
         job: Job = ud.job
         wps = self.cfg.data[job.get_id()]['joint_waypoints']
         rospy.loginfo(f"Start moving the arm to a save driving position.")
@@ -36,4 +40,6 @@ class MoveToIncompletion(State):
             self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.job_incomplete
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

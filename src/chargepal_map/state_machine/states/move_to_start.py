@@ -10,7 +10,11 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+    StateMachineError,
+)
 
 # typing
 from typing import Any
@@ -26,6 +30,7 @@ class MoveToStartLs(State):
         State.__init__(self, outcomes=[out.job_complete], input_keys=['job'], output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
+        print(state_header(type(self)))
         # Check job id
         job: Job = ud.job
         if job.get_id() != Job.ID.move_home_arm:
@@ -46,6 +51,8 @@ class MoveToStartLs(State):
                                     f"Is the robot running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.job_complete
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome
 
 
@@ -59,8 +66,9 @@ class MoveToStartRs(State):
                        outcomes=[out.job_complete], 
                        input_keys=['job'],
                        output_keys=['job'])
-        
+
     def execute(self, ud: Any) -> str:
+        print(state_header(type(self)))
         # Check job id
         job: Job = ud.job
         if job.get_id() != Job.ID.move_home_arm:
@@ -81,4 +89,6 @@ class MoveToStartRs(State):
                                     f"Is the robot is running properly?")
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.job_complete
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

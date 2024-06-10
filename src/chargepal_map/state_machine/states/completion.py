@@ -5,9 +5,14 @@ from __future__ import annotations
 import rospy
 from smach import State
 
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
+from chargepal_map.state_machine.utils import (
+    state_header,
+    state_footer,
+)
 
 # typing 
 from typing import Any
@@ -20,12 +25,15 @@ class Completion(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.job_complete])
+        State.__init__(self, outcomes=[out.job_complete], input_keys=['job'], output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo(f"Complete process successfully in its finale state.")
-        outcome = out.job_complete
-        return outcome
+        print(state_header(type(self)))
+        job: Job = ud.job
+        rospy.loginfo(f"Complete process successfully in its finale state.")
+        job.track_state(type(self))
+        print(state_footer(type(self)))
+        return out.job_complete
 
 
 class Incompletion(State):
@@ -34,9 +42,12 @@ class Incompletion(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.job_incomplete])
+        State.__init__(self, outcomes=[out.job_incomplete], input_keys=['job'], output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.logwarn(f"Complete process unsuccessfully! However, the robot ended in a safe state.")
-        outcome = out.job_incomplete
-        return outcome
+        print(state_header(type(self)))
+        job: Job = ud.job
+        rospy.logwarn(f"Complete process unsuccessfully! However, the robot ended in a safe state.")
+        job.track_state(type(self))
+        print(state_footer(type(self)))
+        return out.job_complete
