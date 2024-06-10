@@ -20,3 +20,11 @@ def silent_smach() -> None:
     def suppress_msg(msg: str) -> None:
         pass
     smach.set_loggers(info=suppress_msg, warn=smach.logwarn, debug=suppress_msg, error=smach.logerr)
+
+
+def state_header(obj: type) -> str:
+    return f"\n{5*'-'}   State: {state_name(obj)}   {5*'-'}"
+
+
+def state_footer(obj: type) -> str:
+    return f"{(len(state_header(obj)) - 1) * '-'}"

@@ -12,7 +12,7 @@ from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
-from chargepal_map.state_machine.utils import StateMachineError
+from chargepal_map.state_machine.utils import StateMachineError, state_header, state_footer
 
 # typing
 from typing import Any
@@ -32,11 +32,24 @@ class ObservePlugScene(State):
                            out.err_obs_plug_recover,
                            out.job_stopped], 
                        input_keys=['job'],
-                       output_keys=['job', 'T_base2socket'])
+                       output_keys=['job', 'T_base2socket_scene'])
 
     def execute(self, ud: Any) -> str:
-        print(), rospy.loginfo('Start observing the scene')
-        outcome = out.err_scene_incomplete
+        print(state_header(ObservePlugScene))
+        job: Job = ud.job
+        detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
+        found, T_base2socket_scene = self.pilot.find_target_pose(
+            detector_fp=detector_fp, time_out=self.cfg.data['time_out'])
+        ud.T_base2socket_scene = T_base2socket_scene
+        if not found:
+            job.retry()
+            if job.retry_count > 4:
+                outcome = out.err_obs_plug_retry
+            else:
+                outcome = out.err_obs_plug_recover
+        else:
+            outcome = out.plug_scene_obs
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_scene_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        print(state_footer(ObservePlugScene))
         return outcome

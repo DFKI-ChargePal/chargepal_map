@@ -32,6 +32,8 @@ class FlipArm(State):
     def execute(self, ud: Any) -> str:
         print(), rospy.loginfo(f"Start flipping the arm into the other workspace.")
         job: Job = ud.job
+        if not job.in_progress_mode():
+            raise StateMachineError(f"Job is not in running mode. Interrupt process.")
         if job.is_part_of_ccs_female():
             wps = self.cfg.data['wps_flip_to_rs']
         elif job.is_part_of_type2_female() or job.is_part_of_type2_male():
