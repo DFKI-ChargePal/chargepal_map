@@ -13,7 +13,6 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
-    StateMachineError,
 )
 
 # typing
@@ -33,11 +32,10 @@ class MoveToSocketPrePos(State):
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
-        rospy.loginfo('Start moving the plug to the pre connecting pose')
         # Get user and configuration data
         job: Job = ud.job
-        T_base2socket = sm.SE3(ud.T_base2socket_scene)
-        
+        T_base2socket = sm.SE3(ud.T_base2socket)
+        rospy.loginfo('Start moving the plug to the pre connecting pose')
         with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.position_control():
                 sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
