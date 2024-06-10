@@ -30,7 +30,7 @@ socket_scene_obs = 'socket_scene_observed'
 socket_scene_pre_obs = 'socket_scene_pre_observed'
 
 plug_obs = 'plug_observed'
-plug_pre_obs = 'plug_pre_observed'
+plug_id_obs = 'plug_id_observed'
 plug_pre_pos = 'plug_pre_position'
 plug_scene_obs = 'plug_scene_observed'
 plug_scene_pre_obs = 'plug_scene_pre_observed'

@@ -7,7 +7,7 @@ from chargepal_map.state_machine.states.insert_plug import InsertPlug
 from chargepal_map.state_machine.states.malfunction import Malfunction
 from chargepal_map.state_machine.states.move_to_completion import MoveToCompletion
 from chargepal_map.state_machine.states.move_to_incompletion import MoveToIncompletion
-from chargepal_map.state_machine.states.move_to_plug_obs import MoveToPlugObs
+from chargepal.chargepal_map.src.chargepal_map.state_machine.states.observe_plug_id import ObservePlugId
 from chargepal_map.state_machine.states.move_to_plug_pre_pos import MoveToPlugPrePos
 from chargepal_map.state_machine.states.move_to_plug_scene_obs import MoveToPlugSceneObs
 from chargepal_map.state_machine.states.move_to_socket_obs_recover import MoveToSocketObsRecover
@@ -35,7 +35,7 @@ __all__ = [
     'Malfunction',
     'MoveToCompletion',
     'MoveToIncompletion',
-    'MoveToPlugObs',
+    'ObservePlugId',
     'MoveToPlugPrePos',
     'MoveToPlugSceneObs',
     'MoveToSocketObsRecover',
