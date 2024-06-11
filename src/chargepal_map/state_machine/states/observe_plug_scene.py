@@ -1,12 +1,8 @@
 """ This file implements the state >>ObservePlugScene<< """
 from __future__ import annotations
-import re
-
 # libs
 import rospy
-import ur_pilot
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -39,11 +35,13 @@ class ObservePlugScene(State):
                        output_keys=['job', 'T_base2socket_scene'])
 
     def execute(self, ud: Any) -> str:
-        print(state_header(ObservePlugScene))
+        print(state_header(type(self)))
+        # Get user and configuration data
         job: Job = ud.job
+        detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
+        rospy.loginfo('Start observing the plug scene')
         found, T_base2socket_scene = self.pilot.find_target_pose(
             detector_fp=detector_fp, time_out=self.cfg.data['time_out'])
         ud.T_base2socket_scene = T_base2socket_scene
@@ -59,5 +57,6 @@ class ObservePlugScene(State):
             outcome = out.plug_scene_obs
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
-        print(state_footer(ObservePlugScene))
+        job.track_state(type(self))
+        print(state_footer(type(self)))
         return outcome

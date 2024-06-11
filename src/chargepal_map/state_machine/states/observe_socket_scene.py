@@ -1,12 +1,8 @@
 """ This file implements the state >>ObserveSocketScene<< """
 from __future__ import annotations
-import re
-
 # libs
 import rospy
-import ur_pilot
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -36,12 +32,29 @@ class ObserveSocketScene(State):
                            out.err_obs_socket_recover,
                            out.job_stopped], 
                        input_keys=['job'],
-                       output_keys=['job', 'T_base2socket'])
+                       output_keys=['job', 'T_base2socket_scene'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
+        # Get user and configuration data
         job: Job = ud.job
-        rospy.loginfo('Start observing the scene')
+        detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
+        if job.in_stop_mode() or job.in_recover_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+        rospy.loginfo('Start observing the socket scene')
+        found, T_base2socket_scene = self.pilot.find_target_pose(
+            detector_fp=detector_fp, time_out=self.cfg.data['time_out'])
+        ud.T_base2socket_scene = T_base2socket_scene
+        if not found:
+            if job.retry_count < 4:
+                job.enable_retry_mode()
+                outcome = out.err_obs_socket_retry
+            else:
+                job.enable_recover_mode()
+                outcome = out.err_obs_socket_recover
+        else:
+            job.enable_progress_mode()
+            outcome = out.socket_scene_obs
         outcome = out.err_scene_incomplete
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_scene_obs, out.job_stopped)

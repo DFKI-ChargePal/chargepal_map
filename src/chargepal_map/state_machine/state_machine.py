@@ -206,7 +206,7 @@ class ManipulationStateMachine:
                 },
                 remapping={
                     'job': 'job',
-                    'T_base2socket': 'T_base2socket',
+                    'T_base2socket_scene': 'T_base2socket_scene',
                 }
             )
             StateMachine.add(
@@ -237,7 +237,7 @@ class ManipulationStateMachine:
                 },
                 remapping={
                     'job': 'job',
-                    'T_base2socket_scene': 'T_base2socket_scene',
+                    'T_base2socket': 'T_base2socket',
                 }
             )
             StateMachine.add(
