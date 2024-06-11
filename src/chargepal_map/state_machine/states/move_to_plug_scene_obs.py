@@ -3,7 +3,6 @@ from __future__ import annotations
 # libs
 import rospy
 import ur_pilot
-import numpy as np
 from smach import State
 import spatialmath as sm
 
@@ -48,34 +47,37 @@ class MoveToPlugSceneObs(State):
                 # Start moving the arm
                 rospy.loginfo(f"Start moving the arm to the battery box scene") 
                 with self.pilot.context.position_control():
-                        self.pilot.robot.move_j(job_data[job.ID]['joint_position'],
+                        self.pilot.robot.move_j(job_data['joint_position'],
                                                 job_data['vel'],
                                                 job_data['acc'])
             elif job.in_retry_mode():
                 rospy.loginfo(f"Retry action: "
                               f"Since there shouldn't be any variance in the observation, the robot will not move")
+        # Move to the external sockets
         elif job.is_part_of_plug_out():
             if job.in_progress_mode():
                 rospy.loginfo(f"Start moving the arm to one of the outer side scene")
                 with self.pilot.context.position_control():
-                    self.pilot.robot.move_path_j(job_data[job.ID]['joint_waypoints'],
+                    self.pilot.robot.move_path_j(job_data['joint_waypoints'],
                                                  job_data['vel'],
                                                  job_data['acc'])
             elif job.in_retry_mode():
                 # Move to a robot arm in a slightly different observation pose
+                rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
                 with self.pilot.context.position_control():
-                    j_pos_finale = job_data[job.ID]['joint_waypoints'][-1]
+                    j_pos_finale = job_data['joint_waypoints'][-1]
                     self.pilot.robot.movej(j_pos_finale, job_data['vel'], job_data['acc'])
                     self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
                     current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
+                    theta = 5.0
                     if job.retry_count % 4 == 1:
-                        new_ee_pose = current_ee_pose * sm.SE3().Rx(5, unit='deg')
+                        new_ee_pose = current_ee_pose * sm.SE3().Rx(theta, unit='deg')
                     elif job.retry_count % 4 == 2:
-                        new_ee_pose = current_ee_pose * sm.SE3().Ry(5, unit='deg')
+                        new_ee_pose = current_ee_pose * sm.SE3().Ry(theta, unit='deg')
                     elif job.retry_count % 4 == 3:
-                        new_ee_pose = current_ee_pose * sm.SE3().Rx(-5, unit='deg')
+                        new_ee_pose = current_ee_pose * sm.SE3().Rx(-theta, unit='deg')
                     else:  # job.retry_count % 4 == 0:
-                        new_ee_pose = current_ee_pose * sm.SE3().Ry(-5, unit='deg')
+                        new_ee_pose = current_ee_pose * sm.SE3().Ry(-theta, unit='deg')
                     self.pilot.move_to_tcp_pose(new_ee_pose)
                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
         else:
