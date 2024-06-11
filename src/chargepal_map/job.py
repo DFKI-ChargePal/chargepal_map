@@ -68,14 +68,11 @@ class Job:
             ]
         return valid
 
-    def initialize(self) -> None:
-        self.retry_count = 0
-        self._mode = Job.Mode.PROGRESS
-
     def in_progress_mode(self) -> bool:
         return self._mode == Job.Mode.PROGRESS
 
     def enable_progress_mode(self) -> None:
+        self.retry_count = 0
         self._mode = Job.Mode.PROGRESS
 
     def enable_retry_mode(self) -> None:

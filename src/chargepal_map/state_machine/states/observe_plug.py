@@ -40,6 +40,8 @@ class ObservePlug(State):
         # Get user and configuration data
         job: Job = ud.job
         T_base2socket_scene = sm.SE3(ud.T_base2socket_scene)
+        if job.in_stop_mode() or job.in_recover_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         found_plug = False
         if job.is_part_of_plug_in():
             ud.T_base2socket = T_base2socket_scene
@@ -62,6 +64,7 @@ class ObservePlug(State):
             outcome = out.plug_obs
         else:
             rospy.loginfo(f"Didn't find a proper plug pose.")
+            job.enable_recover_mode()
             outcome = out.err_obs_plug_recover
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)

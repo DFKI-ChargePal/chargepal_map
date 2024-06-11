@@ -13,6 +13,7 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
+    StateMachineError,
 )
 
 # typing
@@ -35,6 +36,8 @@ class MoveToPlugPrePos(State):
         # Get user and configuration data
         job: Job = ud.job
         T_base2socket = sm.SE3(ud.T_base2socket)
+        if job.in_stop_mode() or job.in_recover_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start moving the plug to the pre attaching pose')
         with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.position_control():

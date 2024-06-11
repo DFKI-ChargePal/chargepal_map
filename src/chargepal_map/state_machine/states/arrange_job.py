@@ -83,7 +83,7 @@ class ArrangeJob(State):
                 outcome = out.arm_ready_to_go
         else:
             raise StateMachineError(f"Not treated job: {job}")
-        job.initialize()
+        job.enable_progress_mode()
         job.track_state(type(self))
         rospy.loginfo(f"Chosen state machine job is: {job}")
         if self.user_cb is not None:

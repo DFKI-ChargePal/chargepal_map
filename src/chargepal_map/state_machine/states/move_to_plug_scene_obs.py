@@ -82,7 +82,6 @@ class MoveToPlugSceneObs(State):
             raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.scene_pre_obs, out.job_stopped)
-        job.enable_progress_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

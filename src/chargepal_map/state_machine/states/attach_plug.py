@@ -12,6 +12,7 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
+    StateMachineError,
 )
 
 # typing
@@ -39,6 +40,8 @@ class AttachPlug(State):
         # Get user and configuration data
         job: Job = ud.job
         T_base2socket = sm.SE3(ud.T_base2socket)
+        if job.in_stop_mode() or job.in_recover_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start to try attaching the robot to the plug')
         sus_cup_plug, sus_dec_plug, sus_lock_plug = False, False, False
         # Start attaching procedure
@@ -49,8 +52,7 @@ class AttachPlug(State):
                     time_out=self.cfg.data['couple_time_out'],
                     max_force=self.cfg.data['couple_max_force'],
                     max_torque=self.cfg.data['couple_max_torque'],
-                    couple_tolerance=self.cfg.data['couple_tolerance']
-                    )
+                    couple_tolerance=self.cfg.data['couple_tolerance'])
                 rospy.loginfo(f"Coupling robot and plug successfully: {sus_cup_plug}")
                 rospy.logdebug(f"Final error after coupling robot and plug: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
@@ -59,8 +61,7 @@ class AttachPlug(State):
                         T_base2socket=T_base2socket,
                         time_out=self.cfg.data['lock_time_out'],
                         max_torque=self.cfg.data['lock_max_torque'],
-                        lock_angle=self.cfg.data['lock_angle']
-                        )
+                        lock_angle=self.cfg.data['lock_angle'])
                     rospy.loginfo(f"Lock robot with plug successfully: {sus_lock_plug}")
                     rospy.logdebug(f"Final error after locking robot with plug: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
@@ -69,13 +70,14 @@ class AttachPlug(State):
                         time_out=self.cfg.data['decouple_time_out'],
                         max_force=self.cfg.data['decouple_max_force'],
                         max_torque=self.cfg.data['decouple_max_torque'],
-                        decoupling_tolerance=self.cfg.data['decouple_tolerance']
-                        )
+                        decoupling_tolerance=self.cfg.data['decouple_tolerance'])
         if sus_cup_plug and sus_lock_plug:
+            job.enable_progress_mode()
             outcome = out.plug_attached
             rospy.loginfo(f"Robot attached the arm to the plug successfully")
         elif not sus_cup_plug and not sus_lock_plug and sus_dec_plug:
             if job.retry_count > 1:
+                job.enable_recover_mode()
                 outcome = out.err_obs_plug_recover
                 rospy.loginfo(f"Robot was not able to attach to the plug. Try to recover the arm")
             else:
@@ -83,6 +85,7 @@ class AttachPlug(State):
                 outcome = out.err_plug_out_retry
                 rospy.loginfo(f"Robot was not able to attach to the plug. Retry attachment procedure")
         elif not sus_cup_plug and not sus_dec_plug or not sus_lock_plug:
+            job.enable_stop_mode()
             outcome = out.err_plug_in_stop
             rospy.logerr(f"Robot got stuck while trying to attach. Arm is in an undefined condition.")
         if self.user_cb is not None:
