@@ -1,5 +1,4 @@
 """ This file implements the state >>RemovePlug<< """
-
 from __future__ import annotations
 # libs
 import rospy
@@ -12,7 +11,6 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
-    StateMachineError,
 )
 
 # typing
@@ -36,20 +34,10 @@ class RemovePlug(State):
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
-        rospy.loginfo('Start removing the plug from the socket')
-        # Check for job ID
+        # Get user and configuration data
         job: Job = ud.job
-        # Get next output
-        if job in job_ids.plug_in():
-            outcome = out.plug_removed_do
-        elif job in job_ids.plug_out():
-            outcome = out.plug_removed_no
-        else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
-        # Get plug type
-        plug_type = job.get_plug_type()
-        # Start removing procedure
-        with self.pilot.plug_model.context(plug_type):
+        rospy.loginfo('Start to try removing the plug from the socket')
+        with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.force_control():
                 sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug(
                     time_out=self.cfg.data['remove_time_out'],
@@ -60,7 +48,11 @@ class RemovePlug(State):
                 rospy.logdebug(f"Final error after removing plug from socket: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
         if not sus_rm_plug:
-            raise StateMachineError(f"Error while trying to unplug. Plug is probably still connected.")
+            outcome = out.err_plug_out_stop
+            rospy.logerr(f"Robot was not able to remove the plug successfully. Plug is probably still connected.")
+        else:
+            rospy.loginfo(f"Robot removed the plug successfully")
+            outcome = out.plug_removed
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))

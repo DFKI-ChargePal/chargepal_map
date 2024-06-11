@@ -12,7 +12,6 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
-    StateMachineError,
 )
 
 # typing
@@ -74,6 +73,7 @@ class AttachPlug(State):
                         )
         if sus_cup_plug and sus_lock_plug:
             outcome = out.plug_attached
+            rospy.loginfo(f"Robot attached the arm to the plug successfully")
         elif not sus_cup_plug and not sus_lock_plug and sus_dec_plug:
             if job.retry_count > 1:
                 outcome = out.err_obs_plug_recover
