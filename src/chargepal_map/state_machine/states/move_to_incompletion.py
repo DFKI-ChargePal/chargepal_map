@@ -70,6 +70,7 @@ class MoveToIncompletion(State):
             self.pilot.robot.move_path_j(act_values, self.cfg.data['vel'], self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.job_incomplete
+        job.enable_stop_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

@@ -41,17 +41,21 @@ class ObservePlugScene(State):
     def execute(self, ud: Any) -> str:
         print(state_header(ObservePlugScene))
         job: Job = ud.job
+        if job.in_stop_mode() or job.in_recover_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
         found, T_base2socket_scene = self.pilot.find_target_pose(
             detector_fp=detector_fp, time_out=self.cfg.data['time_out'])
         ud.T_base2socket_scene = T_base2socket_scene
         if not found:
-            job.retry()
-            if job.retry_count > 4:
+            if job.retry_count < 4:
+                job.enable_retry_mode()
                 outcome = out.err_obs_plug_retry
             else:
+                job.enable_recover_mode()
                 outcome = out.err_obs_plug_recover
         else:
+            job.enable_progress_mode()
             outcome = out.plug_scene_obs
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)

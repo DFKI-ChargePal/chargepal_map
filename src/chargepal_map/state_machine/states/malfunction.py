@@ -34,6 +34,7 @@ class Malfunction(State):
         # self.pilot.disconnect()
         rospy.loginfo(f"Unable to recover the robot arm by itself.")
         outcome = out.job_failed
+        job.enable_stop_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

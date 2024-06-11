@@ -34,6 +34,7 @@ class Stop(State):
         self.pilot.disconnect()
         rospy.loginfo(f"Ended up in stop state. Stop process by user...")
         outcome = out.job_stopped
+        job.enable_stop_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

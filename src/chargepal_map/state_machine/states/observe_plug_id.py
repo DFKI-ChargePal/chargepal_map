@@ -14,6 +14,7 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
+    StateMachineError,
 )
 
 # typing
@@ -43,6 +44,8 @@ class ObservePlugId(State):
         job: Job = ud.job
         T_base2socket_scene = sm.SE3(ud.T_base2socket_scene)
         plug_id_dtt = self.cfg.data['detector'][job.get_plug_type()]['detector']
+        if not job.in_progress_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         # Try to observe plug id
         with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.position_control():
@@ -56,6 +59,7 @@ class ObservePlugId(State):
             outcome = out.plug_id_obs
         else:
             rospy.loginfo(f"Can't find plug id marker. Plug of type '{job.get_plug_type()}' probably not in its place")
+            job.enable_recover_mode()
             outcome = out.err_obs_plug_recover
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)

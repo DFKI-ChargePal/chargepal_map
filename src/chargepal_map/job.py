@@ -68,27 +68,30 @@ class Job:
             ]
         return valid
 
-    def start(self) -> None:
+    def initialize(self) -> None:
         self.retry_count = 0
         self._mode = Job.Mode.PROGRESS
 
     def in_progress_mode(self) -> bool:
         return self._mode == Job.Mode.PROGRESS
 
-    def retry(self) -> None:
+    def enable_progress_mode(self) -> None:
+        self._mode = Job.Mode.PROGRESS
+
+    def enable_retry_mode(self) -> None:
         self.retry_count += 1
         self._mode = Job.Mode.RETRY
 
     def in_retry_mode(self) -> bool:
         return self._mode == Job.Mode.RETRY
 
-    def recover(self) -> None:
+    def enable_recover_mode(self) -> None:
         self._mode = Job.Mode.RECOVER
 
     def in_recover_mode(self) -> bool:
         return self._mode == Job.Mode.RECOVER
 
-    def stop(self) -> None:
+    def enable_stop_mode(self) -> None:
         self._mode = Job.Mode.STOP
 
     def in_stop_mode(self) -> bool:

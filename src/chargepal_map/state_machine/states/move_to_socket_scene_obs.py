@@ -35,11 +35,16 @@ class MoveToSocketSceneObs(State):
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
+        # Get user and configuration data
         job: Job = ud.job
-        job_data = self.cfg.data.get(job)
-
+        job_data = self.cfg.data.get(job.ID)
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
+        if job.in_stop_mode() or job.in_recover_mode():
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+
+
+
         rospy.loginfo(f"Start moving the arm to the job scene")
 
         if job.is_part_of_plug_in():
