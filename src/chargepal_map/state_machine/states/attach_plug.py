@@ -3,7 +3,6 @@ from __future__ import annotations
 # libs
 import rospy
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -32,14 +31,21 @@ class AttachPlug(State):
                                  out.err_plug_out_recover,
                                  out.err_plug_in_stop, 
                                  out.job_stopped],
-                       input_keys=['job', 'T_base2socket'],
-                       output_keys=['job', 'T_base2socket'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self))) 
         # Get user and configuration data
         job: Job = ud.job
-        T_base2socket = sm.SE3(ud.T_base2socket)
+        if job.is_part_of_plug_in():
+            T_base2socket = job.interior_socket.T_base2socket_close_up
+        elif job.is_part_of_plug_out():
+            T_base2socket = job.exterior_socket.T_base2socket_close_up
+        else:
+            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        if T_base2socket is None:
+            raise StateMachineError(f"Missing observation of the plug. Interrupt process")
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start to try attaching the robot to the plug')

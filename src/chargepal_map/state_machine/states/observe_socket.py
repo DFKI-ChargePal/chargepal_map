@@ -36,7 +36,7 @@ class ObserveSocket(State):
                            out.err_plug_in_recover, 
                            out.job_stopped], 
                        input_keys=['job'],
-                       output_keys=['job', 'T_base2socket'])
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))

@@ -35,14 +35,21 @@ class ObservePlugId(State):
                            out.plug_id_obs,
                            out.err_obs_plug_recover,
                            out.job_stopped], 
-                       input_keys=['job', 'T_base2socket_scene'], 
-                       output_keys=['job', 'T_base2socket_scene'])
+                       input_keys=['job'], 
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        T_base2socket_scene = sm.SE3(ud.T_base2socket_scene)
+        if job.is_part_of_plug_in():
+            T_base2socket = job.interior_socket.T_base2socket_scene
+        elif job.is_part_of_plug_out():
+            T_base2socket = job.exterior_socket.T_base2socket_scene
+        else:
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
+        if T_base2socket is None:
+            raise StateMachineError(f"Missing observation of plug scene. Interrupt process")
         plug_id_dtt = self.cfg.data['detector'][job.get_plug_type()]['detector']
         if not job.in_progress_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
@@ -50,7 +57,7 @@ class ObservePlugId(State):
         with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.position_control():
                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
-                T_base2camera = T_base2socket_scene * self._T_socket_save2camera
+                T_base2camera = T_base2socket * self._T_socket_save2camera
                 self.pilot.robot.movel(T_base2camera, self.cfg.data['vel'], self.cfg.data['acc'])
             found_plug_id, _ = self.pilot.find_target_pose(detector_fp=plug_id_dtt,
                                                            time_out=self.cfg.data['detector_time_out'])

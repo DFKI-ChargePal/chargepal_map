@@ -33,8 +33,8 @@ class ReleasePlug(State):
                            out.plug_released, 
                            out.err_plug_in_stop,
                            out.job_stopped], 
-                       input_keys=['job', 'T_base2socket'],
-                       output_keys=['job', 'T_base2socket'])
+                       input_keys=['job'],
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))

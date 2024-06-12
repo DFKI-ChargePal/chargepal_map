@@ -3,6 +3,7 @@ from __future__ import annotations
 # libs
 import rospy
 from smach import State
+from spatialmath import sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -32,7 +33,7 @@ class ObservePlugScene(State):
                            out.err_obs_plug_recover,
                            out.job_stopped], 
                        input_keys=['job'],
-                       output_keys=['job', 'T_base2socket_scene'])
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
@@ -42,19 +43,25 @@ class ObservePlugScene(State):
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start observing the plug scene')
-        found, T_base2socket_scene = self.pilot.find_target_pose(
+        found, T_base2socket = self.pilot.find_target_pose(
             detector_fp=detector_fp, time_out=self.cfg.data['time_out'])
-        ud.T_base2socket_scene = T_base2socket_scene
-        if not found:
+        if found:
+            if job.is_part_of_plug_in():
+                job.interior_socket.T_base2socket_scene = sm.SE3(T_base2socket)
+                job.interior_socket.T_base2socket_close_up = sm.SE3(T_base2socket)
+            elif job.is_part_of_plug_out():
+                job.exterior_socket.T_base2socket_scene = sm.SE3(T_base2socket)
+            else:
+                raise StateMachineError(f"Not treated job: {job}")
+            job.enable_progress_mode()
+            outcome = out.plug_scene_obs
+        else:
             if job.retry_count < 4:
                 job.enable_retry_mode()
                 outcome = out.err_obs_plug_retry
             else:
                 job.enable_recover_mode()
                 outcome = out.err_obs_plug_recover
-        else:
-            job.enable_progress_mode()
-            outcome = out.plug_scene_obs
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))

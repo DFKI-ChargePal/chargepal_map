@@ -31,17 +31,23 @@ class MoveToSocketObs(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.socket_pre_obs, out.job_stopped], 
-                       input_keys=['job', 'T_base2socket_scene'], 
-                       output_keys=['job', 'T_base2socket_scene'])
+                       input_keys=['job'], 
+                       output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        T_base2socket_scene = sm.SE3(ud.T_base2socket_scene)
+        if job.is_part_of_plug_in():
+            T_base2socket_scene = job.exterior_socket.T_base2socket_scene
+        elif job.is_part_of_plug_out():
+            T_base2socket_scene = job.interior_socket.T_base2socket_scene
+        else:
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
+        if T_base2socket_scene is None:
+            raise StateMachineError(f"Missing observation of plug scene. Interrupt process")
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        
         rospy.loginfo(f"Start moving in front of socket to have a better view on the socket")
         with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.position_control():

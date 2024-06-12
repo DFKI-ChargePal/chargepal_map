@@ -8,6 +8,7 @@ class StateMachineError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
+
 def state_name(obj: type) -> str:
     # Split object name at uppercase letters
     upper_split = re.findall('[A-Z][^A-Z]*', obj.__name__)
