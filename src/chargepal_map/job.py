@@ -1,9 +1,12 @@
 from __future__ import annotations
 # libs
+import spatialmath as sm
 from enum import Enum, auto
-from typing import Type
-
+from dataclasses import dataclass
 from chargepal_map.state_machine.utils import state_name
+
+# typing
+from typing import Type
 
 
 class Job:
@@ -31,11 +34,18 @@ class Job:
         plug_out_bcs_ac = 'plug_out_bcs_ac'
         plug_out_dsk_dm = 'plug_out_dsk_dm'
 
+    @dataclass
+    class SocketObservations:
+        T_base2socket_scene: sm.SE3 | None = None
+        T_base2socket_close_up: sm.SE3 | None = None
+
     def __init__(self, job_id: str) -> None:
         self._id = job_id
         self._mode = Job.Mode.STOP
         self.state_history: list[str] = []
         self.retry_count = 0
+        self.interior_socket = Job.SocketObservations()  # socket at the battery cart
+        self.exterior_socket = Job.SocketObservations()  # socket at the adapter station, battery charging station or car
         if not self._is_valid():
             raise ValueError(f"Given job id is invalid: {self._id}")
 

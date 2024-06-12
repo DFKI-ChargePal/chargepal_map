@@ -118,10 +118,7 @@ class ManipulationStateMachine:
                     out.err_obs_plug_recover: state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket_scene': 'T_base2socket_scene',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlugId),
@@ -131,10 +128,7 @@ class ManipulationStateMachine:
                     out.err_obs_plug_recover: state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket_scene': 'T_base2socket_scene',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlug),
@@ -144,10 +138,7 @@ class ManipulationStateMachine:
                     out.err_obs_plug_recover: state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket': 'T_base2socket',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPrePos),
@@ -156,10 +147,7 @@ class ManipulationStateMachine:
                     out.plug_pre_pos: state_name(s.AttachPlug),
                     out.job_stopped:  state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket': 'T_base2socket',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.AttachPlug),
@@ -171,10 +159,7 @@ class ManipulationStateMachine:
                     out.err_plug_out_stop:    state_name(s.Malfunction),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket': 'T_base2socket',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.RemovePlug),
@@ -204,10 +189,7 @@ class ManipulationStateMachine:
                     out.err_obs_socket_recover: state_name(s.MoveToSocketObsRecover),
                     out.job_stopped:            state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket_scene': 'T_base2socket_scene',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToSocketObs),
@@ -235,10 +217,7 @@ class ManipulationStateMachine:
                     out.err_plug_in_recover: state_name(s.MoveToSocketObsRecover),
                     out.job_stopped:         state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket': 'T_base2socket',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToSocketPrePos),
@@ -247,10 +226,7 @@ class ManipulationStateMachine:
                     out.socket_pre_pos: state_name(s.InsertPlug),
                     out.job_stopped:    state_name(s.Stop)
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket': 'T_base2socket',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.InsertPlug),
@@ -262,10 +238,7 @@ class ManipulationStateMachine:
                     out.err_plug_in_stop:    state_name(s.Malfunction),
                     out.job_stopped:         state_name(s.Stop),
                 },
-                remapping={
-                    'job': 'job',
-                    'T_base2socket': 'T_base2socket',
-                }
+                remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.ReleasePlug),
