@@ -49,6 +49,8 @@ class ObservePlug(State):
             found_plug = True
         elif job.is_part_of_plug_out():
             T_base2socket_scene = job.exterior_socket.T_base2socket_scene
+            if T_base2socket_scene is None:
+                raise StateMachineError(f"Missing observation of the plug scene. Interrupt process")
             plug_dtt = self.cfg.data['detector'][job.get_plug_type()]['detector']
             with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
                 with self.pilot.context.position_control():
@@ -60,7 +62,7 @@ class ObservePlug(State):
             if found_plug:
                 job.exterior_socket.T_base2socket_close_up = sm.SE3(T_base2socket_close_up)
         else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
         if found_plug:
             rospy.loginfo(f"Found a plug pose.")
             rospy.logdebug(f"Transformation: Base-Socket = {ur_pilot.utils.se3_to_str(T_base2socket_close_up)}")
