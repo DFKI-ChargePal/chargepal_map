@@ -46,7 +46,7 @@ class MoveToIncompletion(State):
         elif job.latest_state() == state_name(ObservePlug):
             state_key = 'observe_plug'
         elif job.latest_state() == state_name(AttachPlug):
-            state_key = 'attack_plug'
+            state_key = 'attach_plug'
         elif job.latest_state() == state_name(ReleasePlug):
             state_key = 'release_plug'
         else:

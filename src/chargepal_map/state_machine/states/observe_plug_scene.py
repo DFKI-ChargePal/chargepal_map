@@ -44,7 +44,7 @@ class ObservePlugScene(State):
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start observing the plug scene')
         found, T_base2socket = self.pilot.find_target_pose(
-            detector_fp=detector_fp, time_out=self.cfg.data['time_out'])
+            detector_fp=detector_fp, time_out=self.cfg.data['detector_time_out'])
         if found:
             if job.is_part_of_plug_in():
                 job.interior_socket.T_base2socket_scene = sm.SE3(T_base2socket)
