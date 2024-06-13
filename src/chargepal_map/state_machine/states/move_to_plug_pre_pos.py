@@ -39,7 +39,7 @@ class MoveToPlugPrePos(State):
         elif job.is_part_of_plug_out():
             T_base2socket = job.exterior_socket.T_base2socket_close_up
         else:
-            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
         if T_base2socket is None:
             raise StateMachineError(f"Missing observation of the plug. Interrupt process")
         if job.in_stop_mode() or job.in_recover_mode():
@@ -47,11 +47,11 @@ class MoveToPlugPrePos(State):
         rospy.loginfo('Start moving the plug to the pre attaching pose')
         with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
             with self.pilot.context.position_control():
-                sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
+                sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_pre_pos, out.job_stopped)
+            outcome = self.user_cb.request_action(out.plug_pre_pos, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

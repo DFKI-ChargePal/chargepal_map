@@ -32,27 +32,16 @@ class MoveToSocketObsRecover(State):
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
+        # Get user and configuration data
         job: Job = ud.job
-        if job == job_ids.plug_in_ads_ac:
-            rospy.loginfo(f"Start moving the plug to the adapter station on the left side")
-            with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(self.cfg.data[job]['joint_waypoints'],
-                                             self.cfg.data['vel'],
-                                             self.cfg.data['acc'])
-        elif job == job_ids.plug_in_ads_dc:
-            rospy.loginfo(f"Start moving the plug to the adapter station on the right side")
-            with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(self.cfg.data[job]['joint_waypoints'],
-                                             self.cfg.data['vel'],
-                                             self.cfg.data['acc'])
-        elif job == job_ids.plug_in_bcs_ac:
-            rospy.loginfo(f"Start moving the plug to the battery charging station on the left side")
-            with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(self.cfg.data[job]['joint_waypoints'],
-                                             self.cfg.data['vel'],
-                                             self.cfg.data['acc'])
-        else:
-            raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        job_data = self.cfg.data.get(job.ID)
+        if not job.in_recover_mode():
+            raise StateMachineError(f"Job {job} in an invalid mode. Interrupt process")
+
+        rospy.loginfo(f"Moving back to the starting socket")
+        with self.pilot.context.position_control():
+                self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=job_data['vel'], acc=job_data['acc'])
+
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.socket_pre_obs, out.job_stopped)
         job.track_state(type(self))
