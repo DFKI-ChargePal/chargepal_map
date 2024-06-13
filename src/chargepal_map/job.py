@@ -118,7 +118,7 @@ class Job:
             raise RuntimeError(f"Job ID {self._id} is not supposed to have a plug type")
         return plug_type
 
-    def track_state(self, obj: Type) -> None:
+    def track_state(self, obj: Type[object]) -> None:
         self.state_history.append(state_name(obj))
 
     def latest_state(self) -> str:
@@ -128,7 +128,7 @@ class Job:
             ls = ""
         return ls
 
-    def match_latest_state(self, obj: Type) -> bool:
+    def match_latest_state(self, obj: Type[object]) -> bool:
         req_state = state_name(obj)
         lts_state = self.latest_state()
         return req_state == lts_state

@@ -76,7 +76,7 @@ class AttachPlug(State):
                         time_out=self.cfg.data['decouple_time_out'],
                         max_force=self.cfg.data['decouple_max_force'],
                         max_torque=self.cfg.data['decouple_max_torque'],
-                        decoupling_tolerance=self.cfg.data['decouple_tolerance'])
+                        decouple_tolerance=self.cfg.data['decouple_tolerance'])
         if sus_cup_plug and sus_lock_plug:
             job.enable_progress_mode()
             outcome = out.plug_attached
@@ -97,7 +97,7 @@ class AttachPlug(State):
         else:
             raise StateMachineError(f"Logical error. This situation should not occur. Check your implementation!")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.outcome, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

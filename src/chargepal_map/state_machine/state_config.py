@@ -13,7 +13,7 @@ class StateConfig:
 
     def __init__(self, obj: type, config: dict[str, dict[str, Any]]) -> None:
         # Get common configuration
-        self.data = {}
+        self.data: dict[str, Any] = {}
         self.data['step_by_user'] = config['step_by_user']
         self.data['detector'] = copy.deepcopy(config['detector']['files'])
         # Split object name at uppercase letters
@@ -35,4 +35,4 @@ class StateConfig:
         _data = {
             self.name: self.data
         }
-        return  yaml.dump(_data)
+        return yaml.dump(_data)

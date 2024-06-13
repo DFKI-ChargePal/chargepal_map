@@ -37,7 +37,7 @@ class MoveToSocketPrePos(State):
         if job.in_progress_mode() or job.in_retry_mode():
             exterior = job.is_part_of_plug_in()
             interior = job.is_part_of_plug_out()
-        elif job.in_recovery_mode():
+        elif job.in_recover_mode():
             exterior = job.is_part_of_plug_out()
             interior = job.is_part_of_plug_in()
         else:

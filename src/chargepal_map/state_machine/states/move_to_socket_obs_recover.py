@@ -34,7 +34,7 @@ class MoveToSocketObsRecover(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        job_data = self.cfg.data.get(job.get_id())
+        job_data = self.cfg.data[job.get_id()]
         if not job.in_recover_mode():
             raise StateMachineError(f"Job {job} in an invalid mode. Interrupt process")
 

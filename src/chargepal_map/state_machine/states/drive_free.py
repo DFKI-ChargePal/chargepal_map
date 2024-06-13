@@ -6,15 +6,15 @@ import time
 import rospy
 from smach import State
 
+from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
-from chargepal.chargepal_map.src.chargepal_map.job import Job
 from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header, 
     state_footer,
 )
-from chargepal_services.srv import (
+from chargepal_services.srv import (  # type: ignore
     stopFreeDriveArm, 
     stopFreeDriveArmRequest, 
     stopFreeDriveArmResponse,

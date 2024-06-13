@@ -6,8 +6,8 @@ import actionlib
 from smach import UserData
 from collections import namedtuple
 
-from chargepal.chargepal_map.src.chargepal_map.job import Job
-from chargepal_map.state_machine.outcomes import out
+from chargepal_map.job import Job
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.utils import StateMachineError
 from chargepal_map.state_machine.state_machine import ManipulationStateMachine
 
@@ -104,7 +104,7 @@ class ManipulationActionServer:
             ud = UserData()
             ud.job = Job(self.name)
             outcome = self.sm.execute(ud)
-            if outcome == out.completed:
+            if outcome == out.job_complete:
                 result_msg.success = True
                 self.act_srv.set_succeeded(result=result_msg)
                 rospy.loginfo(f"Finish process successfully with outcome {outcome}.")
@@ -126,7 +126,7 @@ class ManipulationActionServer:
     def wait_for_usr_feedback(self) -> None:
         feedback = self.fb_msg()
         feedback.status = "wait_for_user"
-        self.action_server.publish_feedback(feedback)
+        self.act_srv.publish_feedback(feedback)
 
 
 class ActSrvFactory:

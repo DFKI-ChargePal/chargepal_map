@@ -3,7 +3,7 @@ from __future__ import annotations
 import rospy
 
 # services
-from chargepal_map.srv import User, UserRequest, UserResponse
+from chargepal_map.srv import User, UserRequest, UserResponse  # type: ignore
 
 
 class UserSrv:

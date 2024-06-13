@@ -1,7 +1,7 @@
 """ This file implements the state >>MoveToIncompletion<< """
 from __future__ import annotations
+
 # libs
-from chargepal.chargepal_map.src.chargepal_map.state_machine.states.release_plug import ReleasePlug
 import rospy
 import ur_pilot
 from smach import State
@@ -12,6 +12,7 @@ from chargepal_map.state_machine.step_by_user import StepByUser
 from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.states.attach_plug import AttachPlug
 from chargepal_map.state_machine.states.observe_plug import ObservePlug
+from chargepal_map.state_machine.states.release_plug import ReleasePlug
 from chargepal_map.state_machine.states.observe_plug_scene import ObservePlugScene
 from chargepal_map.state_machine.utils import (
     state_name,

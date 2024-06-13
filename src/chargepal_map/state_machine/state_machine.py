@@ -50,7 +50,8 @@ class ManipulationStateMachine:
             input_keys=['job'])
 
     def execute(self, ud: UserData) -> str:
-        return self.state_machine.execute(ud)
+        outcome: str = self.state_machine.execute(ud)
+        return outcome
 
     def build(self, pilot: Pilot) -> None:
         with self.state_machine:
@@ -154,7 +155,7 @@ class ManipulationStateMachine:
                 state=s.AttachPlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_attached:        state_name(s.RemovePlug),
-                    out.err_plug_out_retry:   state_name(s.MoveToPlugObs),
+                    out.err_plug_out_retry:   state_name(s.ObservePlug),
                     out.err_plug_out_recover: state_name(s.MoveToIncompletion),
                     out.err_plug_out_stop:    state_name(s.Malfunction),
                     out.job_stopped:          state_name(s.Stop),

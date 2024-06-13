@@ -47,7 +47,7 @@ class MoveToPlugSceneObs(State):
                 # Start moving the arm
                 rospy.loginfo(f"Start moving the arm to the battery box scene") 
                 with self.pilot.context.position_control():
-                        self.pilot.robot.move_j(job_data['joint_position'],
+                        self.pilot.robot.movej(job_data['joint_position'],
                                                 job_data['vel'],
                                                 job_data['acc'])
             elif job.in_retry_mode():

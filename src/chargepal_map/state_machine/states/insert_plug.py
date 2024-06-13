@@ -1,12 +1,9 @@
 """ This file implements the state >>InsertPlug<< """
 from __future__ import annotations
-from calendar import c
-import time
 
 # libs
 import rospy
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -48,7 +45,7 @@ class InsertPlug(State):
         if job.in_progress_mode() or job.in_retry_mode():
             exterior = job.is_part_of_plug_in()
             interior = job.is_part_of_plug_out()
-        elif job.in_recovery_mode():
+        elif job.in_recover_mode():
             exterior = job.is_part_of_plug_out()
             interior = job.is_part_of_plug_in()
         else:
