@@ -36,7 +36,7 @@ class MoveToSocketSceneObs(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        job_data = self.cfg.data.get(job.ID)
+        job_data = self.cfg.data.get(job.get_id())
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         if job.in_progress_mode():
@@ -63,8 +63,9 @@ class MoveToSocketSceneObs(State):
             self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
         else:
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+        outcome = out.socket_scene_pre_obs
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_scene_pre_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

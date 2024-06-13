@@ -50,8 +50,9 @@ class MoveToPlugPrePos(State):
                 sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
+        outcome = out.plug_pre_pos
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_pre_pos, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

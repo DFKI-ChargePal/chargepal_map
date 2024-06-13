@@ -34,16 +34,16 @@ class MoveToSocketObsRecover(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        job_data = self.cfg.data.get(job.ID)
+        job_data = self.cfg.data.get(job.get_id())
         if not job.in_recover_mode():
             raise StateMachineError(f"Job {job} in an invalid mode. Interrupt process")
 
         rospy.loginfo(f"Moving back to the starting socket")
         with self.pilot.context.position_control():
                 self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=job_data['vel'], acc=job_data['acc'])
-
+        outcome = out.socket_pre_obs
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_pre_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

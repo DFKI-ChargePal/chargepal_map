@@ -84,7 +84,7 @@ class AttachPlug(State):
         elif not sus_cup_plug and not sus_lock_plug and sus_dec_plug:
             if job.retry_count > 1:
                 job.enable_recover_mode()
-                outcome = out.err_obs_plug_recover
+                outcome = out.err_plug_out_recover
                 rospy.loginfo(f"Robot was not able to attach to the plug. Try to recover the arm")
             else:
                 job.enable_retry_mode()
@@ -92,8 +92,10 @@ class AttachPlug(State):
                 rospy.loginfo(f"Robot was not able to attach to the plug. Retry attachment procedure")
         elif not sus_cup_plug and not sus_dec_plug or not sus_lock_plug:
             job.enable_stop_mode()
-            outcome = out.err_plug_in_stop
+            outcome = out.err_plug_out_stop
             rospy.logerr(f"Robot got stuck while trying to attach. Arm is in an undefined condition.")
+        else:
+            raise StateMachineError(f"Logical error. This situation should not occur. Check your implementation!")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(out.outcome, out.job_stopped)
         job.track_state(type(self))

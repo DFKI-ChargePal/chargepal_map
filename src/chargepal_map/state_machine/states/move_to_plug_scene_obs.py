@@ -36,7 +36,7 @@ class MoveToPlugSceneObs(State):
         print(state_header(type(self)))
         # Try to find matching configuration
         job: Job = ud.job
-        job_data = self.cfg.data.get(job.ID)
+        job_data = self.cfg.data.get(job.get_id())
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         if job.in_stop_mode() or job.in_recover_mode():
@@ -82,8 +82,9 @@ class MoveToPlugSceneObs(State):
                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
         else:
             raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        outcome = out.plug_scene_pre_obs
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.scene_pre_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

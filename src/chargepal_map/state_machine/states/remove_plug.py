@@ -53,7 +53,7 @@ class RemovePlug(State):
         if not sus_rm_plug:
             job.enable_stop_mode()
             outcome = out.err_plug_out_stop
-            rospy.logerr(f"Robot was not able to remove the plug successfully. Plug is probably still connected.")
+            rospy.logerr(f"Robot was not able to remove the plug successfully. Plug is probably still connected")
         else:
             rospy.loginfo(f"Robot removed the plug successfully")
             outcome = out.plug_removed

@@ -1,5 +1,7 @@
 """ This file implements the state >>InsertPlug<< """
 from __future__ import annotations
+from calendar import c
+import time
 
 # libs
 import rospy
@@ -40,15 +42,26 @@ class InsertPlug(State):
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
-        rospy.loginfo('Start inserting the plug to the socket')
+        # Get user and configuration data
         job: Job = ud.job
-        # Get transformation matrices
-        T_base2socket = sm.SE3(ud.T_base2socket)
-        # Get plug type
-        plug_type = job.get_plug_type()
-        # Start inserting procedure
-        with self.pilot.plug_model.context(plug_type): 
-            sus_eng_plug, sus_ins_plug = False, False
+        # Get transformation matrix of socket pose
+        if job.in_progress_mode() or job.in_retry_mode():
+            exterior = job.is_part_of_plug_in()
+            interior = job.is_part_of_plug_out()
+        elif job.in_recovery_mode():
+            exterior = job.is_part_of_plug_out()
+            interior = job.is_part_of_plug_in()
+        else:
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+        if exterior:
+            T_base2socket = job.exterior_socket.T_base2socket_close_up
+        elif interior:
+            T_base2socket = job.interior_socket.T_base2socket_close_up
+        else:
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
+        rospy.loginfo('Start inserting the plug to the socket')
+        with self.pilot.plug_model.context(plug_type=job.get_plug_type()): 
+            sus_eng_plug, sus_ins_plug, sus_rmv_plug = False, False, False
             with self.pilot.context.force_control():
                 sus_eng_plug, lin_ang_err = self.pilot.try2_engage_with_socket(
                     T_base2socket=T_base2socket,
@@ -57,6 +70,7 @@ class InsertPlug(State):
                     engage_depth=self.cfg.data['engage_depth'],
                     engage_tolerance=self.cfg.data['engage_tolerance']
                     )
+                rospy.loginfo(f"Engaging plug to socket successfully: {sus_eng_plug}")
                 rospy.logdebug(f"Final error after engaging between plug and socket: "
                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                 if sus_eng_plug:
@@ -67,15 +81,49 @@ class InsertPlug(State):
                         end_force=self.cfg.data['insert_end_force'],
                         insert_tolerance=self.cfg.data['insert_tolerance']
                         )
+                    rospy.loginfo(f"Inserting plug to socket successfully: {sus_ins_plug}")
                     rospy.logdebug(f"Final error after inserting plug to socket: "
                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
-
-            rospy.loginfo(f"Engaging plug to socket successfully: {sus_eng_plug}")
-            rospy.loginfo(f"Inserting plug to socket successfully: {sus_ins_plug}")
-        if not sus_eng_plug or not sus_ins_plug:
-            raise StateMachineError(f"Spatial error to large. Robot is probably in an undefined condition.")
+                if not sus_eng_plug or not sus_ins_plug:
+                    rospy.loginfo(f"Error while inserting the plug. Try to recover by removing the plug.")
+                    sus_rmv_plug, lin_ang_err = self.pilot.try2_remove_plug(
+                        time_out=self.cfg.data['remove_time_out'],
+                        max_force=self.cfg.data['remove_max_force'],
+                        remove_tolerance=self.cfg.data['remove_tolerance']
+                    )
+                    rospy.loginfo(f"Removing plug from socket successfully: {sus_rmv_plug}")
+        
+        if job.in_progress_mode() or job.in_retry_mode():
+            if sus_eng_plug and sus_ins_plug:
+                job.enable_progress_mode()
+                outcome = out.plug_connected
+                rospy.loginfo(f"Robot connected plug and socket successfully")
+            elif not sus_eng_plug and not sus_ins_plug and sus_rmv_plug:
+                if job.retry_count > 1:
+                    job.enable_recover_mode()
+                    outcome = out.err_plug_in_recover
+                    rospy.loginfo(f"Robot was not able to connect plug to socket. Try to recover the arm")
+                else:
+                    job.enable_retry_mode()
+                    outcome = out.err_plug_in_retry
+                    rospy.loginfo(f"Robot was not able to connect plug to socket. Retry inserting procedure")
+            elif not sus_eng_plug and not sus_ins_plug and not sus_rmv_plug:
+                job.enable_stop_mode()
+                outcome = out.err_plug_in_stop
+                rospy.logerr(f"Robot got stuck while trying to insert the plug. Arm is in an undefined condition.")
+            else:
+                raise StateMachineError(f"Logical error. This situation should not occur. Check your implementation!")
+        elif job.in_recover_mode():
+            if sus_eng_plug and sus_ins_plug:
+                outcome = out.plug_connected
+                rospy.loginfo(f"Robot connected plug and socket successfully")
+            else:
+                job.enable_stop_mode()
+                outcome = out.err_plug_in_stop
+        else:
+            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.plug_connected, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

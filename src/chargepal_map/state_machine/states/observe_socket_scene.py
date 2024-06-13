@@ -39,7 +39,7 @@ class ObserveSocketScene(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
+        detector_fp = self.cfg.data['detector'][self.cfg.data[job.get_id()]['scene_detector']]
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start observing the socket scene')
@@ -63,7 +63,7 @@ class ObserveSocketScene(State):
                 job.enable_recover_mode()
                 outcome = out.err_obs_socket_recover
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_scene_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

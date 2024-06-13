@@ -54,8 +54,9 @@ class MoveToSocketPrePos(State):
                 sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
         rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
         rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
+        outcome = out.socket_pre_pos
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_pre_pos, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

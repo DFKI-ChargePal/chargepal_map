@@ -54,8 +54,9 @@ class MoveToSocketObs(State):
                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
                 T_base2camera = T_base2socket_scene * self._T_socket_save2camera
                 self.pilot.robot.movel(T_base2camera, self.cfg.data['vel'], self.cfg.data['acc'])
+        outcome = out.socket_pre_obs
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_pre_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

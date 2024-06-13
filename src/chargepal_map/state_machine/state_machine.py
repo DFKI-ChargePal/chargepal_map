@@ -213,9 +213,9 @@ class ManipulationStateMachine:
                 label=state_name(s.ObserveSocket),
                 state=s.ObserveSocket(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.socket_obs:          state_name(s.MoveToSocketPrePos),
-                    out.err_plug_in_recover: state_name(s.MoveToSocketObsRecover),
-                    out.job_stopped:         state_name(s.Stop),
+                    out.socket_obs:             state_name(s.MoveToSocketPrePos),
+                    out.err_obs_socket_recover: state_name(s.MoveToSocketObsRecover),
+                    out.job_stopped:            state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
@@ -244,9 +244,10 @@ class ManipulationStateMachine:
                 label=state_name(s.ReleasePlug),
                 state=s.ReleasePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_released:    state_name(s.MoveToCompletion),
-                    out.err_plug_in_stop: state_name(s.Malfunction),
-                    out.job_stopped:      state_name(s.Stop),
+                    out.plug_released:       state_name(s.MoveToCompletion),
+                    out.err_plug_in_recover: state_name(s.MoveToIncompletion),
+                    out.err_plug_in_stop:    state_name(s.Malfunction),
+                    out.job_stopped:         state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )

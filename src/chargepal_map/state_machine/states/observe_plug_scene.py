@@ -39,7 +39,7 @@ class ObservePlugScene(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        detector_fp = self.cfg.data['detector'][self.cfg.data[job.ID]['scene_detector']]
+        detector_fp = self.cfg.data['detector'][self.cfg.data[job.get_id()]['scene_detector']]
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         rospy.loginfo('Start observing the plug scene')

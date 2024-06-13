@@ -33,7 +33,7 @@ class ObserveSocket(State):
         State.__init__(self, 
                        outcomes=[
                            out.socket_obs, 
-                           out.err_plug_in_recover, 
+                           out.err_obs_socket_recover, 
                            out.job_stopped], 
                        input_keys=['job'],
                        output_keys=['job'])
@@ -87,7 +87,7 @@ class ObserveSocket(State):
             job.enable_recover_mode()
             outcome = out.err_obs_socket_recover
         if self.user_cb is not None:
-            outcome = self.user_cb.request_action(out.socket_obs, out.job_stopped)
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

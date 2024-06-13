@@ -1,6 +1,7 @@
 """ This file implements the state >>MoveToIncompletion<< """
 from __future__ import annotations
 # libs
+from chargepal.chargepal_map.src.chargepal_map.state_machine.states.release_plug import ReleasePlug
 import rospy
 import ur_pilot
 from smach import State
@@ -45,9 +46,11 @@ class MoveToIncompletion(State):
             state_key = 'observe_plug'
         elif job.latest_state() == state_name(AttachPlug):
             state_key = 'attack_plug'
+        elif job.latest_state() == state_name(ReleasePlug):
+            state_key = 'release_plug'
         else:
             raise StateMachineError(f"Latest state '{job.latest_state()}' cannot be matched to a new state outcome")
-        
+
         if job.is_part_of_plug_in() and job.is_part_of_workspace_left():
             job_key = 'home_position_workspace_left'
         elif job.is_part_of_plug_in() and job.is_part_of_workspace_right():
