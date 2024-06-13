@@ -46,7 +46,7 @@ class Job:
         self.retry_count = 0
         self.interior_socket = Job.SocketObservations()  # socket at the battery cart
         self.exterior_socket = Job.SocketObservations()  # socket at the adapter station, battery charging station or car
-        if not self._is_valid():
+        if not self.is_valid_id(self._id):
             raise ValueError(f"Given job id is invalid: {self._id}")
 
     def __str__(self) -> str:
@@ -56,13 +56,14 @@ class Job:
         class_name = type(self).__name__
         return f"{class_name}(id={self._id!r}, mode={self._mode!r})"
 
-    def _is_valid(self) -> bool:
+    @staticmethod
+    def is_valid_id(job_id: str) -> bool:
         """ Check if given job name is valid or not
         
         Returns:
             True if valid - False otherwise
         """
-        valid = self._id in [
+        valid = job_id in [
             Job.ID.move_home_arm,
             Job.ID.free_drive_arm,
 

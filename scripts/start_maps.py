@@ -48,7 +48,7 @@ def start_maps(fp_cfg: Path) -> None:
     # Create action servers
     maps: list[ManipulationActionServer] = []
     for job_name in config_dict['jobs']:
-        if mp.job_ids.is_valid(job_name):
+        if mp.Job.is_valid_id(job_name):
             rospy.loginfo(f"Start action server: {job_name}")
             mas = mp.manipulation_action_server.create(job_name, sm)
             maps.append(mas)
@@ -78,6 +78,6 @@ if __name__ == '__main__':
     rospy.loginfo(f"Starting manipulation action process servers")
     sys_cfg_path = Path(sys.argv[1])
     if sys_cfg_path.exists() and sys_cfg_path.is_file():
-        maps = start_maps(sys_cfg_path)
+        start_maps(sys_cfg_path)
     else:
         raise FileNotFoundError(f"Can not find configuration file '{sys_cfg_path}'")
