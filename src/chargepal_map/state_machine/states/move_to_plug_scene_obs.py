@@ -36,7 +36,9 @@ class MoveToPlugSceneObs(State):
         print(state_header(type(self)))
         # Try to find matching configuration
         job: Job = ud.job
-        job_data = self.cfg.data.get(job.get_id())
+        job_data = self.cfg.data[job.get_id()]
+        vel = self.cfg.data['vel']
+        acc = self.cfg.data['acc']
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         if job.in_stop_mode() or job.in_recover_mode():
@@ -47,9 +49,7 @@ class MoveToPlugSceneObs(State):
                 # Start moving the arm
                 rospy.loginfo(f"Start moving the arm to the battery box scene") 
                 with self.pilot.context.position_control():
-                        self.pilot.robot.movej(job_data['joint_position'],
-                                                job_data['vel'],
-                                                job_data['acc'])
+                        self.pilot.robot.movej(job_data['joint_position'],vel=vel, acc=acc)
             elif job.in_retry_mode():
                 rospy.loginfo(f"Retry action: "
                               f"Since there shouldn't be any variance in the observation, the robot will not move")
@@ -58,15 +58,13 @@ class MoveToPlugSceneObs(State):
             if job.in_progress_mode():
                 rospy.loginfo(f"Start moving the arm to one of the outer side scene")
                 with self.pilot.context.position_control():
-                    self.pilot.robot.move_path_j(job_data['joint_waypoints'],
-                                                 job_data['vel'],
-                                                 job_data['acc'])
+                    self.pilot.robot.move_path_j(job_data['joint_waypoints'], vel=vel, acc=acc)
             elif job.in_retry_mode():
                 # Move to a robot arm in a slightly different observation pose
                 rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
                 with self.pilot.context.position_control():
                     j_pos_finale = job_data['joint_waypoints'][-1]
-                    self.pilot.robot.movej(j_pos_finale, job_data['vel'], job_data['acc'])
+                    self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
                     self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
                     current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
                     theta = 5.0
