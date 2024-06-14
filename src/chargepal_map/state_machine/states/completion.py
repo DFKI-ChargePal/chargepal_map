@@ -52,4 +52,4 @@ class Incompletion(State):
         job.enable_stop_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))
-        return out.job_complete
+        return out.job_incomplete

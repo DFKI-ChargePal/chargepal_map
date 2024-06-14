@@ -29,7 +29,7 @@ class AttachPlug(State):
                        outcomes=[out.plug_attached,
                                  out.err_plug_out_retry,
                                  out.err_plug_out_recover,
-                                 out.err_plug_in_stop, 
+                                 out.err_plug_out_stop, 
                                  out.job_stopped],
                        input_keys=['job'],
                        output_keys=['job'])

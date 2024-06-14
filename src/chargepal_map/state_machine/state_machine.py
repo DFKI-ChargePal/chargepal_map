@@ -275,7 +275,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.Incompletion),
-                state=s.Completion(self.config, pilot),
+                state=s.Incompletion(self.config, pilot),
                 transitions={out.job_incomplete: out.job_incomplete}
             )
             StateMachine.add(
