@@ -3,7 +3,7 @@ from __future__ import annotations
 # libs
 import rospy
 from smach import State
-from spatialmath import sm
+import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out

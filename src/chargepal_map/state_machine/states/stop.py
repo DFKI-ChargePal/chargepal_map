@@ -12,7 +12,6 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.utils import (
     state_header,
     state_footer,
-    StateMachineError,
 )
 
 # typing
