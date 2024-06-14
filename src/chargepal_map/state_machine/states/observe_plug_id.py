@@ -50,7 +50,7 @@ class ObservePlugId(State):
             raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
         if T_base2socket is None:
             raise StateMachineError(f"Missing observation of plug scene. Interrupt process")
-        plug_id_dtt = self.cfg.data['detector'][job.get_plug_type()]['detector']
+        plug_id_dtt = self.cfg.data['detector'][self.cfg.data[job.get_plug_type()]['detector']]
         if not job.in_progress_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         # Try to observe plug id
