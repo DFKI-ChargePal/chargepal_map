@@ -13,6 +13,7 @@ from chargepal_map.state_machine.state_config import StateConfig
 from chargepal_map.state_machine.states.attach_plug import AttachPlug
 from chargepal_map.state_machine.states.observe_plug import ObservePlug
 from chargepal_map.state_machine.states.release_plug import ReleasePlug
+from chargepal_map.state_machine.states.observe_plug_id import ObservePlugId
 from chargepal_map.state_machine.states.observe_plug_scene import ObservePlugScene
 from chargepal_map.state_machine.utils import (
     state_name,
@@ -43,6 +44,8 @@ class MoveToIncompletion(State):
         # Find matching key for motion path configuration
         if job.latest_state() == state_name(ObservePlugScene):
             state_key = 'observe_plug_scene'
+        elif job.latest_state() == state_name(ObservePlugId):
+            state_key = 'observe_plug_id'
         elif job.latest_state() == state_name(ObservePlug):
             state_key = 'observe_plug'
         elif job.latest_state() == state_name(AttachPlug):
