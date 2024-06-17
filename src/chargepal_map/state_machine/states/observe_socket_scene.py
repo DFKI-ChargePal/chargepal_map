@@ -55,13 +55,17 @@ class ObserveSocketScene(State):
                 raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
             job.enable_progress_mode()
             outcome = out.socket_scene_obs
+            rospy.loginfo(f"Found the socket scene successfully")
         else:
             if job.retry_count < 4:
                 job.enable_retry_mode()
                 outcome = out.err_obs_socket_retry
+                rospy.loginfo(f"No socket scene found. Try again for {4 - job.retry_count}")
             else:
                 job.enable_recover_mode()
                 outcome = out.err_obs_socket_recover
+                rospy.loginfo(f"No socket scene found. Check observation view and the detector settings")
+                rospy.logwarn(f"Switch to recover mode")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))

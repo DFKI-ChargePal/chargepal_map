@@ -4,6 +4,7 @@ from __future__ import annotations
 # libs
 import rospy
 import ur_pilot
+import numpy as np
 from smach import State
 import spatialmath as sm
 
@@ -24,7 +25,7 @@ from ur_pilot import Pilot
 
 class ObservePlug(State):
 
-    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, 0.0)), t=(0.0, 0.0, -0.25))
+    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(-0.1, 0.0, -0.25)) * sm.SE3().Rx(-10.0, unit='deg')
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
@@ -51,7 +52,7 @@ class ObservePlug(State):
             T_base2socket_scene = job.exterior_socket.T_base2socket_scene
             if T_base2socket_scene is None:
                 raise StateMachineError(f"Missing observation of the plug scene. Interrupt process")
-            plug_dtt = self.cfg.data['detector'][job.get_plug_type()]['detector']
+            plug_dtt = self.cfg.data['detector'][self.cfg.data[job.get_plug_type()]['detector']]
             with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
                 with self.pilot.context.position_control():
                     self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)

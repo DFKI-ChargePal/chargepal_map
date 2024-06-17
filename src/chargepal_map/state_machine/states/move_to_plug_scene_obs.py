@@ -67,6 +67,7 @@ class MoveToPlugSceneObs(State):
                     self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
                     self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
                     current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
+                    rospy.logdebug(f"Current ee pose: {ur_pilot.utils.se3_to_str(current_ee_pose)}")
                     theta = 5.0
                     if job.retry_count % 4 == 1:
                         new_ee_pose = current_ee_pose * sm.SE3().Rx(theta, unit='deg')
@@ -76,6 +77,7 @@ class MoveToPlugSceneObs(State):
                         new_ee_pose = current_ee_pose * sm.SE3().Rx(-theta, unit='deg')
                     else:  # job.retry_count % 4 == 0:
                         new_ee_pose = current_ee_pose * sm.SE3().Ry(-theta, unit='deg')
+                    rospy.logdebug(f"    New ee pose: {ur_pilot.utils.se3_to_str(new_ee_pose)}")
                     self.pilot.move_to_tcp_pose(new_ee_pose)
                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
         else:

@@ -4,6 +4,7 @@ from __future__ import annotations
 # libs
 import rospy
 import ur_pilot
+import numpy as np
 from smach import State
 import spatialmath as sm
 
@@ -24,7 +25,7 @@ from ur_pilot import Pilot
 
 class ObservePlugId(State):
 
-    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, 0.0)), t=(0.0, 0.0, -0.25))
+    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0, 0.0, -0.25))
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot

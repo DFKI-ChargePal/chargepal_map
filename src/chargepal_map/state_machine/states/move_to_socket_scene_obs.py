@@ -37,17 +37,19 @@ class MoveToSocketSceneObs(State):
         # Get user and configuration data
         job: Job = ud.job
         job_data = self.cfg.data.get(job.get_id())
+        vel = self.cfg.data['vel']
+        acc = self.cfg.data['acc']
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
         if job.in_progress_mode():
             rospy.loginfo(f"Start moving the arm to the job scene according its waypoints")
             with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=job_data['vel'], acc=job_data['acc'])
+                self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=vel, acc=acc)
         elif job.in_retry_mode():
             rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
             with self.pilot.context.position_control():
                 j_pos_finale = job_data['joint_waypoints'][-1]
-                self.pilot.robot.movej(j_pos_finale, job_data['vel'], job_data['acc'])
+                self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
                 current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
                 theta = 5.0

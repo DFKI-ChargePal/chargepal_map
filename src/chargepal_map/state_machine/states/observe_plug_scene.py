@@ -53,15 +53,19 @@ class ObservePlugScene(State):
                 job.exterior_socket.T_base2socket_scene = sm.SE3(T_base2socket)
             else:
                 raise StateMachineError(f"Not treated job: {job}")
+            rospy.loginfo(f"Found the plug scene successfully")
             job.enable_progress_mode()
             outcome = out.plug_scene_obs
         else:
             if job.retry_count < 4:
                 job.enable_retry_mode()
                 outcome = out.err_obs_plug_retry
+                rospy.loginfo(f"No plug scene found. Try again for {4 - job.retry_count}")
             else:
                 job.enable_recover_mode()
                 outcome = out.err_obs_plug_recover
+                rospy.loginfo(f"No plug scene found. Check observation view and the detector settings")
+                rospy.logwarn(f"Switch to recover mode")
         if self.user_cb is not None:
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))

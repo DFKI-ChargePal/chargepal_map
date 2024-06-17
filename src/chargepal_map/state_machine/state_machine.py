@@ -112,7 +112,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.ObservePlugScene),
-                state=s.ObservePlugScene(self.config, pilot, self.step_by_user),
+                state=s.ObservePlugScene(self.config, pilot),
                 transitions={
                     out.plug_scene_obs:       state_name(s.ObservePlugId),
                     out.err_obs_plug_retry:   state_name(s.MoveToPlugSceneObs),
