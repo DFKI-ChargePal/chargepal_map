@@ -41,7 +41,7 @@ class MoveToSocketObsRecover(State):
         job_key = job.get_id()
         if not job.in_recover_mode():
             raise StateMachineError(f"Job {job} in an invalid mode. Interrupt process")
-
+        
         # Find matching key for motion path configuration
         if job.latest_state() == state_name(ObserveSocket):
             state_key = 'observe_socket'
@@ -51,12 +51,15 @@ class MoveToSocketObsRecover(State):
             raise StateMachineError(f"Latest state '{job.latest_state}' cannot be matched to a new state outcome")
         
         act_values = self.cfg.data[state_key][job_key]
-        rospy.loginfo(f"Moving back to the starting socket")
-        with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(wps=act_values, vel=self.cfg.data['vel'], acc=self.cfg.data['acc'])
-        outcome = out.socket_pre_obs
+        outcome = ''
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move the arm into a recover pose to bring back the plug")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo(f"Moving back to the starting socket")
+            with self.pilot.context.position_control():
+                    self.pilot.robot.move_path_j(wps=act_values, vel=self.cfg.data['vel'], acc=self.cfg.data['acc'])
+            outcome = out.socket_pre_obs
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

@@ -48,15 +48,18 @@ class MoveToSocketPrePos(State):
             T_base2socket = job.interior_socket.T_base2socket_close_up
         else:
             raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
-        rospy.loginfo('Start moving the plug to the pre connecting pose')
-        with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
-            with self.pilot.context.position_control():
-                sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
-        rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
-        rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
-        outcome = out.socket_pre_pos
+        outcome = ''
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move the arm to the pre-connect position in front of the socket")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo('Start moving the plug to the pre connecting pose')
+            with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
+                with self.pilot.context.position_control():
+                    sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
+            rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
+            rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
+            outcome = out.socket_pre_pos
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

@@ -67,6 +67,7 @@ class ObserveSocketScene(State):
                 rospy.loginfo(f"No socket scene found. Check observation view and the detector settings")
                 rospy.logwarn(f"Switch to recover mode")
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready to continue process: {job}")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         job.track_state(type(self))
         print(state_footer(type(self)))

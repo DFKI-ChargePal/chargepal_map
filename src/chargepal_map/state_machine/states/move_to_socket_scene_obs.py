@@ -41,33 +41,36 @@ class MoveToSocketSceneObs(State):
         acc = self.cfg.data['acc']
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
-        if job.in_progress_mode():
-            rospy.loginfo(f"Start moving the arm to the job scene according its waypoints")
-            with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=vel, acc=acc)
-        elif job.in_retry_mode():
-            rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
-            with self.pilot.context.position_control():
-                j_pos_finale = job_data['joint_waypoints'][-1]
-                self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
-                self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
-                current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
-                theta = 5.0
-                if job.retry_count % 4 == 1:
-                    new_ee_pose = current_ee_pose * sm.SE3().Rx(theta, unit='deg')
-                elif job.retry_count % 4 == 2:
-                    new_ee_pose = current_ee_pose * sm.SE3().Ry(theta, unit='deg')
-                elif job.retry_count % 4 == 3:
-                    new_ee_pose = current_ee_pose * sm.SE3().Rx(-theta, unit='deg')
-                else:  # job.retry_count % 4 == 0:
-                    new_ee_pose = current_ee_pose * sm.SE3().Ry(-theta, unit='deg')
-                self.pilot.move_to_tcp_pose(new_ee_pose)
-            self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
-        else:
-            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        outcome = out.socket_scene_pre_obs
+        outcome = ''
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move arm to the socket scene observation configuration")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            if job.in_progress_mode():
+                rospy.loginfo(f"Start moving the arm to the job scene according its waypoints")
+                with self.pilot.context.position_control():
+                    self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=vel, acc=acc)
+            elif job.in_retry_mode():
+                rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
+                with self.pilot.context.position_control():
+                    j_pos_finale = job_data['joint_waypoints'][-1]
+                    self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
+                    self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
+                    current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
+                    theta = 5.0
+                    if job.retry_count % 4 == 1:
+                        new_ee_pose = current_ee_pose * sm.SE3().Rx(theta, unit='deg')
+                    elif job.retry_count % 4 == 2:
+                        new_ee_pose = current_ee_pose * sm.SE3().Ry(theta, unit='deg')
+                    elif job.retry_count % 4 == 3:
+                        new_ee_pose = current_ee_pose * sm.SE3().Rx(-theta, unit='deg')
+                    else:  # job.retry_count % 4 == 0:
+                        new_ee_pose = current_ee_pose * sm.SE3().Ry(-theta, unit='deg')
+                    self.pilot.move_to_tcp_pose(new_ee_pose)
+                self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
+            else:
+                raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+            outcome = out.socket_scene_pre_obs
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

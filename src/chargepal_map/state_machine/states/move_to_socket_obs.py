@@ -49,15 +49,18 @@ class MoveToSocketObs(State):
             raise StateMachineError(f"Missing observation of plug scene. Interrupt process")
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        rospy.loginfo(f"Start moving in front of socket to have a better view on the socket")
-        with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
-            with self.pilot.context.position_control():
-                self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
-                T_base2camera = T_base2socket_scene * self._T_socket_save2camera
-                self.pilot.robot.movel(T_base2camera, self.cfg.data['vel'], self.cfg.data['acc'])
-        outcome = out.socket_pre_obs
+        outcome = ''
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move arm to the socket observation pose")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo(f"Start moving in front of socket to have a better view on the socket")
+            with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
+                with self.pilot.context.position_control():
+                    self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
+                    T_base2camera = T_base2socket_scene * self._T_socket_save2camera
+                    self.pilot.robot.movel(T_base2camera, self.cfg.data['vel'], self.cfg.data['acc'])
+            outcome = out.socket_pre_obs
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

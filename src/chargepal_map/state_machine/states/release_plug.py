@@ -54,42 +54,45 @@ class ReleasePlug(State):
             T_base2socket = job.interior_socket.T_base2socket_close_up
         else:
             raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
-        rospy.loginfo('Start to try releasing the arm from the plug')
-        with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
-            sus_unl_plug, sus_dec_plug = False, False
-            with self.pilot.context.force_control():
-                sus_unl_plug, lin_ang_err = self.pilot.try2_unlock_plug(
-                    T_base2socket=T_base2socket,
-                    time_out=self.cfg.data['unlock_time_out'],
-                    max_torque=self.cfg.data['unlock_max_torque'],
-                    unlock_angle=self.cfg.data['unlock_angle']
-                    )
-                rospy.logdebug(f"Final error after unlocking robot from plug: "
-                               f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
-                if sus_unl_plug:
-                    sus_dec_plug, lin_ang_err = self.pilot.try2_decouple_to_plug(
-                        time_out=self.cfg.data['decouple_time_out'],
-                        max_force=self.cfg.data['decouple_max_force'],
-                        max_torque=self.cfg.data['decouple_max_torque'],
-                        decouple_tolerance=self.cfg.data['decouple_tolerance']
-                        )
-                    rospy.logdebug("Final error after decoupling robot from plug: "
-                                   f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
-        rospy.loginfo(f"Unlock robot from plug successfully: {sus_unl_plug}")
-        rospy.loginfo(f"Decoupling robot and plug successfully: {sus_dec_plug}")
-        if sus_unl_plug and sus_dec_plug:
-            if job.in_progress_mode():
-                outcome = out.plug_released
-            elif job.in_recover_mode():
-                outcome = out.err_plug_in_recover
-            else:
-                raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        else:
-            job.enable_stop_mode()
-            outcome = out.err_plug_in_stop
-            rospy.logerr(f"Robot was not able to release the plug successfully. Arm is probably still connected")
+        outcome = ''
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready to release plug from arm")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo('Start to try releasing the arm from the plug')
+            with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
+                sus_unl_plug, sus_dec_plug = False, False
+                with self.pilot.context.force_control():
+                    sus_unl_plug, lin_ang_err = self.pilot.try2_unlock_plug(
+                        T_base2socket=T_base2socket,
+                        time_out=self.cfg.data['unlock_time_out'],
+                        max_torque=self.cfg.data['unlock_max_torque'],
+                        unlock_angle=self.cfg.data['unlock_angle']
+                        )
+                    rospy.logdebug(f"Final error after unlocking robot from plug: "
+                                f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
+                    if sus_unl_plug:
+                        sus_dec_plug, lin_ang_err = self.pilot.try2_decouple_to_plug(
+                            time_out=self.cfg.data['decouple_time_out'],
+                            max_force=self.cfg.data['decouple_max_force'],
+                            max_torque=self.cfg.data['decouple_max_torque'],
+                            decouple_tolerance=self.cfg.data['decouple_tolerance']
+                            )
+                        rospy.logdebug("Final error after decoupling robot from plug: "
+                                    f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
+            rospy.loginfo(f"Unlock robot from plug successfully: {sus_unl_plug}")
+            rospy.loginfo(f"Decoupling robot and plug successfully: {sus_dec_plug}")
+            if sus_unl_plug and sus_dec_plug:
+                if job.in_progress_mode():
+                    outcome = out.plug_released
+                elif job.in_recover_mode():
+                    outcome = out.err_plug_in_recover
+                else:
+                    raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+            else:
+                job.enable_stop_mode()
+                outcome = out.err_plug_in_stop
+                rospy.logerr(f"Robot was not able to release the plug successfully. Arm is probably still connected")
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

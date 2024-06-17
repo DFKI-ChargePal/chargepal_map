@@ -112,7 +112,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.ObservePlugScene),
-                state=s.ObservePlugScene(self.config, pilot),
+                state=s.ObservePlugScene(self.config, pilot, None),
                 transitions={
                     out.plug_scene_obs:       state_name(s.ObservePlugId),
                     out.err_obs_plug_retry:   state_name(s.MoveToPlugSceneObs),
@@ -183,7 +183,7 @@ class ManipulationStateMachine:
             )
             StateMachine.add(
                 label=state_name(s.ObserveSocketScene),
-                state=s.ObserveSocketScene(self.config, pilot, self.step_by_user),
+                state=s.ObserveSocketScene(self.config, pilot, None),
                 transitions={
                     out.socket_scene_obs:       state_name(s.MoveToSocketObs),
                     out.err_obs_socket_retry:   state_name(s.MoveToSocketSceneObs),
@@ -257,6 +257,7 @@ class ManipulationStateMachine:
                 state=s.MoveToCompletion(self.config, pilot, self.step_by_user),
                 transitions={
                     out.job_complete: state_name(s.Completion),
+                    out.job_stopped:  state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
@@ -270,6 +271,7 @@ class ManipulationStateMachine:
                 state=s.MoveToIncompletion(self.config, pilot, self.step_by_user),
                 transitions={
                     out.job_incomplete: state_name(s.Incompletion),
+                    out.job_stopped:    state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )

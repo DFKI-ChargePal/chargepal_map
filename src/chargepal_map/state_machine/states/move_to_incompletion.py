@@ -33,7 +33,7 @@ class MoveToIncompletion(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.job_incomplete],
+                       outcomes=[out.job_incomplete, out.job_stopped],
                        input_keys=['job'],
                        output_keys=['job'])
 
@@ -67,13 +67,17 @@ class MoveToIncompletion(State):
             job_key = 'joint_waypoints_ads2home_rs'
         else:
             raise StateMachineError(f"Current job '{job.ID}' cannot be matched to a new state outcome")
-
-        rospy.loginfo(f"Start moving the arm to a save driving position.")
-        act_values = self.cfg.data[state_key][job_key]
-        with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(act_values, self.cfg.data['vel'], self.cfg.data['acc'])
-        rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
-        outcome = out.job_incomplete
+        outcome = ''
+        if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move arm in final position")
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo(f"Start moving the arm to a save driving position.")
+            act_values = self.cfg.data[state_key][job_key]
+            with self.pilot.context.position_control():
+                self.pilot.robot.move_path_j(act_values, self.cfg.data['vel'], self.cfg.data['acc'])
+            rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
+            outcome = out.job_incomplete
         job.enable_stop_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))

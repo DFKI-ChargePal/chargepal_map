@@ -26,7 +26,7 @@ class MoveToCompletion(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
-                       outcomes=[out.job_complete],
+                       outcomes=[out.job_complete, out.job_stopped],
                        input_keys=['job'],
                        output_keys=['job'])
 
@@ -34,11 +34,16 @@ class MoveToCompletion(State):
         print(state_header(type(self)))
         job: Job = ud.job
         wps = self.cfg.data[job.get_id()]['joint_waypoints']
-        rospy.loginfo(f"Start moving the arm to a save driving position.")
-        with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
-        rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
-        outcome = out.job_complete
+        outcome = ''
+        if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move arm in final position")
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo(f"Start moving the arm to a save driving position.")
+            with self.pilot.context.position_control():
+                self.pilot.robot.move_path_j(wps, self.cfg.data['vel'], self.cfg.data['acc'])
+            rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
+            outcome = out.job_complete
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome
