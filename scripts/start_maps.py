@@ -40,7 +40,7 @@ def start_maps(fp_cfg: Path) -> None:
     cam.load_coefficients(cam_cc_path)
     # Setting up ur-pilot
     arm_dir = config_dir.joinpath('ur_arm')
-    ur_pilot.logger.set_logging_level(logging.DEBUG)
+    ur_pilot.logger.set_logging_level(logging.INFO)
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
     # Create manipulation state machine / process
@@ -78,7 +78,7 @@ def start_maps(fp_cfg: Path) -> None:
 
 
 if __name__ == '__main__':
-    rospy.init_node('manipulation_action_process', log_level=rospy.DEBUG, disable_signals=True)
+    rospy.init_node('manipulation_action_process', log_level=rospy.INFO, disable_signals=True)
     rospy.loginfo(f"Starting manipulation action process servers")
     sys_cfg_path = Path(sys.argv[1])
     if sys_cfg_path.exists() and sys_cfg_path.is_file():

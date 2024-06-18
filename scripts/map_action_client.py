@@ -4,6 +4,7 @@ from http import client
 
 # libs
 import rospy
+import argparse
 import actionlib
 
 # actions
@@ -67,7 +68,25 @@ from typing import Type
 from genpy import Message
 
 
-class ManipulationActionClient:
+_plug_in_action_config = {
+        'name': 'plug_in_dsk_dm', 
+        'act_msg': PlugInDskDmAction, 
+        'goal_msg': PlugInDskDmGoal,
+        'res_msg': PlugInDskDmResult,
+        'fb_msg': PlugInDskDmFeedback,
+    }
+
+_plug_out_action_config = {
+        'name': 'plug_out_dsk_dm', 
+        'act_msg': PlugOutDskDmAction, 
+        'goal_msg': PlugOutDskDmGoal,
+        'res_msg': PlugOutDskDmResult,
+        'fb_msg': PlugOutDskDmFeedback,
+    }
+
+
+
+class ManipulationAction:
 
     def __init__(self, 
                  name: str,
@@ -83,24 +102,40 @@ class ManipulationActionClient:
         goal = self.goal_msg()
         self.client.send_goal(goal)
         self.client.wait_for_result()
-        return client.get_result()
-    
+        return self.client.get_result()
+
 
 
 if __name__ == '__main__':
     
-    plug_in_client_config = {
-        'name': 'plug_in_dsk_dm', 
-        'act_msg': PlugInDskDmAction, 
-        'goal_msg': PlugInDskDmGoal,
-        'res_msg': PlugInDskDmResult,
-        'fb_msg': PlugInDskDmFeedback,
-    }
-    
+    parser = argparse.ArgumentParser(description='Script to run MAP actions')
+    parser.add_argument('loops', type=int, help='Number of loops that are performed')
+    args = parser.parse_args()
     try:
         rospy.init_node('chargepal_map_action_client')
-        plug_in_client = ManipulationActionClient(**plug_in_client_config)
-        plug_in_res = plug_in_client.run()
-        print(f"Plug-in process successfully: {plug_in_res.success}")
+        plug_in_action = ManipulationAction(**_plug_in_action_config)
+        plug_out_action = ManipulationAction(**_plug_out_action_config)
+
+        n_loops: int = args.loops
+        for l in range(args.loops):
+            print(f"\n")
+            print(f"----   Run Manipulation Process   ----")
+            print(f"Start loop: {l+1}/{n_loops}")
+            plug_in_res = plug_in_action.run()
+            print(f"Plug-in process successfully: {plug_in_res.success}")
+            stop_process = True
+            if plug_in_res.success:
+                plug_out_res = plug_out_action.run()
+                print(f"Plug-out process successfully: {plug_out_res.success}")
+                if not plug_out_res.success:
+                    print(f"Error in plug-out process. Stop executing")
+                else:
+                    stop_process = False
+            else:
+                print(f"Error during plug-in process. Stop executing")
+            print(f"--------------------------------------")
+            if stop_process:
+                break
+        print(f"\n")
     except rospy.ROSInterruptException:
         print(f"Program interrupted before completion")
