@@ -57,5 +57,6 @@ include_directories(
 catkin_install_python(PROGRAMS
   scripts/start_maps.py
   scripts/manipulation_server_ui.py
+  scripts/map_action_client.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
