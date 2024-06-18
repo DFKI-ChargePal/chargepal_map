@@ -88,7 +88,7 @@ _plug_out_action_config = {
 
 
 def print_countdown(seconds: float) -> None:
-    n = 49
+    n = 69
     _t_sleep = seconds / n
     time_out_bar = tqdm.tqdm(range(n), ascii=' >=', ncols=n, leave=False, disable=False, bar_format="{l_bar}{bar}|")
     _t_start = time.perf_counter()
@@ -96,7 +96,7 @@ def print_countdown(seconds: float) -> None:
         tts = seconds - (time.perf_counter() - _t_start)
         if tts < 0.0:
             tts = 0.0
-        time_out_bar.set_description(f"Start in {tts:5.2f} seconds")
+        time_out_bar.set_description(f"===>   Start in {tts:5.2f} seconds")
         time.sleep(_t_sleep)
 
 
