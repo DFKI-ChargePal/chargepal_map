@@ -6,6 +6,7 @@ import yaml
 import rospy
 import logging
 import ur_pilot
+import smach_ros
 import camera_kit as ck
 from pathlib import Path
 import chargepal_map as mp
@@ -45,10 +46,13 @@ def start_maps(fp_cfg: Path) -> None:
     # Create manipulation state machine / process
     sm =  mp.ManipulationStateMachine(config_dir, config_dict)
     sm.build(pilot)
+    sis = smach_ros.IntrospectionServer(f"server_name", sm.state_machine, '/SM_ROOT')
+    sis.start()
     # Create action servers
     maps: list[ManipulationActionServer] = []
     for job_name in config_dict['jobs']:
         if mp.Job.is_valid_id(job_name):
+            # Create and start the introspection server
             rospy.loginfo(f"Start action server: {job_name}")
             mas = mp.manipulation_action_server.create(job_name, sm)
             maps.append(mas)
