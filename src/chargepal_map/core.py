@@ -3,6 +3,7 @@ from __future__ import annotations
 # libs
 import rospy
 import actionlib
+from enum import Enum
 from smach import UserData
 from collections import namedtuple
 
@@ -71,6 +72,13 @@ from typing import Type
 from genpy import Message
 
 
+class Outcome(Enum):
+    ERROR = -1
+    COMPLETION = 0
+    INCOMPLETION = 1
+    USER_STOP = 2
+
+
 class ManipulationActionServer:
 
     def __init__(self, 
@@ -100,26 +108,43 @@ class ManipulationActionServer:
         """
         rospy.loginfo(f"Launch a new process.")
         result_msg = self.res_msg()
+        self.act_srv.accept_new_goal()
         try:
             ud = UserData()
             ud.job = Job(self.name)
             outcome = self.sm.execute(ud)
             if outcome == out.job_complete:
                 result_msg.success = True
+                result_msg.outcome = Outcome.COMPLETION.value
                 self.act_srv.set_succeeded(result=result_msg)
-                rospy.loginfo(f"Finish process successfully with outcome {outcome}.")
-            else:
+                rospy.loginfo(f"Process fully completed")
+            elif outcome == out.job_incomplete:
                 result_msg.success = False
-                self.act_srv.set_preempted(result=result_msg)
-                rospy.loginfo(f"Stop process prematurely with outcome {outcome}.")
+                result_msg.outcome = Outcome.INCOMPLETION.value
+                self.act_srv.set_succeeded(result=result_msg)
+                rospy.loginfo(f"Process not fully completed")
+            elif outcome == out.job_failed:
+                result_msg.success = False
+                result_msg.outcome = Outcome.ERROR.value
+                self.act_srv.set_aborted(result=result_msg)
+                rospy.loginfo(f"Process failed. Abort action")
+            elif outcome == out.job_stopped:
+                result_msg.success = False
+                result_msg.outcome = Outcome.USER_STOP.value
+                self.act_srv.set_aborted(result=result_msg)
+                rospy.loginfo(f"Stop process by user request")
+            else:
+                raise StateMachineError(f"Undefined behavior for outcome: {outcome}")
         except StateMachineError as sme:
-            self.act_srv.set_aborted(result=result_msg)
             result_msg.success = False
+            result_msg.outcome = Outcome.ERROR.value
+            self.act_srv.set_aborted(result=result_msg)
             rospy.logwarn(f"Error in state machine procedure: {sme}")
         except Exception as e:
-            self.act_srv.set_aborted(result=result_msg)
-            result_msg.success = False
             self.shutdown = True
+            result_msg.success = False
+            result_msg.outcome = Outcome.ERROR.value
+            self.act_srv.set_aborted(result=result_msg)
             rospy.logerr(f"Unknown error while executing manipulation process: {e}")
             rospy.logerr(f"Shutdown manipulation node!")
 
@@ -167,9 +192,6 @@ class ActSrvFactory:
                                            msg_col.fb_msg,
                                            state_machine)
         return act_srv
-
-
-
 
 
 # Register all manipulation action servers
