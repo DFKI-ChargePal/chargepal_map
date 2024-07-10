@@ -3,7 +3,6 @@ from __future__ import annotations
 # libs
 import rospy
 import actionlib
-from enum import Enum
 from smach import UserData
 from collections import namedtuple
 
@@ -72,13 +71,6 @@ from typing import Type
 from genpy import Message
 
 
-class Outcome(Enum):
-    ERROR = -1
-    COMPLETION = 0
-    INCOMPLETION = 1
-    USER_STOP = 2
-
-
 class ManipulationActionServer:
 
     def __init__(self, 
@@ -115,35 +107,35 @@ class ManipulationActionServer:
             outcome = self.sm.execute(ud)
             if outcome == out.job_complete:
                 result_msg.success = True
-                result_msg.outcome = Outcome.COMPLETION.value
+                result_msg.arm_free = True
                 self.act_srv.set_succeeded(result=result_msg)
                 rospy.loginfo(f"Process fully completed")
             elif outcome == out.job_incomplete:
                 result_msg.success = False
-                result_msg.outcome = Outcome.INCOMPLETION.value
+                result_msg.arm_free = True
                 self.act_srv.set_succeeded(result=result_msg)
                 rospy.loginfo(f"Process not fully completed")
             elif outcome == out.job_failed:
                 result_msg.success = False
-                result_msg.outcome = Outcome.ERROR.value
+                result_msg.arm_free = False
                 self.act_srv.set_aborted(result=result_msg)
                 rospy.loginfo(f"Process failed. Abort action")
             elif outcome == out.job_stopped:
                 result_msg.success = False
-                result_msg.outcome = Outcome.USER_STOP.value
+                result_msg.arm_free = False
                 self.act_srv.set_aborted(result=result_msg)
                 rospy.loginfo(f"Stop process by user request")
             else:
                 raise StateMachineError(f"Undefined behavior for outcome: {outcome}")
         except StateMachineError as sme:
             result_msg.success = False
-            result_msg.outcome = Outcome.ERROR.value
+            result_msg.arm_free = False
             self.act_srv.set_aborted(result=result_msg)
             rospy.logwarn(f"Error in state machine procedure: {sme}")
         except Exception as e:
             self.shutdown = True
             result_msg.success = False
-            result_msg.outcome = Outcome.ERROR.value
+            result_msg.arm_free = False
             self.act_srv.set_aborted(result=result_msg)
             rospy.logerr(f"Unknown error while executing manipulation process: {e}")
             rospy.logerr(f"Shutdown manipulation node!")
