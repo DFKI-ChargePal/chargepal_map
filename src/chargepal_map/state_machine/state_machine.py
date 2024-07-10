@@ -8,6 +8,7 @@ from smach import StateMachine, UserData
 import chargepal_map.state_machine.states as s
 import chargepal_map.state_machine.outcomes as out
 from chargepal_map.state_machine.step_by_user import StepByUser
+from chargepal_map.state_machine.arm_status import ArmStatusServer
 from chargepal_map.state_machine.utils import silent_smach, state_name
 
 # typing
@@ -39,7 +40,10 @@ class ManipulationStateMachine:
             cfg_fp.stem: cfg_fp 
             for cfg_fp in config_dir.joinpath(self.config['states']['folder_name']).glob('*.yaml')
             }
+        # Create step by user service if enabled
         self.step_by_user = StepByUser(self.config['step_by_user'])
+        # Create arm status server
+        self.arm_status = ArmStatusServer()
         self.state_machine = StateMachine(
             outcomes=[
                 out.job_stopped, 

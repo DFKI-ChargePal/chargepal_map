@@ -101,6 +101,7 @@ class ManipulationActionServer:
         rospy.loginfo(f"Launch a new process.")
         result_msg = self.res_msg()
         self.act_srv.accept_new_goal()
+        self.sm.arm_status.arm_free = False
         try:
             ud = UserData()
             ud.job = Job(self.name)
@@ -108,11 +109,13 @@ class ManipulationActionServer:
             if outcome == out.job_complete:
                 result_msg.success = True
                 result_msg.arm_free = True
+                self.sm.arm_status.arm_free = True
                 self.act_srv.set_succeeded(result=result_msg)
                 rospy.loginfo(f"Process fully completed")
             elif outcome == out.job_incomplete:
                 result_msg.success = False
                 result_msg.arm_free = True
+                self.sm.arm_status.arm_free = True
                 self.act_srv.set_succeeded(result=result_msg)
                 rospy.loginfo(f"Process not fully completed")
             elif outcome == out.job_failed:
