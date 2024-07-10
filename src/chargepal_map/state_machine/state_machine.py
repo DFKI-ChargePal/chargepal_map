@@ -43,7 +43,7 @@ class ManipulationStateMachine:
         # Create step by user service if enabled
         self.step_by_user = StepByUser(self.config['step_by_user'])
         # Create arm status server
-        self.arm_status = ArmStatusServer()
+        self.arm_status = ArmStatusServer(self.config)
         self.state_machine = StateMachine(
             outcomes=[
                 out.job_stopped, 
@@ -58,6 +58,7 @@ class ManipulationStateMachine:
         return outcome
 
     def build(self, pilot: Pilot) -> None:
+        self.arm_status.initial_check(pilot)
         with self.state_machine:
             StateMachine.add(
                 label=state_name(s.ArrangeJob),
