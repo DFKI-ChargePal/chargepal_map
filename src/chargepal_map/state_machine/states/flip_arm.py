@@ -51,7 +51,7 @@ class FlipArm(State):
         if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
             raise StateMachineError(f"Distance to first way points is to large: {error_pos}. To dangerous to move ;)")
         with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(wps)
+            self.pilot.robot.move_path_j(wps, vel=self.cfg.data['vel'], acc=self.cfg.data['acc'])
         rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.arm_ready_to_go
         if self.user_cb is not None:
