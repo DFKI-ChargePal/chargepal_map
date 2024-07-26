@@ -17,8 +17,8 @@ class ArmStatusServer:
 
     def __init__(self, config: dict[str, Any]) -> None:
         self.arm_free = False
-        self.cfg = StateConfig(type(ArrangeJob), config=config)
-        self._srv = rospy.Service('get_arm_status', getArmStatus)
+        self.cfg = StateConfig(ArrangeJob, config=config)
+        self._srv = rospy.Service('get_arm_status', getArmStatus, self._status_callback)
 
     def initial_check(self, pilot: Pilot) -> None:
         # Get current workspace

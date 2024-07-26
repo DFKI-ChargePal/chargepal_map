@@ -100,7 +100,6 @@ class ManipulationActionServer:
         """
         rospy.loginfo(f"Launch a new process.")
         result_msg = self.res_msg()
-        self.act_srv.accept_new_goal()
         self.sm.arm_status.arm_free = False
         try:
             ud = UserData()

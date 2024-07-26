@@ -58,7 +58,7 @@ class ManipulationStateMachine:
         return outcome
 
     def build(self, pilot: Pilot) -> None:
-        self.arm_status.initial_check(pilot)
+        # self.arm_status.initial_check(pilot)
         with self.state_machine:
             StateMachine.add(
                 label=state_name(s.ArrangeJob),

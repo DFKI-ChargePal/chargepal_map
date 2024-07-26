@@ -62,11 +62,10 @@ def start_maps(fp_cfg: Path) -> None:
     try:
         pilot.connect()
         if pilot.is_connected:
-            print(f"pilot...{pilot.robot.rtde_receiver.getRobotMode()}")
+            sm.arm_status.initial_check(pilot)
             rospy.loginfo(f"Ready to receive action goal commands")
             while not rospy.is_shutdown() and pilot.robot.is_in_running_mode:
                 rospy.sleep(0.02)
-                # pilot.is_running()
                 if not all([not mas.shutdown for mas in maps]):
                     rospy.loginfo(f"Stop running node 'manipulation_action_process'")
                     break
