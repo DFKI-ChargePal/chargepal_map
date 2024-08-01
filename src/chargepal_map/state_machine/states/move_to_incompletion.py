@@ -14,7 +14,7 @@ from chargepal_map.state_machine.states.attach_plug import AttachPlug
 from chargepal_map.state_machine.states.observe_plug import ObservePlug
 from chargepal_map.state_machine.states.release_plug import ReleasePlug
 from chargepal_map.state_machine.states.observe_plug_id import ObservePlugId
-from chargepal_map.state_machine.states.observe_plug_scene import ObservePlugScene
+from chargepal.chargepal_map.src.chargepal_map.state_machine.states.__observe_plug_scene import ObservePlugScene
 from chargepal_map.state_machine.utils import (
     state_name,
     state_header,

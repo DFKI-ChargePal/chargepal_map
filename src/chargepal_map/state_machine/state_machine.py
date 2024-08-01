@@ -107,42 +107,61 @@ class ManipulationStateMachine:
                 remapping={'job': 'job'}
             )
             StateMachine.add(
-                label=state_name(s.MoveToPlugSceneObs),
-                state=s.MoveToPlugSceneObs(self.config, pilot, self.step_by_user),
+                label=state_name(s.MoveToBatteryObs),
+                state=s.MoveToBatteryObs(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_scene_pre_obs: state_name(s.ObservePlugScene),
-                    out.job_stopped:        state_name(s.Stop),
+                    out.battery_pre_obs: state_name(s.ObserveBattery),
+                    out.job_stopped:     state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
             StateMachine.add(
-                label=state_name(s.ObservePlugScene),
-                state=s.ObservePlugScene(self.config, pilot, None),
+                label=state_name(s.ObserveBattery),
+                state=s.ObserveBattery(self.config, pilot, None),
                 transitions={
-                    out.plug_scene_obs:       state_name(s.ObservePlugId),
-                    out.err_obs_plug_retry:   state_name(s.MoveToPlugSceneObs),
-                    out.err_obs_plug_recover: state_name(s.MoveToIncompletion),
+                    out.battery_obs_plug_in:  state_name(s.MoveToPlugIdObs),
+                    out.battery_obs_plug_out: state_name(s.MoveToPeripheryObs),
+                    out.err_obs_recover:      state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
+                },
+                remapping={'job': 'job'}
+            )
+            StateMachine.add(
+                label=state_name(s.MoveToPlugIdObs),
+                state=s.MoveToPlugIdObs(self.config, pilot, self.step_by_user),
+                transitions={
+                    out.plug_id_pre_obs: state_name(s.ObservePlugId),
+                    out.job_stopped:     state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlugId),
-                state=s.ObservePlugId(self.config, pilot, self.step_by_user),
+                state=s.ObservePlugId(self.config, pilot, None),
                 transitions={
-                    out.plug_id_obs:          state_name(s.ObservePlug),
-                    out.err_obs_plug_recover: state_name(s.MoveToIncompletion),
-                    out.job_stopped:          state_name(s.Stop),
+                    out.battery_plug_id_obs:   state_name(s.MoveToPlugPrePos),
+                    out.periphery_plug_id_obs: state_name(s.MoveToPlugObs),
+                    out.err_obs_recover:       state_name(s.MoveToIncompletion),
+                    out.job_stopped:           state_name(s.Stop),
+                },
+                remapping={'job': 'job'}
+            )
+            StateMachine.add(
+                label=state_name(s.MoveToPlugObs),
+                state=s.MoveToPlugObs(self.config, pilot, self.step_by_user),
+                transitions={
+                    out.plug_pre_obs: state_name(s.ObservePlug),
+                    out.job_stopped:  state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlug),
-                state=s.ObservePlug(self.config, pilot, self.step_by_user),
+                state=s.ObservePlug(self.config, pilot, None),
                 transitions={
-                    out.plug_obs:             state_name(s.MoveToPlugPrePos),
-                    out.err_obs_plug_recover: state_name(s.MoveToIncompletion),
-                    out.job_stopped:          state_name(s.Stop),
+                    out.plug_obs:        state_name(s.MoveToPlugPrePos),
+                    out.err_obs_recover: state_name(s.MoveToIncompletion),
+                    out.job_stopped:     state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
@@ -160,7 +179,7 @@ class ManipulationStateMachine:
                 state=s.AttachPlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_attached:        state_name(s.RemovePlug),
-                    out.err_plug_out_retry:   state_name(s.ObservePlug),
+                    out.err_plug_out_retry:   state_name(s.MoveToPlugObs),
                     out.err_plug_out_recover: state_name(s.MoveToIncompletion),
                     out.err_plug_out_stop:    state_name(s.Malfunction),
                     out.job_stopped:          state_name(s.Stop),
@@ -171,29 +190,32 @@ class ManipulationStateMachine:
                 label=state_name(s.RemovePlug),
                 state=s.RemovePlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_removed:      state_name(s.MoveToSocketSceneObs),
-                    out.err_plug_out_stop: state_name(s.Malfunction),
+                    out.battery_plug_removed:   state_name(s.MoveToPeripheryObs),
+                    out.periphery_plug_removed: state_name(s.MoveToSocketPrePos),
+                    out.err_plug_out_stop:      state_name(s.Malfunction),
+                    out.job_stopped:            state_name(s.Stop),
+                },
+                remapping={'job': 'job'}
+            )
+            StateMachine.add(
+                label=state_name(s.MoveToPeripheryObs),
+                state=s.MoveToPeripheryObs(self.config, pilot, self.step_by_user),
+                transitions={
+                    out.periphery_pre_obs: state_name(s.ObservePeriphery),
                     out.job_stopped:       state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
             StateMachine.add(
-                label=state_name(s.MoveToSocketSceneObs),
-                state=s.MoveToSocketSceneObs(self.config, pilot, self.step_by_user),
+                label=state_name(s.ObservePeriphery),
+                state=s.ObservePeriphery(self.config, pilot, None),
                 transitions={
-                    out.socket_scene_pre_obs: state_name(s.ObserveSocketScene),
+                    out.periphery_plug_obs:   state_name(s.MoveToPlugIdObs),
+                    out.periphery_socket_obs: state_name(s.MoveToSocketObs),
+                    out.err_obs_retry:        state_name(s.MoveToPeripheryObs),
+                    out.err_plug_in_recover:  state_name(s.MoveToRecoverPrePos),
+                    out.err_plug_out_recover: state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
-                },
-                remapping={'job': 'job'}
-            )
-            StateMachine.add(
-                label=state_name(s.ObserveSocketScene),
-                state=s.ObserveSocketScene(self.config, pilot, None),
-                transitions={
-                    out.socket_scene_obs:       state_name(s.MoveToSocketObs),
-                    out.err_obs_socket_retry:   state_name(s.MoveToSocketSceneObs),
-                    out.err_obs_socket_recover: state_name(s.MoveToSocketObsRecover),
-                    out.job_stopped:            state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
@@ -207,21 +229,12 @@ class ManipulationStateMachine:
                 remapping={'job': 'job'}
             )
             StateMachine.add(
-                label=state_name(s.MoveToSocketObsRecover),
-                state=s.MoveToSocketObsRecover(self.config, pilot, self.step_by_user),
-                transitions={
-                    out.socket_pre_obs: state_name(s.ObserveSocket),
-                    out.job_stopped:    state_name(s.Stop)
-                },
-                remapping={'job': 'job'}
-            )
-            StateMachine.add(
                 label=state_name(s.ObserveSocket),
-                state=s.ObserveSocket(self.config, pilot, self.step_by_user),
+                state=s.ObserveSocket(self.config, pilot, None),
                 transitions={
-                    out.socket_obs:             state_name(s.MoveToSocketPrePos),
-                    out.err_obs_socket_recover: state_name(s.MoveToSocketObsRecover),
-                    out.job_stopped:            state_name(s.Stop),
+                    out.socket_obs:      state_name(s.MoveToSocketPrePos),
+                    out.err_obs_recover: state_name(s.MoveToRecoverPrePos),
+                    out.job_stopped:     state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
@@ -235,17 +248,29 @@ class ManipulationStateMachine:
                 remapping={'job': 'job'}
             )
             StateMachine.add(
+                label=state_name(s.MoveToRecoverPrePos),
+                state=s.MoveToRecoverPrePos(self.config, pilot, self.step_by_user),
+                transitions={
+                    out.recover_pre_pos: state_name(s.InsertPlug),
+                    out.job_stopped:     state_name(s.Stop)
+                },
+                remapping={'job': 'job'}
+            )
+            StateMachine.add(
                 label=state_name(s.InsertPlug),
                 state=s.InsertPlug(self.config, pilot, self.step_by_user),
                 transitions={
                     out.plug_connected:      state_name(s.ReleasePlug),
                     out.err_plug_in_retry:   state_name(s.MoveToSocketObs),
-                    out.err_plug_in_recover: state_name(s.MoveToSocketObsRecover),
+                    out.err_plug_in_recover: state_name(s.MoveToRecoverPrePos),
                     out.err_plug_in_stop:    state_name(s.Malfunction),
                     out.job_stopped:         state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
+
+
+
             StateMachine.add(
                 label=state_name(s.ReleasePlug),
                 state=s.ReleasePlug(self.config, pilot, self.step_by_user),
