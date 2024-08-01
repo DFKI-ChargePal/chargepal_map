@@ -37,41 +37,27 @@ class MoveToBatteryObs(State):
         # Get user and configuration data
         job: Job = ud.job
         # job_data = self.cfg.data.get(job.get_id())
-        # vel = self.cfg.data['vel']
-        # acc = self.cfg.data['acc']
-        # if job_data is None:
-        #     raise KeyError(f"Can't find configuration data for the job: {job}")
-        # outcome = ''
-        # if self.user_cb is not None:
-        #     rospy.loginfo(f"Ready to move arm to the socket scene observation configuration")
-        #     outcome = self.user_cb.request_action(outcome, out.job_stopped)
-        # if outcome != out.job_stopped:
-        #     if job.in_progress_mode():
-        #         rospy.loginfo(f"Start moving the arm to the job scene according its waypoints")
-        #         with self.pilot.context.position_control():
-        #             self.pilot.robot.move_path_j(wps=job_data['joint_waypoints'], vel=vel, acc=acc)
-        #     elif job.in_retry_mode():
-        #         rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
-        #         with self.pilot.context.position_control():
-        #             j_pos_finale = job_data['joint_waypoints'][-1]
-        #             self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
-        #             self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
-        #             current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
-        #             theta = 5.0
-        #             if job.retry_count % 4 == 1:
-        #                 new_ee_pose = current_ee_pose * sm.SE3().Rx(theta, unit='deg')
-        #             elif job.retry_count % 4 == 2:
-        #                 new_ee_pose = current_ee_pose * sm.SE3().Ry(theta, unit='deg')
-        #             elif job.retry_count % 4 == 3:
-        #                 new_ee_pose = current_ee_pose * sm.SE3().Rx(-theta, unit='deg')
-        #             else:  # job.retry_count % 4 == 0:
-        #                 new_ee_pose = current_ee_pose * sm.SE3().Ry(-theta, unit='deg')
-        #             self.pilot.move_to_tcp_pose(new_ee_pose)
-        #         self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
-        #     else:
-        #         raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        #     outcome = out.socket_scene_pre_obs
-        job.track_state(type(self))
+        vel = self.cfg.data['vel']
+        acc = self.cfg.data['acc']
         outcome = out.battery_pre_obs
+        # Find matching key for motion path configuration
+        if job.is_part_of_workspace_right():
+            job_key = 'workspace_right'
+        elif job.is_part_of_workspace_left():
+            job_key = 'workspace_left'
+        else:
+            raise StateMachineError(f"Current job '{job.ID}' cannot be matched to a new state outcome")
+        if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move arm to the battery observation configuration")
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            if job.in_progress_mode():
+                rospy.loginfo(f"Start moving the arm to the battery observation")
+                act_values = self.cfg.data[job_key]
+                with self.pilot.context.position_control():
+                    self.pilot.robot.movej(target=act_values, vel=vel, acc=acc)
+            else:
+                raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+        job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

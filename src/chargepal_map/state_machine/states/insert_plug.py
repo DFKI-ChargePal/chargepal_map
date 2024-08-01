@@ -101,7 +101,7 @@ class InsertPlug(State):
                     outcome = out.plug_connected
                     rospy.loginfo(f"Robot connected plug and socket successfully")
                 elif not sus_eng_plug and not sus_ins_plug and sus_rmv_plug:
-                    if job.retry_count > 1:
+                    if job.retry_count > self.cfg.data['number_of_retries']:
                         job.enable_recover_mode()
                         outcome = out.err_plug_in_recover
                         rospy.loginfo(f"Robot was not able to connect plug to socket. Try to recover the arm")

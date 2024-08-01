@@ -14,7 +14,8 @@ from chargepal_map.state_machine.states.attach_plug import AttachPlug
 from chargepal_map.state_machine.states.observe_plug import ObservePlug
 from chargepal_map.state_machine.states.release_plug import ReleasePlug
 from chargepal_map.state_machine.states.observe_plug_id import ObservePlugId
-from chargepal.chargepal_map.src.chargepal_map.state_machine.states.__observe_plug_scene import ObservePlugScene
+from chargepal_map.state_machine.states.observe_battery import ObserveBattery
+from chargepal_map.state_machine.states.observe_periphery import ObservePeriphery
 from chargepal_map.state_machine.utils import (
     state_name,
     state_header,
@@ -42,8 +43,10 @@ class MoveToIncompletion(State):
         print(state_header(type(self)))
         job: Job = ud.job
         # Find matching key for motion path configuration
-        if job.latest_state() == state_name(ObservePlugScene):
-            state_key = 'observe_plug_scene'
+        if job.latest_state() == state_name(ObserveBattery):
+            state_key = 'observe_battery'
+        elif job.latest_state() == state_name(ObservePeriphery):
+            state_key = 'observe_periphery'
         elif job.latest_state() == state_name(ObservePlugId):
             state_key = 'observe_plug_id'
         elif job.latest_state() == state_name(ObservePlug):

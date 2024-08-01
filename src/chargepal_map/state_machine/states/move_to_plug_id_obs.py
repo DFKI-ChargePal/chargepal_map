@@ -39,11 +39,14 @@ class MoveToPlugIdObs(State):
         job_data = self.cfg.data[job.get_id()]
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
-        # if job_data is None:
-        #     raise KeyError(f"Can't find configuration data for the job: {job}")
+        if job_data is None:
+            raise KeyError(f"Can't find configuration data for the job: {job}")
+        outcome = out.plug_id_pre_obs
+
+        # TODO: CONTINUE HERE
+
         # if job.in_stop_mode() or job.in_recover_mode():
         #     raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        # outcome = out.plug_scene_pre_obs
         # if self.user_cb is not None:
         #     rospy.loginfo(f"Ready to move the arm to plug scene observation configuration")
         #     outcome = self.user_cb.request_action(outcome, out.job_stopped)

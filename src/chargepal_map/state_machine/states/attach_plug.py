@@ -87,7 +87,7 @@ class AttachPlug(State):
                 outcome = out.plug_attached
                 rospy.loginfo(f"Robot attached the arm to the plug successfully")
             elif not sus_cup_plug and not sus_lock_plug and sus_dec_plug:
-                if job.retry_count > 1:
+                if job.retry_count > self.cfg.data['number_of_retries']:
                     job.enable_recover_mode()
                     outcome = out.err_plug_out_recover
                     rospy.loginfo(f"Robot was not able to attach to the plug. Try to recover the arm")

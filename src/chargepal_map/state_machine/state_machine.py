@@ -268,9 +268,6 @@ class ManipulationStateMachine:
                 },
                 remapping={'job': 'job'}
             )
-
-
-
             StateMachine.add(
                 label=state_name(s.ReleasePlug),
                 state=s.ReleasePlug(self.config, pilot, self.step_by_user),
