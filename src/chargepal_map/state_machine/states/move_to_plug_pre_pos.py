@@ -44,7 +44,7 @@ class MoveToPlugPrePos(State):
             raise StateMachineError(f"Missing observation of the plug. Interrupt process")
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        outcome = ''
+        outcome = out.plug_pre_pos
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to move the arm to the pre-connect position in front of the plug")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
@@ -55,7 +55,6 @@ class MoveToPlugPrePos(State):
                     sus, _ = self.pilot.try2_approach_to_plug(T_base2socket)
             rospy.loginfo(f"Arm ended in pre-attached pose successfully: {sus}")
             rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
-            outcome = out.plug_pre_pos
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome
