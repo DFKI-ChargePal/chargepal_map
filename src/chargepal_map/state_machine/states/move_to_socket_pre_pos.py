@@ -1,6 +1,7 @@
 """ This file implements the state >>MoveToSocketPrePos<< """
 from __future__ import annotations
 # libs
+from chargepal.chargepal_map.src.chargepal_map.state_machine.states import insert_plug
 import rospy
 import ur_pilot
 from smach import State
@@ -34,21 +35,16 @@ class MoveToSocketPrePos(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        if job.in_progress_mode() or job.in_retry_mode():
-            exterior = job.is_part_of_plug_in()
-            interior = job.is_part_of_plug_out()
-        elif job.in_recover_mode():
-            exterior = job.is_part_of_plug_out()
-            interior = job.is_part_of_plug_in()
-        else:
-            raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        if exterior:
+        if not job.in_progress_mode():
+            raise StateMachineError(f"Job not in progress mode. Interrupt process")
+        # Get latest socket pose
+        if job.is_part_of_plug_in():
             T_base2socket = job.exterior_socket.T_base2socket_close_up
-        elif interior:
+        elif job.is_part_of_plug_out():
             T_base2socket = job.interior_socket.T_base2socket_close_up
         else:
-            raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
-        outcome = ''
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
+        outcome = out.socket_pre_pos
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to move the arm to the pre-connect position in front of the socket")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
@@ -59,7 +55,6 @@ class MoveToSocketPrePos(State):
                     sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
             rospy.loginfo(f"Arm ended in pre-insert pose successfully: {sus}")
             rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
-            outcome = out.socket_pre_pos
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

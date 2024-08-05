@@ -27,7 +27,8 @@ class RemovePlug(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[
-                           out.plug_removed,
+                           out.battery_plug_removed,
+                           out.periphery_plug_removed,
                            out.err_plug_out_stop,
                            out.job_stopped],
                        input_keys=['job'],
@@ -61,7 +62,10 @@ class RemovePlug(State):
                 rospy.logerr(f"Robot was not able to remove the plug successfully. Plug is probably still connected")
             else:
                 rospy.loginfo(f"Robot removed the plug successfully")
-                outcome = out.plug_removed
+                if job.is_part_of_plug_in():
+                    outcome = out.battery_plug_removed
+                elif job.is_part_of_plug_out():
+                    outcome = out.periphery_plug_removed
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

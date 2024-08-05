@@ -4,7 +4,6 @@ from __future__ import annotations
 import rospy
 import ur_pilot
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -36,7 +35,6 @@ class MoveToBatteryObs(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        # job_data = self.cfg.data.get(job.get_id())
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
         outcome = out.battery_pre_obs
@@ -56,6 +54,7 @@ class MoveToBatteryObs(State):
                 act_values = self.cfg.data[job_key]
                 with self.pilot.context.position_control():
                     self.pilot.robot.movej(target=act_values, vel=vel, acc=acc)
+                rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
             else:
                 raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         job.track_state(type(self))

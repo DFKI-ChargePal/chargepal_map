@@ -4,7 +4,6 @@ from __future__ import annotations
 import rospy
 import ur_pilot
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -41,56 +40,34 @@ class MoveToRecoverPrePos(State):
         acc = self.cfg.data['acc']
         if job_data is None:
             raise KeyError(f"Can't find configuration data for the job: {job}")
-
-        # TODO: continue here
-
-        # if job.in_stop_mode() or job.in_recover_mode():
-        #     raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        # outcome = out.plug_scene_pre_obs
-        # if self.user_cb is not None:
-        #     rospy.loginfo(f"Ready to move the arm to plug scene observation configuration")
-        #     outcome = self.user_cb.request_action(outcome, out.job_stopped)
-        # if outcome != out.job_stopped:
-        #     # Move to battery box observation
-        #     if job.is_part_of_plug_in():
-        #         if job.in_progress_mode():
-        #             # Start moving the arm
-        #             rospy.loginfo(f"Start moving the arm to the battery box scene") 
-        #             with self.pilot.context.position_control():
-        #                     self.pilot.robot.movej(job_data['joint_position'],vel=vel, acc=acc)
-        #         elif job.in_retry_mode():
-        #             rospy.loginfo(f"Retry action: "
-        #                         f"Since there shouldn't be any variance in the observation, the robot will not move")
-        #     # Move to the external sockets
-        #     elif job.is_part_of_plug_out():
-        #         if job.in_progress_mode():
-        #             rospy.loginfo(f"Start moving the arm to one of the outer side scene")
-        #             with self.pilot.context.position_control():
-        #                 self.pilot.robot.move_path_j(job_data['joint_waypoints'], vel=vel, acc=acc)
-        #         elif job.in_retry_mode():
-        #             # Move to a robot arm in a slightly different observation pose
-        #             rospy.loginfo(f"Start moving the arm in an observation pose again with slightly different view angle.")
-        #             with self.pilot.context.position_control():
-        #                 j_pos_finale = job_data['joint_waypoints'][-1]
-        #                 self.pilot.robot.movej(j_pos_finale, vel=vel, acc=acc)
-        #                 self.pilot.set_tcp(ur_pilot.EndEffectorFrames.CAMERA)
-        #                 current_ee_pose = self.pilot.get_pose(ur_pilot.EndEffectorFrames.CAMERA)
-        #                 rospy.logdebug(f"Current ee pose: {ur_pilot.utils.se3_to_str(current_ee_pose)}")
-        #                 theta = 5.0
-        #                 if job.retry_count % 4 == 1:
-        #                     new_ee_pose = current_ee_pose * sm.SE3().Rx(theta, unit='deg')
-        #                 elif job.retry_count % 4 == 2:
-        #                     new_ee_pose = current_ee_pose * sm.SE3().Ry(theta, unit='deg')
-        #                 elif job.retry_count % 4 == 3:
-        #                     new_ee_pose = current_ee_pose * sm.SE3().Rx(-theta, unit='deg')
-        #                 else:  # job.retry_count % 4 == 0:
-        #                     new_ee_pose = current_ee_pose * sm.SE3().Ry(-theta, unit='deg')
-        #                 rospy.logdebug(f"    New ee pose: {ur_pilot.utils.se3_to_str(new_ee_pose)}")
-        #                 self.pilot.move_to_tcp_pose(new_ee_pose)
-        #             self.pilot.set_tcp(ur_pilot.EndEffectorFrames.FLANGE)
-        #     else:
-        #         raise StateMachineError(f"Invalid or undefined job ID '{job}' for this state.")
+        if not job.in_recover_mode():
+            raise StateMachineError(f"Job not in recover mode. Interrupt process")
+        # Get infos and dictionary key for the right movement
+        if job.is_part_of_plug_in():
+            ws_key = 'move_to_battery'
+            T_base2socket = job.interior_socket.T_base2socket_close_up
+        elif job.is_part_of_plug_out():
+            ws_key = 'move_to_periphery'
+            T_base2socket = job.exterior_socket.T_base2socket_close_up
+        else:
+            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
+        plug_key = job.get_plug_type()
+        path_values = job_data[ws_key][plug_key]['recover_waypoints']
+        # Try to move back to the initial socket to recover
         outcome = out.recover_pre_pos
+        if self.user_cb is not None:
+            rospy.loginfo(f"Ready to move the arm back to the initial socket")
+            outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo(f"Start moving the arm to the initial socket scene")
+            with self.pilot.context.position_control():
+                self.pilot.robot.move_path_j(path_values, vel, acc)
+            rospy.loginfo(f"Start moving the arm to the pre-connect position in front of the socket")
+            with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
+                with self.pilot.context.position_control():
+                    sus, _ = self.pilot.try2_approach_to_socket(T_base2socket)
+            rospy.loginfo(f"Arm ended in pre-insert pose for recovery successfully: {sus}")
+            rospy.logdebug(f"Transformation: Base-TCP = {ur_pilot.utils.se3_to_str(self.pilot.robot.tcp_pose)}")
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome

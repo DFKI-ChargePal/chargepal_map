@@ -4,7 +4,6 @@ from __future__ import annotations
 import rospy
 import ur_pilot
 from smach import State
-import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
