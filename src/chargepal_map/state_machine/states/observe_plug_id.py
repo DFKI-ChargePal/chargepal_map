@@ -49,7 +49,7 @@ class ObservePlugId(State):
             found_plug_id, _ = self.pilot.find_target_pose(
                 detector_fp=plug_id_dtt, time_out=self.cfg.data['detector_time_out'])
             if found_plug_id:
-                rospy.loginfo(f"Found plug of type '{job.get_plug_type()}' its intended place")
+                rospy.loginfo(f"Found plug of type '{job.get_plug_type()}' in its intended place")
                 if job.is_part_of_plug_in():
                     outcome = out.battery_plug_id_obs
                 elif job.is_part_of_plug_out():

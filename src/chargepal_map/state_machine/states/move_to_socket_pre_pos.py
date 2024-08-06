@@ -1,7 +1,6 @@
 """ This file implements the state >>MoveToSocketPrePos<< """
 from __future__ import annotations
 # libs
-from chargepal.chargepal_map.src.chargepal_map.state_machine.states import insert_plug
 import rospy
 import ur_pilot
 from smach import State

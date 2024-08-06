@@ -39,11 +39,8 @@ class MoveToPlugObs(State):
         print(state_header(type(self)))
         # Try to find matching configuration
         job: Job = ud.job
-        job_data = self.cfg.data[job.get_id()]
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
-        if job_data is None:
-            raise KeyError(f"Can't find configuration data for the job: {job}")
         # Try to move the arm in front of the plug observation pattern
         outcome = out.plug_pre_obs
         if self.user_cb is not None:

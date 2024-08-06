@@ -3,7 +3,9 @@ from __future__ import annotations
 # libs
 import rospy
 import ur_pilot
+import numpy as np
 from smach import State
+import spatialmath as sm
 
 from chargepal_map.job import Job
 from chargepal_map.state_machine import outcomes as out
@@ -22,6 +24,8 @@ from ur_pilot import Pilot
 
 class MoveToPlugIdObs(State):
 
+    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0, 0.0, -0.25))
+
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
         self.user_cb = user_cb
@@ -35,14 +39,11 @@ class MoveToPlugIdObs(State):
         print(state_header(type(self)))
         # Try to find matching configuration
         job: Job = ud.job
-        job_data = self.cfg.data[job.get_id()]
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
-        if job_data is None:
-            raise KeyError(f"Can't find configuration data for the job: {job}")
         # Get socket position
         if job.is_part_of_plug_in():
-            T_base2socket = job.interior_socket.T_base2socket_scene
+            T_base2socket = job.interior_socket.T_base2socket_close_up
         elif job.is_part_of_plug_out():
             T_base2socket = job.exterior_socket.T_base2socket_scene
         else:

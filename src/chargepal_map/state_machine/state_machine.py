@@ -65,7 +65,7 @@ class ManipulationStateMachine:
                 state=s.ArrangeJob(self.config, pilot, None),
                 transitions={
                     out.arm_in_wrong_ws:      state_name(s.FlipArm),
-                    out.arm_ready_to_go:      state_name(s.MoveToPlugSceneObs),
+                    out.arm_ready_to_go:      state_name(s.MoveToBatteryObs),
                     out.arm_ready_to_free:    state_name(s.DriveFree),
                     out.arm_ready_to_move_ls: state_name(s.MoveToStartLs),
                     out.arm_ready_to_move_rs: state_name(s.MoveToStartRs),
@@ -101,7 +101,7 @@ class ManipulationStateMachine:
                 label=state_name(s.FlipArm),
                 state=s.FlipArm(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.arm_ready_to_go: state_name(s.MoveToPlugSceneObs),
+                    out.arm_ready_to_go: state_name(s.MoveToBatteryObs),
                     out.job_stopped:     state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
