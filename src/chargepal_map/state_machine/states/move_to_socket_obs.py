@@ -52,7 +52,7 @@ class MoveToSocketObs(State):
             raise StateMachineError(f"Missing observation of plug scene. Interrupt process")
         if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
-        outcome = out.socket_pre_pos
+        outcome = out.socket_pre_obs
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to move arm to the socket observation pose")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)

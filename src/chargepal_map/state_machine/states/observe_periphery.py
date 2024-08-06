@@ -47,7 +47,7 @@ class ObservePeriphery(State):
             rospy.loginfo(f"Ready to observe periphery")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         if outcome != out.job_stopped:
-            periphery_dtt = self.cfg.data['detector'][self.cfg.data[job.get_id()]['detector']]
+            periphery_dtt = self.cfg.data['detector'][self.cfg.data[job.get_plug_type()]['detector']]
             found_socket, T_base2socket_scene = self.pilot.find_target_pose(
                 detector_fp=periphery_dtt, time_out=self.cfg.data['detector_time_out'])
             if found_socket:

@@ -34,6 +34,8 @@ class MoveToSocketPrePos(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        vel = self.cfg.data['vel']
+        acc = self.cfg.data['acc']
         if not job.in_progress_mode():
             raise StateMachineError(f"Job not in progress mode. Interrupt process")
         # Get latest socket pose
@@ -48,6 +50,12 @@ class MoveToSocketPrePos(State):
             rospy.loginfo(f"Ready to move the arm to the pre-connect position in front of the socket")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         if outcome != out.job_stopped:
+            if job.is_part_of_plug_out():
+                job_data = self.cfg.data[job.get_id()]
+                rospy.loginfo(f"Start moving the arm to the battery scene")
+                with self.pilot.context.position_control():
+                    self.pilot.robot.move_path_j(job_data['joint_waypoints'], vel, acc)
+
             rospy.loginfo('Start moving the plug to the pre connecting pose')
             with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
                 with self.pilot.context.position_control():
