@@ -35,7 +35,6 @@ class FlipArm(State):
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
-        rospy.loginfo(f"Start flipping the arm into the other workspace.")
         job: Job = ud.job
         if not job.in_progress_mode():
             raise StateMachineError(f"Job is not in running mode. Interrupt process.")
@@ -50,12 +49,15 @@ class FlipArm(State):
         error_pos = np.abs(first_pos - start_pos)
         if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
             raise StateMachineError(f"Distance to first way points is to large: {error_pos}. To dangerous to move ;)")
-        with self.pilot.context.position_control():
-            self.pilot.robot.move_path_j(wps, vel=self.cfg.data['vel'], acc=self.cfg.data['acc'])
-        rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         outcome = out.arm_ready_to_go
         if self.user_cb is not None:
+            rospy.loginfo(f"Ready flipping the arm into the other workspace.")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
+        if outcome != out.job_stopped:
+            rospy.loginfo(f"Start flipping the arm into the other workspace.")
+            with self.pilot.context.position_control():
+                self.pilot.robot.move_path_j(wps, vel=self.cfg.data['vel'], acc=self.cfg.data['acc'])
+            rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         job.track_state(type(self))
         print(state_footer(type(self)))
         return outcome
