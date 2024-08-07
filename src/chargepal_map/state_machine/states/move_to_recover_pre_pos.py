@@ -35,11 +35,8 @@ class MoveToRecoverPrePos(State):
         print(state_header(type(self)))
         # Try to find matching configuration
         job: Job = ud.job
-        job_data = self.cfg.data[job.get_id()]
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
-        if job_data is None:
-            raise KeyError(f"Can't find configuration data for the job: {job}")
         if not job.in_recover_mode():
             raise StateMachineError(f"Job not in recover mode. Interrupt process")
         # Get infos and dictionary key for the right movement
@@ -52,7 +49,7 @@ class MoveToRecoverPrePos(State):
         else:
             raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
         plug_key = job.get_plug_type()
-        path_values = job_data[ws_key][plug_key]['recover_waypoints']
+        path_values = self.cfg.data[ws_key][plug_key]['recover_waypoints']
         # Try to move back to the initial socket to recover
         outcome = out.recover_pre_pos
         if self.user_cb is not None:

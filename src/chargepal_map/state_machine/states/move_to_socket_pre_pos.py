@@ -36,8 +36,6 @@ class MoveToSocketPrePos(State):
         job: Job = ud.job
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
-        if not job.in_progress_mode():
-            raise StateMachineError(f"Job not in progress mode. Interrupt process")
         # Get latest socket pose
         if job.is_part_of_plug_in():
             T_base2socket = job.exterior_socket.T_base2socket_close_up
