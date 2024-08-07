@@ -24,7 +24,7 @@ from ur_pilot import Pilot
 
 class MoveToPlugIdObs(State):
 
-    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2)), t=(0.0, 0.0, -0.25))
+    _T_socket_save2camera = sm.SE3().Rt(R=sm.SO3.EulerVec((0.0, 0.0, -np.pi/2 - np.pi/4)), t=(0.0, 0.0, -0.21))
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
