@@ -69,7 +69,7 @@ class Job:
 
             Job.ID.plug_in_ads_ac,
             Job.ID.plug_in_ads_dc,
-            Job.ID.plug_in_ads_ac,
+            Job.ID.plug_in_bcs_ac,
             Job.ID.plug_in_dsk_dm,
             
             Job.ID.plug_out_ads_ac,

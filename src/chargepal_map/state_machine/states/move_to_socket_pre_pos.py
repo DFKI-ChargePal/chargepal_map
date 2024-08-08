@@ -37,18 +37,21 @@ class MoveToSocketPrePos(State):
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
         # Get latest socket pose
-        if job.is_part_of_plug_in():
-            T_base2socket = job.exterior_socket.T_base2socket_close_up
-        elif job.is_part_of_plug_out():
-            T_base2socket = job.interior_socket.T_base2socket_close_up
+        if job.in_progress_mode() or job.in_retry_mode():
+            if job.is_part_of_plug_in():
+                T_base2socket = job.exterior_socket.T_base2socket_close_up
+            elif job.is_part_of_plug_out():
+                T_base2socket = job.interior_socket.T_base2socket_close_up
+            else:
+                raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
         else:
-            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
+            StateMachineError(f"Job in an invalid mode. Interrupt process")
         outcome = out.socket_pre_pos
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to move the arm to the pre-connect position in front of the socket")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         if outcome != out.job_stopped:
-            if job.is_part_of_plug_out():
+            if job.is_part_of_plug_out() and not job.in_retry_mode():
                 job_data = self.cfg.data[job.get_id()]
                 rospy.loginfo(f"Start moving the arm to the battery scene")
                 with self.pilot.context.position_control():

@@ -43,16 +43,18 @@ class MoveToSocketObs(State):
         vel = self.cfg.data['vel']
         acc = self.cfg.data['acc']
         # Get socket position
-        if job.is_part_of_plug_in():
-            T_base2socket_scene = job.exterior_socket.T_base2socket_scene
-        elif job.is_part_of_plug_out():
-            T_base2socket_scene = job.interior_socket.T_base2socket_scene
+        if job.in_progress_mode() or job.in_retry_mode():
+            if job.is_part_of_plug_in():
+                T_base2socket_scene = job.exterior_socket.T_base2socket_scene
+            elif job.is_part_of_plug_out():
+                T_base2socket_scene = job.interior_socket.T_base2socket_scene
+            else:
+                raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
         else:
-            raise StateMachineError(f"Invalid or undefined job '{job}' for this state.")
-        if T_base2socket_scene is None:
-            raise StateMachineError(f"Missing observation of plug scene. Interrupt process")
-        if job.in_stop_mode() or job.in_recover_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
+
+        if T_base2socket_scene is None:
+            raise StateMachineError(f"Missing observation of socket scene. Interrupt process")
         outcome = out.socket_pre_obs
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to move arm to the socket observation pose")

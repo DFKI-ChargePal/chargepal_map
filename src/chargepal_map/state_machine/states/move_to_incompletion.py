@@ -71,9 +71,9 @@ class MoveToIncompletion(State):
                 raise StateMachineError(f"Current job '{job.ID}' cannot be matched to a waypoint set")
         elif job.latest_state() == state_name(ReleasePlug):
             state_key = 'release_plug'
-            if job.is_part_of_plug_out():
+            if job.is_part_of_plug_in():
                 p2p_key = 'battery2home'
-            elif job.is_part_of_plug_in():
+            elif job.is_part_of_plug_out():
                 p2p_key = 'periphery2home'
             else:
                 raise StateMachineError(f"Current job '{job.ID}' cannot be matched to a waypoint set")

@@ -29,7 +29,8 @@ class InsertPlug(State):
         State.__init__(self, 
                        outcomes=[
                            out.plug_connected,
-                           out.err_plug_in_retry,
+                           out.err_plug_in_battery_retry,
+                           out.err_plug_in_periphery_retry,
                            out.err_plug_in_recover,
                            out.err_plug_in_stop,
                            out.job_stopped,
@@ -100,14 +101,19 @@ class InsertPlug(State):
                     job.enable_progress_mode()
                     outcome = out.plug_connected
                     rospy.loginfo(f"Robot connected plug and socket successfully")
-                elif not sus_eng_plug and not sus_ins_plug and sus_rmv_plug:
+                elif not sus_ins_plug and sus_rmv_plug:
                     if job.retry_count >= self.cfg.data['number_of_retries']:
                         job.enable_recover_mode()
                         outcome = out.err_plug_in_recover
                         rospy.loginfo(f"Robot was not able to connect plug to socket. Try to recover the arm")
                     else:
                         job.enable_retry_mode()
-                        outcome = out.err_plug_in_retry
+                        if job.is_part_of_plug_in():
+                            outcome = out.err_plug_in_periphery_retry
+                        elif job.is_part_of_plug_out():
+                            outcome = out.err_plug_in_battery_retry
+                        else:
+                            raise StateMachineError(f"Invalid or undefined job '{job}' for this state")
                         rospy.loginfo(f"Robot was not able to connect plug to socket. Retry inserting procedure")
                 elif not sus_eng_plug and not sus_ins_plug and not sus_rmv_plug:
                     job.enable_stop_mode()

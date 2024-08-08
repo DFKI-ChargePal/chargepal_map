@@ -260,11 +260,12 @@ class ManipulationStateMachine:
                 label=state_name(s.InsertPlug),
                 state=s.InsertPlug(self.config, pilot, self.step_by_user),
                 transitions={
-                    out.plug_connected:      state_name(s.ReleasePlug),
-                    out.err_plug_in_retry:   state_name(s.MoveToSocketObs),
-                    out.err_plug_in_recover: state_name(s.MoveToRecoverPrePos),
-                    out.err_plug_in_stop:    state_name(s.Malfunction),
-                    out.job_stopped:         state_name(s.Stop),
+                    out.plug_connected:              state_name(s.ReleasePlug),
+                    out.err_plug_in_recover:         state_name(s.MoveToRecoverPrePos),
+                    out.err_plug_in_battery_retry:   state_name(s.MoveToSocketPrePos),
+                    out.err_plug_in_periphery_retry: state_name(s.MoveToSocketObs),
+                    out.err_plug_in_stop:            state_name(s.Malfunction),
+                    out.job_stopped:                 state_name(s.Stop),
                 },
                 remapping={'job': 'job'}
             )
