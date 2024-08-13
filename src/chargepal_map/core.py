@@ -6,8 +6,8 @@ import actionlib
 from smach import UserData
 from collections import namedtuple
 
-from chargepal_map.jobs import job_ids
-from chargepal_map.state_machine.outcomes import out
+from chargepal_map.job import Job
+from chargepal_map.state_machine import outcomes as out
 from chargepal_map.state_machine.utils import StateMachineError
 from chargepal_map.state_machine.state_machine import ManipulationStateMachine
 
@@ -16,9 +16,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcAction,
     PlugInAdsDcAction,
     PlugInBcsAcAction,
+    PlugInDskDmAction,
     PlugOutAdsAcAction,
     PlugOutAdsDcAction,
     PlugOutBcsAcAction,
+    PlugOutDskDmAction,
     MoveHomeArmAction,
     FreeDriveArmAction,
     MarkerSocketCalibAdsAction,
@@ -27,9 +29,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcGoal,
     PlugInAdsDcGoal,
     PlugInBcsAcGoal,
+    PlugInDskDmGoal,
     PlugOutAdsAcGoal,
     PlugOutAdsDcGoal,
     PlugOutBcsAcGoal,
+    PlugOutDskDmGoal,
     FreeDriveArmGoal,
     MoveHomeArmGoal,
     MarkerSocketCalibAdsGoal,
@@ -38,9 +42,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcResult,
     PlugInAdsDcResult,
     PlugInBcsAcResult,
+    PlugInDskDmResult,
     PlugOutAdsAcResult,
     PlugOutAdsDcResult,
     PlugOutBcsAcResult,
+    PlugOutDskDmResult,
     FreeDriveArmResult,
     MoveHomeArmResult,
     MarkerSocketCalibAdsResult,
@@ -49,9 +55,11 @@ from chargepal_actions.msg import (
     PlugInAdsAcFeedback,
     PlugInAdsDcFeedback,
     PlugInBcsAcFeedback,
+    PlugInDskDmFeedback,
     PlugOutAdsAcFeedback,
     PlugOutAdsDcFeedback,
     PlugOutBcsAcFeedback,
+    PlugOutDskDmFeedback,
     FreeDriveArmFeedback,
     MoveHomeArmFeedback,
     MarkerSocketCalibAdsFeedback,
@@ -92,33 +100,52 @@ class ManipulationActionServer:
         """
         rospy.loginfo(f"Launch a new process.")
         result_msg = self.res_msg()
+        self.sm.arm_status.arm_free = False
         try:
             ud = UserData()
-            ud.job_id = self.name
+            ud.job = Job(self.name)
             outcome = self.sm.execute(ud)
-            if outcome == out.completed:
+            if outcome == out.job_complete:
                 result_msg.success = True
+                result_msg.arm_free = True
+                self.sm.arm_status.arm_free = True
                 self.act_srv.set_succeeded(result=result_msg)
-                rospy.loginfo(f"Finish process successfully with outcome {outcome}.")
-            else:
+                rospy.loginfo(f"Process fully completed")
+            elif outcome == out.job_incomplete:
                 result_msg.success = False
-                self.act_srv.set_preempted(result=result_msg)
-                rospy.loginfo(f"Stop process prematurely with outcome {outcome}.")
+                result_msg.arm_free = True
+                self.sm.arm_status.arm_free = True
+                self.act_srv.set_succeeded(result=result_msg)
+                rospy.loginfo(f"Process not fully completed")
+            elif outcome == out.job_failed:
+                result_msg.success = False
+                result_msg.arm_free = False
+                self.act_srv.set_aborted(result=result_msg)
+                rospy.loginfo(f"Process failed. Abort action")
+            elif outcome == out.job_stopped:
+                result_msg.success = False
+                result_msg.arm_free = False
+                self.act_srv.set_aborted(result=result_msg)
+                rospy.loginfo(f"Stop process by user request")
+            else:
+                raise StateMachineError(f"Undefined behavior for outcome: {outcome}")
         except StateMachineError as sme:
-            self.act_srv.set_aborted(result=result_msg)
             result_msg.success = False
+            result_msg.arm_free = False
+            self.act_srv.set_aborted(result=result_msg)
             rospy.logwarn(f"Error in state machine procedure: {sme}")
         except Exception as e:
-            self.act_srv.set_aborted(result=result_msg)
-            result_msg.success = False
             self.shutdown = True
+            result_msg.success = False
+            result_msg.arm_free = False
+            self.act_srv.set_aborted(result=result_msg)
             rospy.logerr(f"Unknown error while executing manipulation process: {e}")
             rospy.logerr(f"Shutdown manipulation node!")
 
     def wait_for_usr_feedback(self) -> None:
         feedback = self.fb_msg()
         feedback.status = "wait_for_user"
-        self.action_server.publish_feedback(feedback)
+        self.act_srv.publish_feedback(feedback)
 
 
 class ActSrvFactory:
@@ -161,67 +188,79 @@ class ActSrvFactory:
         return act_srv
 
 
-
-
-
 # Register all manipulation action servers
 manipulation_action_server = ActSrvFactory()
 
-manipulation_action_server.register(job_ids.plug_in_ads_ac,
+# PLUG IN
+manipulation_action_server.register(Job.ID.plug_in_ads_ac,
                                     PlugInAdsAcAction,
                                     PlugInAdsAcGoal,
                                     PlugInAdsAcResult,
                                     PlugInAdsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_in_ads_dc,
+manipulation_action_server.register(Job.ID.plug_in_ads_dc,
                                     PlugInAdsDcAction,
                                     PlugInAdsDcGoal,
                                     PlugInAdsDcResult,
                                     PlugInAdsDcFeedback)
 
-manipulation_action_server.register(job_ids.plug_in_bcs_ac,
+manipulation_action_server.register(Job.ID.plug_in_bcs_ac,
                                     PlugInBcsAcAction,
                                     PlugInBcsAcGoal,
                                     PlugInBcsAcResult,
                                     PlugInBcsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_out_ads_ac,
+manipulation_action_server.register(Job.ID.plug_in_dsk_dm,
+                                    PlugInDskDmAction,
+                                    PlugInDskDmGoal,
+                                    PlugInDskDmResult,
+                                    PlugInDskDmFeedback)
+
+# PLUG OUT
+manipulation_action_server.register(Job.ID.plug_out_ads_ac,
                                     PlugOutAdsAcAction,
                                     PlugOutAdsAcGoal,
                                     PlugOutAdsAcResult,
                                     PlugOutAdsAcFeedback)
 
-manipulation_action_server.register(job_ids.plug_out_ads_dc,
+manipulation_action_server.register(Job.ID.plug_out_ads_dc,
                                     PlugOutAdsDcAction,
                                     PlugOutAdsDcGoal,
                                     PlugOutAdsDcResult,
                                     PlugOutAdsDcFeedback)
 
-manipulation_action_server.register(job_ids.plug_out_bcs_ac,
+manipulation_action_server.register(Job.ID.plug_out_bcs_ac,
                                     PlugOutBcsAcAction,
                                     PlugOutBcsAcGoal,
                                     PlugOutBcsAcResult,
                                     PlugOutBcsAcFeedback)
 
-manipulation_action_server.register(job_ids.free_drive_arm,
+manipulation_action_server.register(Job.ID.plug_out_dsk_dm,
+                                    PlugOutDskDmAction,
+                                    PlugOutDskDmGoal,
+                                    PlugOutDskDmResult,
+                                    PlugOutDskDmFeedback)
+
+# MISCELLANEOUS
+manipulation_action_server.register(Job.ID.free_drive_arm,
                                     FreeDriveArmAction,
                                     FreeDriveArmGoal,
                                     FreeDriveArmResult, 
                                     FreeDriveArmFeedback)
 
-manipulation_action_server.register(job_ids.move_home_arm, 
+manipulation_action_server.register(Job.ID.move_home_arm, 
                                     MoveHomeArmAction, 
                                     MoveHomeArmGoal,
                                     MoveHomeArmResult,
                                     MoveHomeArmFeedback)
 
-manipulation_action_server.register(job_ids.marker_socket_calib_ads,
+manipulation_action_server.register(Job.ID.marker_socket_calib_ads,
                                     MarkerSocketCalibAdsAction,
                                     MarkerSocketCalibAdsGoal,
                                     MarkerSocketCalibAdsResult,
                                     MarkerSocketCalibAdsFeedback)
 
-manipulation_action_server.register(job_ids.marker_socket_calib_bcs,
+manipulation_action_server.register(Job.ID.marker_socket_calib_bcs,
                                     MarkerSocketCalibBcsAction,
                                     MarkerSocketCalibBcsGoal,
                                     MarkerSocketCalibBcsResult,

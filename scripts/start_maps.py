@@ -6,6 +6,7 @@ import yaml
 import rospy
 import logging
 import ur_pilot
+import smach_ros
 import camera_kit as ck
 from pathlib import Path
 import chargepal_map as mp
@@ -39,16 +40,19 @@ def start_maps(fp_cfg: Path) -> None:
     cam.load_coefficients(cam_cc_path)
     # Setting up ur-pilot
     arm_dir = config_dir.joinpath('ur_arm')
-    ur_pilot.logger.set_logging_level(logging.DEBUG)
+    ur_pilot.logger.set_logging_level(logging.INFO)
     pilot = ur_pilot.Pilot(config_dir=arm_dir)
     pilot.register_ee_cam(cam, cam_dir)
     # Create manipulation state machine / process
     sm =  mp.ManipulationStateMachine(config_dir, config_dict)
     sm.build(pilot)
+    sis = smach_ros.IntrospectionServer(f"server_name", sm.state_machine, '/SM_ROOT')
+    sis.start()
     # Create action servers
     maps: list[ManipulationActionServer] = []
     for job_name in config_dict['jobs']:
-        if mp.job_ids.is_valid(job_name):
+        if mp.Job.is_valid_id(job_name):
+            # Create and start the introspection server
             rospy.loginfo(f"Start action server: {job_name}")
             mas = mp.manipulation_action_server.create(job_name, sm)
             maps.append(mas)
@@ -58,11 +62,10 @@ def start_maps(fp_cfg: Path) -> None:
     try:
         pilot.connect()
         if pilot.is_connected:
-            print(f"pilot...{pilot.robot.rtde_receiver.getRobotMode()}")
+            sm.arm_status.initial_check(pilot)
             rospy.loginfo(f"Ready to receive action goal commands")
             while not rospy.is_shutdown() and pilot.robot.is_in_running_mode:
                 rospy.sleep(0.02)
-                # pilot.is_running()
                 if not all([not mas.shutdown for mas in maps]):
                     rospy.loginfo(f"Stop running node 'manipulation_action_process'")
                     break
@@ -74,10 +77,10 @@ def start_maps(fp_cfg: Path) -> None:
 
 
 if __name__ == '__main__':
-    rospy.init_node('manipulation_action_process', log_level=rospy.DEBUG, disable_signals=True)
+    rospy.init_node('manipulation_action_process', log_level=rospy.INFO, disable_signals=True)
     rospy.loginfo(f"Starting manipulation action process servers")
     sys_cfg_path = Path(sys.argv[1])
     if sys_cfg_path.exists() and sys_cfg_path.is_file():
-        maps = start_maps(sys_cfg_path)
+        start_maps(sys_cfg_path)
     else:
         raise FileNotFoundError(f"Can not find configuration file '{sys_cfg_path}'")

@@ -1,4 +1,4 @@
-""" This file implements the state >>Stop<< """
+""" This file implements the state >>Malfunction<< """
 from __future__ import annotations
 
 # libs
@@ -14,24 +14,27 @@ from chargepal_map.state_machine.utils import (
     state_footer,
 )
 
-# typing
+# typing 
 from typing import Any
 from ur_pilot import Pilot
 
 
-class Stop(State):
+class Malfunction(State):
 
     def __init__(self, config: dict[str, Any], pilot: Pilot, user_cb: StepByUser | None = None):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.job_stopped], input_keys=['job'], output_keys=['job'])
+        State.__init__(self, outcomes=[out.job_failed], input_keys=['job'], output_keys=['job'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
-        rospy.loginfo(f"Ended up in stop state. Stop process by user...")
+        rospy.logwarn(f"Malfunction during the process.")
+        # self.pilot.disconnect()
+        rospy.loginfo(f"Unable to recover the robot arm by itself.")
+        outcome = out.job_failed
         job.enable_stop_mode()
         job.track_state(type(self))
         print(state_footer(type(self)))
-        return out.job_stopped
+        return outcome
