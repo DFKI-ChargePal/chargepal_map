@@ -35,8 +35,9 @@ class MoveToBatteryObs(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        vel = self.cfg.data['vel']
-        acc = self.cfg.data['acc']
+        cfg_data = self.cfg.extract_data(ud.battery_id)
+        vel = cfg_data['vel']
+        acc = cfg_data['acc']
         outcome = out.battery_pre_obs
         # Find matching key for motion path configuration
         if job.is_part_of_workspace_right():
@@ -51,7 +52,7 @@ class MoveToBatteryObs(State):
         if outcome != out.job_stopped:
             if job.in_progress_mode():
                 rospy.loginfo(f"Start moving the arm to the battery observation")
-                act_values = self.cfg.data[job_key]
+                act_values = cfg_data[job_key]
                 with self.pilot.context.position_control():
                     self.pilot.robot.movej(target=act_values, vel=vel, acc=acc)
                 rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")

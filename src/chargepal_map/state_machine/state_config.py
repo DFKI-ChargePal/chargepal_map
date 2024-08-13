@@ -3,6 +3,7 @@ from __future__ import annotations
 # global
 import re
 import copy
+from tkinter import NO
 import yaml
 
 # typing
@@ -13,9 +14,9 @@ class StateConfig:
 
     def __init__(self, obj: type, config: dict[str, dict[str, Any]]) -> None:
         # Get common configuration
-        self.data: dict[str, Any] = {}
-        self.data['step_by_user'] = config['step_by_user']
-        self.data['detector'] = copy.deepcopy(config['detector']['files'])
+        self._data: dict[str, Any] = {}
+        self._data['step_by_user'] = config['step_by_user']
+        self._data['detector'] = copy.deepcopy(config['detector']['files'])
         # Split object name at uppercase letters
         upper_split = re.findall('[A-Z][^A-Z]*', obj.__name__)
         # Make all splits lowercase and connect them by _
@@ -29,10 +30,16 @@ class StateConfig:
                 raise RuntimeError(f"Error while reading {fp_config} configuration with error msg: {e}")
         if state_config_dict is None:
             state_config_dict = {}
-        self.data.update(state_config_dict)
+        self._data.update(state_config_dict)
+
+    def extract_data(self, battery_id: str) -> dict[str, Any]:
+        data = self._data.get(battery_id)
+        if data is None:
+            data = self._data
+        return data
 
     def dump(self) -> str:
-        _data = {
-            self.name: self.data
+        data = {
+            self.name: self._data
         }
-        return yaml.dump(_data)
+        return yaml.dump(data)

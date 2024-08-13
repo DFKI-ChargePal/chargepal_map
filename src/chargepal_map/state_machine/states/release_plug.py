@@ -39,6 +39,7 @@ class ReleasePlug(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         # Get transformation matrix of socket pose
         if job.in_progress_mode():
             exterior = job.is_part_of_plug_in()
@@ -65,18 +66,18 @@ class ReleasePlug(State):
                 with self.pilot.context.force_control():
                     sus_unl_plug, lin_ang_err = self.pilot.try2_unlock_plug(
                         T_base2socket=T_base2socket,
-                        time_out=self.cfg.data['unlock_time_out'],
-                        max_torque=self.cfg.data['unlock_max_torque'],
-                        unlock_angle=self.cfg.data['unlock_angle']
+                        time_out=cfg_data['unlock_time_out'],
+                        max_torque=cfg_data['unlock_max_torque'],
+                        unlock_angle=cfg_data['unlock_angle']
                         )
                     rospy.logdebug(f"Final error after unlocking robot from plug: "
                                 f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                     if sus_unl_plug:
                         sus_dec_plug, lin_ang_err = self.pilot.try2_decouple_to_plug(
-                            time_out=self.cfg.data['decouple_time_out'],
-                            max_force=self.cfg.data['decouple_max_force'],
-                            max_torque=self.cfg.data['decouple_max_torque'],
-                            decouple_tolerance=self.cfg.data['decouple_tolerance']
+                            time_out=cfg_data['decouple_time_out'],
+                            max_force=cfg_data['decouple_max_force'],
+                            max_torque=cfg_data['decouple_max_torque'],
+                            decouple_tolerance=cfg_data['decouple_tolerance']
                             )
                         rospy.logdebug("Final error after decoupling robot from plug: "
                                     f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")

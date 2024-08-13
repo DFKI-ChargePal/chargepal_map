@@ -40,8 +40,9 @@ class MoveToSocketObs(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        vel = self.cfg.data['vel']
-        acc = self.cfg.data['acc']
+        cfg_data = self.cfg.extract_data(ud.battery_id)
+        vel = cfg_data['vel']
+        acc = cfg_data['acc']
         # Get socket position
         if job.in_progress_mode() or job.in_retry_mode():
             if job.is_part_of_plug_in():

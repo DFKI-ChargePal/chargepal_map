@@ -33,16 +33,17 @@ class MoveToStartLs(State):
         print(state_header(type(self)))
         # Check job id
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         if job.get_id() != Job.ID.move_home_arm:
             raise StateMachineError(f"This state doesn't support the job: {job}")
         start_pos = self.pilot.robot.joint_pos
-        home_pos = self.cfg.data['home_joint_pos']
+        home_pos = cfg_data['home_joint_pos']
         # Try to avoid dangerous movements
         error_pos = np.abs(np.array(home_pos) - start_pos)
-        if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
+        if np.all(error_pos > cfg_data['max_moving_tolerance']):
             raise StateMachineError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
         with self.pilot.context.position_control():
-            self.pilot.robot.movej(home_pos, self.cfg.data['vel'], self.cfg.data['acc'])
+            self.pilot.robot.movej(home_pos, cfg_data['vel'], cfg_data['acc'])
         # Get finale position and check remaining error to target
         finale_pos = self.pilot.robot.joint_pos
         error_pos = np.abs(np.array(home_pos) - finale_pos)
@@ -71,16 +72,17 @@ class MoveToStartRs(State):
         print(state_header(type(self)))
         # Check job id
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         if job.get_id() != Job.ID.move_home_arm:
             raise StateMachineError(f"This state doesn't support the job: {job}")
         start_pos = self.pilot.robot.joint_pos
-        home_pos = self.cfg.data['home_joint_pos']
+        home_pos = cfg_data['home_joint_pos']
         # Try to avoid dangerous movements
         error_pos = np.abs(np.array(home_pos) - start_pos)
-        if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
+        if np.all(error_pos > cfg_data['max_moving_tolerance']):
             raise StateMachineError(f"Distance to home position is to large: {error_pos}. To dangerous to move ;)")
         with self.pilot.context.position_control():
-            self.pilot.robot.movej(home_pos, self.cfg.data['vel'], self.cfg.data['acc'])
+            self.pilot.robot.movej(home_pos, cfg_data['vel'], cfg_data['acc'])
         # Get finale position and check remaining error to target
         finale_pos = self.pilot.robot.joint_pos
         error_pos = np.abs(np.array(home_pos) - finale_pos)

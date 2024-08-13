@@ -38,6 +38,7 @@ class AttachPlug(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         if job.is_part_of_plug_in():
             T_base2socket = job.interior_socket.T_base2socket_close_up
         elif job.is_part_of_plug_out():
@@ -60,34 +61,34 @@ class AttachPlug(State):
                 with self.pilot.context.force_control():
                     sus_cup_plug, lin_ang_err = self.pilot.try2_couple_to_plug(
                         T_base2socket=T_base2socket,
-                        time_out=self.cfg.data['couple_time_out'],
-                        max_force=self.cfg.data['couple_max_force'],
-                        max_torque=self.cfg.data['couple_max_torque'],
-                        couple_tolerance=self.cfg.data['couple_tolerance'])
+                        time_out=cfg_data['couple_time_out'],
+                        max_force=cfg_data['couple_max_force'],
+                        max_torque=cfg_data['couple_max_torque'],
+                        couple_tolerance=cfg_data['couple_tolerance'])
                     rospy.loginfo(f"Coupling robot and plug successfully: {sus_cup_plug}")
                     rospy.logdebug(f"Final error after coupling robot and plug: "
                                 f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                     if sus_cup_plug:
                         sus_lock_plug, lin_ang_err = self.pilot.try2_lock_plug(
                             T_base2socket=T_base2socket,
-                            time_out=self.cfg.data['lock_time_out'],
-                            max_torque=self.cfg.data['lock_max_torque'],
-                            lock_angle=self.cfg.data['lock_angle'])
+                            time_out=cfg_data['lock_time_out'],
+                            max_torque=cfg_data['lock_max_torque'],
+                            lock_angle=cfg_data['lock_angle'])
                         rospy.loginfo(f"Lock robot with plug successfully: {sus_lock_plug}")
                         rospy.logdebug(f"Final error after locking robot with plug: "
                                     f"(Linear error={lin_ang_err[0]}[m] | Angular error={lin_ang_err[1]}[rad])")
                     else:
                         sus_dec_plug, lin_ang_err = self.pilot.try2_decouple_to_plug(
-                            time_out=self.cfg.data['decouple_time_out'],
-                            max_force=self.cfg.data['decouple_max_force'],
-                            max_torque=self.cfg.data['decouple_max_torque'],
-                            decouple_tolerance=self.cfg.data['decouple_tolerance'])
+                            time_out=cfg_data['decouple_time_out'],
+                            max_force=cfg_data['decouple_max_force'],
+                            max_torque=cfg_data['decouple_max_torque'],
+                            decouple_tolerance=cfg_data['decouple_tolerance'])
             if sus_cup_plug and sus_lock_plug:
                 job.enable_progress_mode()
                 outcome = out.plug_attached
                 rospy.loginfo(f"Robot attached the arm to the plug successfully")
             elif not sus_cup_plug and not sus_lock_plug and sus_dec_plug:
-                if job.is_part_of_plug_in() or job.retry_count > self.cfg.data['number_of_retries']:
+                if job.is_part_of_plug_in() or job.retry_count > cfg_data['number_of_retries']:
                     job.enable_recover_mode()
                     outcome = out.err_plug_out_recover
                     rospy.loginfo(f"Robot was not able to attach to the plug. Try to recover the arm")

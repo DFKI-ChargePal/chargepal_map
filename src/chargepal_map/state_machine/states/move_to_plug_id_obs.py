@@ -39,8 +39,9 @@ class MoveToPlugIdObs(State):
         print(state_header(type(self)))
         # Try to find matching configuration
         job: Job = ud.job
-        vel = self.cfg.data['vel']
-        acc = self.cfg.data['acc']
+        cfg_data = self.cfg.extract_data(ud.battery_id)
+        vel = cfg_data['vel']
+        acc = cfg_data['acc']
         # Get socket position
         if job.is_part_of_plug_in():
             T_base2socket = job.interior_socket.T_base2socket_close_up

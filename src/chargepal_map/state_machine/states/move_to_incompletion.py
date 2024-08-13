@@ -42,6 +42,7 @@ class MoveToIncompletion(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         # Find matching key for motion path configuration
         plug_type_key = job.get_plug_type()
         if job.latest_state() == state_name(ObserveBattery):
@@ -85,9 +86,9 @@ class MoveToIncompletion(State):
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         if outcome != out.job_stopped:
             rospy.loginfo(f"Start moving the arm to a save driving position.")
-            act_values = self.cfg.data[plug_type_key][state_key][p2p_key]
+            act_values = cfg_data[plug_type_key][state_key][p2p_key]
             with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(act_values, self.cfg.data['vel'], self.cfg.data['acc'])
+                self.pilot.robot.move_path_j(act_values, cfg_data['vel'], cfg_data['acc'])
             rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
             outcome = out.job_incomplete
         job.enable_stop_mode()

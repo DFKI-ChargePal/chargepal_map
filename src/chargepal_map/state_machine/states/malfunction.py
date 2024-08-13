@@ -30,6 +30,7 @@ class Malfunction(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        # cfg_data = self.cfg.extract_data(ud.battery_id)
         rospy.logwarn(f"Malfunction during the process.")
         # self.pilot.disconnect()
         rospy.loginfo(f"Unable to recover the robot arm by itself.")

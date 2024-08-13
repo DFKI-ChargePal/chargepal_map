@@ -34,8 +34,9 @@ class MoveToSocketPrePos(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        vel = self.cfg.data['vel']
-        acc = self.cfg.data['acc']
+        cfg_data = self.cfg.extract_data(ud.battery_id)
+        vel = cfg_data['vel']
+        acc = cfg_data['acc']
         # Get latest socket pose
         if job.in_progress_mode() or job.in_retry_mode():
             if job.is_part_of_plug_in():
@@ -52,7 +53,7 @@ class MoveToSocketPrePos(State):
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         if outcome != out.job_stopped:
             if job.is_part_of_plug_out() and not job.in_retry_mode():
-                job_data = self.cfg.data[job.get_id()]
+                job_data = cfg_data[job.get_id()]
                 rospy.loginfo(f"Start moving the arm to the battery scene")
                 with self.pilot.context.position_control():
                     self.pilot.robot.move_path_j(job_data['joint_waypoints'], vel, acc)

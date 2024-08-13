@@ -22,16 +22,17 @@ class ArmStatusServer:
 
     def initial_check(self, pilot: Pilot) -> None:
         # Get current workspace
+        cfg_data = self.cfg.extract_data("")
         shoulder_pan_pos = pilot.robot.joint_pos[0]
-        shoulder_pan_ws_ls= self.cfg.data['workspace_left']['shoulder_pan_pos']
-        shoulder_pan_ws_rs = self.cfg.data['workspace_right']['shoulder_pan_pos']
+        shoulder_pan_ws_ls= cfg_data['workspace_left']['shoulder_pan_pos']
+        shoulder_pan_ws_rs = cfg_data['workspace_right']['shoulder_pan_pos']
         is_ws_ls = True if shoulder_pan_ws_ls - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_ls + np.pi/2 else False
         is_ws_rs = True if shoulder_pan_ws_rs - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_rs + np.pi/2 else False
         # Get home position
         if is_ws_ls:
-            set_joint_pos = np.array(self.cfg.data['workspace_left']['home_joint_pos'])
+            set_joint_pos = np.array(cfg_data['workspace_left']['home_joint_pos'])
         elif is_ws_rs:
-            set_joint_pos = np.array(self.cfg.data['workspace_right']['home_joint_pos'])
+            set_joint_pos = np.array(cfg_data['workspace_right']['home_joint_pos'])
         # Check if robot is close to its home pos
         if is_ws_ls or is_ws_rs:
             cur_joint_pos = pilot.robot.joint_pos

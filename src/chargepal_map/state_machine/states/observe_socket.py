@@ -36,15 +36,16 @@ class ObserveSocket(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         outcome = ''
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to observe the socket")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         
         if outcome != out.job_stopped:
-            socket_dtt = self.cfg.data['detector'][self.cfg.data[job.get_plug_type()]['detector']]
+            socket_dtt = cfg_data['detector'][cfg_data[job.get_plug_type()]['detector']]
             found_socket, T_base2socket_close_up = self.pilot.find_target_pose(
-                detector_fp=socket_dtt, time_out=self.cfg.data['detector_time_out'])
+                detector_fp=socket_dtt, time_out=cfg_data['detector_time_out'])
         if found_socket:
             rospy.loginfo(f"Found a socket pose.")
             rospy.logdebug(f"Transformation: Base-Socket = {ur_pilot.utils.se3_to_str(T_base2socket_close_up)}")

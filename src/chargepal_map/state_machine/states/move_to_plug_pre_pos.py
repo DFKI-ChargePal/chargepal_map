@@ -34,6 +34,7 @@ class MoveToPlugPrePos(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         if job.is_part_of_plug_in():
             T_base2socket = job.interior_socket.T_base2socket_close_up
         elif job.is_part_of_plug_out():

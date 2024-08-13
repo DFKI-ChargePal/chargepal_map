@@ -59,6 +59,7 @@ class DriveFree(State):
         print(state_header(type(self)))
         rospy.loginfo(f"Call service 'robot_arm/stop_free_drive_arm' to stop free drive mode")
         job: Job = ud.job
+        # cfg_data = self.cfg.extract_data(ud.battery_id)
         usr_srv = DriveFree.StopService()
         with self.pilot.context.teach_in_control():
             _t_ref = time.perf_counter()

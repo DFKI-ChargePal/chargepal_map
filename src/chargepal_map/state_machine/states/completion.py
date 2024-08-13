@@ -30,6 +30,7 @@ class Completion(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        # cfg_data = self.cfg.extract_data(ud.battery_id)
         rospy.loginfo(f"Complete process successfully in its finale state.")
         job.enable_stop_mode()
         job.track_state(type(self))
@@ -48,6 +49,7 @@ class Incompletion(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        # cfg_data = self.cfg.extract_data(ud.battery_id)
         rospy.logwarn(f"Complete process unsuccessfully! However, the robot ended in a safe state.")
         job.enable_stop_mode()
         job.track_state(type(self))

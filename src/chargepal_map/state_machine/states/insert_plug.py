@@ -42,6 +42,7 @@ class InsertPlug(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         # Get transformation matrix of socket pose
         if job.in_progress_mode() or job.in_retry_mode():
             exterior = job.is_part_of_plug_in()
@@ -68,10 +69,10 @@ class InsertPlug(State):
                 with self.pilot.context.force_control():
                     sus_eng_plug, lin_ang_err = self.pilot.try2_engage_with_socket(
                         T_base2socket=T_base2socket,
-                        time_out=self.cfg.data['engage_time_out'],
-                        max_force=self.cfg.data['engage_max_force'],
-                        engage_depth=self.cfg.data['engage_depth'],
-                        engage_tolerance=self.cfg.data['engage_tolerance']
+                        time_out=cfg_data['engage_time_out'],
+                        max_force=cfg_data['engage_max_force'],
+                        engage_depth=cfg_data['engage_depth'],
+                        engage_tolerance=cfg_data['engage_tolerance']
                         )
                     rospy.loginfo(f"Engaging plug to socket successfully: {sus_eng_plug}")
                     rospy.logdebug(f"Final error after engaging between plug and socket: "
@@ -79,10 +80,10 @@ class InsertPlug(State):
                     if sus_eng_plug:
                         sus_ins_plug, lin_ang_err = self.pilot.try2_insert_plug(
                             T_base2socket=T_base2socket,
-                            time_out=self.cfg.data['insert_time_out'],
-                            start_force=self.cfg.data['insert_start_force'],
-                            end_force=self.cfg.data['insert_end_force'],
-                            insert_tolerance=self.cfg.data['insert_tolerance']
+                            time_out=cfg_data['insert_time_out'],
+                            start_force=cfg_data['insert_start_force'],
+                            end_force=cfg_data['insert_end_force'],
+                            insert_tolerance=cfg_data['insert_tolerance']
                             )
                         rospy.loginfo(f"Inserting plug to socket successfully: {sus_ins_plug}")
                         rospy.logdebug(f"Final error after inserting plug to socket: "
@@ -90,9 +91,9 @@ class InsertPlug(State):
                     if not sus_eng_plug or not sus_ins_plug:
                         rospy.loginfo(f"Error while inserting the plug. Try to recover by removing the plug.")
                         sus_rmv_plug, lin_ang_err = self.pilot.try2_remove_plug(
-                            time_out=self.cfg.data['remove_time_out'],
-                            max_force=self.cfg.data['remove_max_force'],
-                            remove_tolerance=self.cfg.data['remove_tolerance']
+                            time_out=cfg_data['remove_time_out'],
+                            max_force=cfg_data['remove_max_force'],
+                            remove_tolerance=cfg_data['remove_tolerance']
                         )
                         rospy.loginfo(f"Removing plug from socket successfully: {sus_rmv_plug}")
             
@@ -102,7 +103,7 @@ class InsertPlug(State):
                     outcome = out.plug_connected
                     rospy.loginfo(f"Robot connected plug and socket successfully")
                 elif not sus_ins_plug and sus_rmv_plug:
-                    if job.retry_count >= self.cfg.data['number_of_retries']:
+                    if job.retry_count >= cfg_data['number_of_retries']:
                         job.enable_recover_mode()
                         outcome = out.err_plug_in_recover
                         rospy.loginfo(f"Robot was not able to connect plug to socket. Try to recover the arm")

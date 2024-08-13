@@ -33,15 +33,16 @@ class ObservePlug(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         outcome = ''
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to observe the plug")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
 
         if outcome != out.job_stopped:
-            plug_dtt = self.cfg.data['detector'][self.cfg.data[job.get_plug_type()]['detector']]
+            plug_dtt = cfg_data['detector'][cfg_data[job.get_plug_type()]['detector']]
             found_plug, T_base2socket_close_up = self.pilot.find_target_pose(
-                detector_fp=plug_dtt, time_out=self.cfg.data['detector_time_out'])
+                detector_fp=plug_dtt, time_out=cfg_data['detector_time_out'])
             if found_plug:
                 rospy.loginfo(f"Found a plug pose.")
                 rospy.logdebug(f"Transformation: Base-Socket = {ur_pilot.utils.se3_to_str(T_base2socket_close_up)}")

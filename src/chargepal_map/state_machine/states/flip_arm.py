@@ -36,18 +36,19 @@ class FlipArm(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         if not job.in_progress_mode():
             raise StateMachineError(f"Job is not in running mode. Interrupt process.")
         if job.is_part_of_ccs_female():
-            wps = self.cfg.data['wps_flip_to_rs']
+            wps = cfg_data['wps_flip_to_rs']
         elif job.is_part_of_type2_female() or job.is_part_of_type2_male():
-            wps = self.cfg.data['wps_flip_to_ls']
+            wps = cfg_data['wps_flip_to_ls']
         else:
             raise StateMachineError(f"Can't match job '{job}' to state action.")
         start_pos = self.pilot.robot.joint_pos
         first_pos = np.array(wps[1])
         error_pos = np.abs(first_pos - start_pos)
-        if np.all(error_pos > self.cfg.data['max_moving_tolerance']):
+        if np.all(error_pos > cfg_data['max_moving_tolerance']):
             raise StateMachineError(f"Distance to first way points is to large: {error_pos}. To dangerous to move ;)")
         outcome = out.arm_ready_to_go
         if self.user_cb is not None:
@@ -56,7 +57,7 @@ class FlipArm(State):
         if outcome != out.job_stopped:
             rospy.loginfo(f"Start flipping the arm into the other workspace.")
             with self.pilot.context.position_control():
-                self.pilot.robot.move_path_j(wps, vel=self.cfg.data['vel'], acc=self.cfg.data['acc'])
+                self.pilot.robot.move_path_j(wps, vel=cfg_data['vel'], acc=cfg_data['acc'])
             rospy.loginfo(f"Arm ended in joint configuration: {ur_pilot.utils.vec_to_str(self.pilot.robot.joint_pos)}")
         job.track_state(type(self))
         print(state_footer(type(self)))

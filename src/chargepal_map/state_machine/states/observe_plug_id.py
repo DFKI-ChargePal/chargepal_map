@@ -39,15 +39,16 @@ class ObservePlugId(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         outcome = ''
         if self.user_cb is not None:
             rospy.loginfo(f"Ready observe the plug ID")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
 
         if outcome != out.job_stopped:
-            plug_id_dtt = self.cfg.data['detector'][self.cfg.data[job.get_plug_type()]['detector']]
+            plug_id_dtt = cfg_data['detector'][cfg_data[job.get_plug_type()]['detector']]
             found_plug_id, _ = self.pilot.find_target_pose(
-                detector_fp=plug_id_dtt, time_out=self.cfg.data['detector_time_out'])
+                detector_fp=plug_id_dtt, time_out=cfg_data['detector_time_out'])
             if found_plug_id:
                 rospy.loginfo(f"Found plug of type '{job.get_plug_type()}' in its intended place")
                 if job.is_part_of_plug_in():

@@ -104,6 +104,7 @@ class ManipulationActionServer:
         try:
             ud = UserData()
             ud.job = Job(self.name)
+            ud.battery_id = goal.battery_id
             outcome = self.sm.execute(ud)
             if outcome == out.job_complete:
                 result_msg.success = True

@@ -30,6 +30,7 @@ class Stop(State):
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
+        # cfg_data = self.cfg.extract_data(ud.battery_id)
         rospy.loginfo(f"Ended up in stop state. Stop process by user...")
         job.enable_stop_mode()
         job.track_state(type(self))

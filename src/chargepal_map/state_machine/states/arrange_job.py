@@ -41,10 +41,11 @@ class ArrangeJob(State):
         print(state_header(type(self)))
         rospy.loginfo(f"Arrange the start of the state machine with respect to the job ID")
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
-        shoulder_pan_ws_ls= self.cfg.data['workspace_left']['shoulder_pan_pos']
-        shoulder_pan_ws_rs = self.cfg.data['workspace_right']['shoulder_pan_pos']
+        shoulder_pan_ws_ls= cfg_data['workspace_left']['shoulder_pan_pos']
+        shoulder_pan_ws_rs = cfg_data['workspace_right']['shoulder_pan_pos']
         is_ws_ls = True if shoulder_pan_ws_ls - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_ls + np.pi/2 else False
         is_ws_rs = True if shoulder_pan_ws_rs - np.pi/2 < shoulder_pan_pos < shoulder_pan_ws_rs + np.pi/2 else False
         rospy.logdebug(f"Arm in workspace left: {is_ws_ls}")
@@ -61,9 +62,9 @@ class ArrangeJob(State):
         elif job.is_part_of_plug_in() or job.is_part_of_plug_out():
             # Get desired target joint positions
             if is_ws_ls:
-                des_joint_pos = np.array(self.cfg.data['workspace_left']['home_joint_pos'])
+                des_joint_pos = np.array(cfg_data['workspace_left']['home_joint_pos'])
             elif is_ws_rs:
-                des_joint_pos =  np.array(self.cfg.data['workspace_left']['home_joint_pos'])
+                des_joint_pos =  np.array(cfg_data['workspace_left']['home_joint_pos'])
             else:
                 raise StateMachineError(f"Robot arm is in an undefined workspace. Shoulder pan position: {shoulder_pan_pos}")
             # Get desired workspace

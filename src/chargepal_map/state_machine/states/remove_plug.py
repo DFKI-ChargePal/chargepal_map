@@ -38,6 +38,7 @@ class RemovePlug(State):
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
+        cfg_data = self.cfg.extract_data(ud.battery_id)
         if not job.in_progress_mode():
             raise StateMachineError(f"Job in an invalid mode. Interrupt process")
         outcome = ''
@@ -49,9 +50,9 @@ class RemovePlug(State):
             with self.pilot.plug_model.context(plug_type=job.get_plug_type()):
                 with self.pilot.context.force_control():
                     sus_rm_plug, lin_ang_err = self.pilot.try2_remove_plug(
-                        time_out=self.cfg.data['remove_time_out'],
-                        max_force=self.cfg.data['remove_max_force'],
-                        remove_tolerance=self.cfg.data['remove_tolerance']
+                        time_out=cfg_data['remove_time_out'],
+                        max_force=cfg_data['remove_max_force'],
+                        remove_tolerance=cfg_data['remove_tolerance']
                         )
                     rospy.loginfo(f"Removing plug from socket successfully: {sus_rm_plug}")
                     rospy.logdebug(f"Final error after removing plug from socket: "
