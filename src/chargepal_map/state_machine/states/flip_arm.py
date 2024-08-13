@@ -30,11 +30,12 @@ class FlipArm(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.arm_ready_to_go, out.job_stopped],
-                       input_keys=['job'],
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
+        # Get user and configuration data
         job: Job = ud.job
         cfg_data = self.cfg.extract_data(ud.battery_id)
         if not job.in_progress_mode():

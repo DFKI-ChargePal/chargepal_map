@@ -27,7 +27,10 @@ class MoveToStartLs(State):
         self.pilot = pilot
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
-        State.__init__(self, outcomes=[out.job_complete], input_keys=['job'], output_keys=['job'])
+        State.__init__(self,
+                       outcomes=[out.job_complete],
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
@@ -65,8 +68,8 @@ class MoveToStartRs(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_complete], 
-                       input_keys=['job'],
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))

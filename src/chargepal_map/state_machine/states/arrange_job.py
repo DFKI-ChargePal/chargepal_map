@@ -34,8 +34,8 @@ class ArrangeJob(State):
                                  out.arm_ready_to_move_ls,
                                  out.arm_ready_to_move_rs,
                                  out.job_stopped],
-                       input_keys=['job'],
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))

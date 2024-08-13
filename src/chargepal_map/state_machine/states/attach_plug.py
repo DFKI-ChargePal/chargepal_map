@@ -31,8 +31,8 @@ class AttachPlug(State):
                                  out.err_plug_out_recover,
                                  out.err_plug_out_stop,
                                  out.job_stopped],
-                       input_keys=['job'],
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))

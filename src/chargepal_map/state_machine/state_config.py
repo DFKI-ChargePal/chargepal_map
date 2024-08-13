@@ -16,7 +16,7 @@ class StateConfig:
         # Get common configuration
         self._data: dict[str, Any] = {}
         self._data['step_by_user'] = config['step_by_user']
-        self._data['detector'] = copy.deepcopy(config['detector']['files'])
+        self.detector_files = copy.deepcopy(config['detector']['files'])
         # Split object name at uppercase letters
         upper_split = re.findall('[A-Z][^A-Z]*', obj.__name__)
         # Make all splits lowercase and connect them by _

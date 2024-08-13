@@ -36,8 +36,8 @@ class ObservePeriphery(State):
                            out.err_plug_in_recover,
                            out.err_plug_out_recover,
                            out.job_stopped],
-                       input_keys=['job'],
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
@@ -48,7 +48,7 @@ class ObservePeriphery(State):
             rospy.loginfo(f"Ready to observe periphery")
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         if outcome != out.job_stopped:
-            periphery_dtt = cfg_data['detector'][cfg_data[job.get_plug_type()]['detector']]
+            periphery_dtt = self.cfg.detector_files[cfg_data[job.get_plug_type()]['detector']]
             found_socket, T_base2socket_scene = self.pilot.find_target_pose(
                 detector_fp=periphery_dtt, time_out=cfg_data['detector_time_out'])
             if found_socket:

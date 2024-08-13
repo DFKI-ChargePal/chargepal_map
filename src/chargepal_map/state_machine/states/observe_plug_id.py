@@ -32,8 +32,8 @@ class ObservePlugId(State):
                            out.periphery_plug_id_obs,
                            out.err_obs_recover,
                            out.job_stopped], 
-                       input_keys=['job'], 
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'], 
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
@@ -46,7 +46,7 @@ class ObservePlugId(State):
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
 
         if outcome != out.job_stopped:
-            plug_id_dtt = cfg_data['detector'][cfg_data[job.get_plug_type()]['detector']]
+            plug_id_dtt = self.cfg.detector_files[cfg_data[job.get_plug_type()]['detector']]
             found_plug_id, _ = self.pilot.find_target_pose(
                 detector_fp=plug_id_dtt, time_out=cfg_data['detector_time_out'])
             if found_plug_id:

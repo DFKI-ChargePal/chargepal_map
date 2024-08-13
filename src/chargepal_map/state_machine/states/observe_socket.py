@@ -30,8 +30,8 @@ class ObserveSocket(State):
                            out.socket_obs, 
                            out.err_obs_recover, 
                            out.job_stopped], 
-                       input_keys=['job'],
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'],
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
@@ -43,7 +43,7 @@ class ObserveSocket(State):
             outcome = self.user_cb.request_action(outcome, out.job_stopped)
         
         if outcome != out.job_stopped:
-            socket_dtt = cfg_data['detector'][cfg_data[job.get_plug_type()]['detector']]
+            socket_dtt = self.cfg.detector_files[cfg_data[job.get_plug_type()]['detector']]
             found_socket, T_base2socket_close_up = self.pilot.find_target_pose(
                 detector_fp=socket_dtt, time_out=cfg_data['detector_time_out'])
         if found_socket:

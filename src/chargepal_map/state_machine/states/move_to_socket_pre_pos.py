@@ -27,8 +27,8 @@ class MoveToSocketPrePos(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, outcomes=[out.socket_pre_pos, out.job_stopped],
-                       input_keys=['job'], 
-                       output_keys=['job'])
+                       input_keys=['job', 'battery_id'], 
+                       output_keys=['job', 'battery_id'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
