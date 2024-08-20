@@ -51,7 +51,7 @@ class ManipulationStateMachine:
                 out.job_incomplete, 
                 out.job_complete,
             ],
-            input_keys=['job', 'battery_id'])
+            input_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: UserData) -> str:
         outcome: str = self.state_machine.execute(ud)
@@ -71,7 +71,7 @@ class ManipulationStateMachine:
                     out.arm_ready_to_move_rs: state_name(s.MoveToStartRs),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToStartLs),
@@ -79,7 +79,7 @@ class ManipulationStateMachine:
                 transitions={
                     out.job_complete: state_name(s.Completion),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToStartRs),
@@ -87,7 +87,7 @@ class ManipulationStateMachine:
                 transitions={
                     out.job_complete: state_name(s.Completion),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.DriveFree),
@@ -95,7 +95,7 @@ class ManipulationStateMachine:
                 transitions={
                     out.job_complete: state_name(s.Completion),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.FlipArm),
@@ -104,7 +104,7 @@ class ManipulationStateMachine:
                     out.arm_ready_to_go: state_name(s.MoveToBatteryObs),
                     out.job_stopped:     state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToBatteryObs),
@@ -113,7 +113,7 @@ class ManipulationStateMachine:
                     out.battery_pre_obs: state_name(s.ObserveBattery),
                     out.job_stopped:     state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.ObserveBattery),
@@ -124,7 +124,7 @@ class ManipulationStateMachine:
                     out.err_obs_recover:      state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugIdObs),
@@ -133,7 +133,7 @@ class ManipulationStateMachine:
                     out.plug_id_pre_obs: state_name(s.ObservePlugId),
                     out.job_stopped:     state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlugId),
@@ -144,7 +144,7 @@ class ManipulationStateMachine:
                     out.err_obs_recover:       state_name(s.MoveToIncompletion),
                     out.job_stopped:           state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugObs),
@@ -153,7 +153,7 @@ class ManipulationStateMachine:
                     out.plug_pre_obs: state_name(s.ObservePlug),
                     out.job_stopped:  state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePlug),
@@ -163,7 +163,7 @@ class ManipulationStateMachine:
                     out.err_obs_recover: state_name(s.MoveToIncompletion),
                     out.job_stopped:     state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToPlugPrePos),
@@ -172,7 +172,7 @@ class ManipulationStateMachine:
                     out.plug_pre_pos: state_name(s.AttachPlug),
                     out.job_stopped:  state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.AttachPlug),
@@ -184,7 +184,7 @@ class ManipulationStateMachine:
                     out.err_plug_out_stop:    state_name(s.Malfunction),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.RemovePlug),
@@ -195,7 +195,7 @@ class ManipulationStateMachine:
                     out.err_plug_out_stop:      state_name(s.Malfunction),
                     out.job_stopped:            state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToPeripheryObs),
@@ -204,7 +204,7 @@ class ManipulationStateMachine:
                     out.periphery_pre_obs: state_name(s.ObservePeriphery),
                     out.job_stopped:       state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.ObservePeriphery),
@@ -217,7 +217,7 @@ class ManipulationStateMachine:
                     out.err_plug_out_recover: state_name(s.MoveToIncompletion),
                     out.job_stopped:          state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToSocketObs),
@@ -226,7 +226,7 @@ class ManipulationStateMachine:
                     out.socket_pre_obs: state_name(s.ObserveSocket),
                     out.job_stopped:    state_name(s.Stop)
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.ObserveSocket),
@@ -236,7 +236,7 @@ class ManipulationStateMachine:
                     out.err_obs_recover: state_name(s.MoveToRecoverPrePos),
                     out.job_stopped:     state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToSocketPrePos),
@@ -245,7 +245,7 @@ class ManipulationStateMachine:
                     out.socket_pre_pos: state_name(s.InsertPlug),
                     out.job_stopped:    state_name(s.Stop)
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToRecoverPrePos),
@@ -254,7 +254,7 @@ class ManipulationStateMachine:
                     out.recover_pre_pos: state_name(s.InsertPlug),
                     out.job_stopped:     state_name(s.Stop)
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.InsertPlug),
@@ -267,7 +267,7 @@ class ManipulationStateMachine:
                     out.err_plug_in_stop:            state_name(s.Malfunction),
                     out.job_stopped:                 state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.ReleasePlug),
@@ -278,7 +278,7 @@ class ManipulationStateMachine:
                     out.err_plug_in_stop:    state_name(s.Malfunction),
                     out.job_stopped:         state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.MoveToCompletion),
@@ -287,7 +287,7 @@ class ManipulationStateMachine:
                     out.job_complete: state_name(s.Completion),
                     out.job_stopped:  state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.Completion),
@@ -301,7 +301,7 @@ class ManipulationStateMachine:
                     out.job_incomplete: state_name(s.Incompletion),
                     out.job_stopped:    state_name(s.Stop),
                 },
-                remapping={'job': 'job', 'battery_id': 'battery_id'}
+                remapping={'job': 'job', 'cart_name': 'cart_name', 'station_name': 'station_name'}
             )
             StateMachine.add(
                 label=state_name(s.Incompletion),

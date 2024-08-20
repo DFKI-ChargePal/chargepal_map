@@ -104,7 +104,8 @@ class ManipulationActionServer:
         try:
             ud = UserData()
             ud.job = Job(self.name)
-            ud.battery_id = goal.battery_id
+            ud.cart_name = goal.cart_name  # [BAT_1, BAT_2, BAT_X]
+            ud.station_name = goal.station_name  # [ADS_1_AC, ADS_1_DC, BCS_1, ADS_2_AC, ..., BCS_X]
             outcome = self.sm.execute(ud)
             if outcome == out.job_complete:
                 result_msg.success = True

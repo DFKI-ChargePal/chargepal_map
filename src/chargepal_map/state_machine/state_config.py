@@ -3,7 +3,6 @@ from __future__ import annotations
 # global
 import re
 import copy
-from tkinter import NO
 import yaml
 
 # typing
@@ -32,8 +31,10 @@ class StateConfig:
             state_config_dict = {}
         self._data.update(state_config_dict)
 
-    def extract_data(self, battery_id: str) -> dict[str, Any]:
-        data = self._data.get(battery_id)
+    def extract_data(self, name: str) -> dict[str, Any]:
+        # Parse the name and remove suffix
+        name = "_".join(name.lower().split('_')[:2])
+        data = self._data.get(name)
         if data is None:
             data = self._data
         return data

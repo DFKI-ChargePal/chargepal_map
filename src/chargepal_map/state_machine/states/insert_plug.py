@@ -35,14 +35,14 @@ class InsertPlug(State):
                            out.err_plug_in_stop,
                            out.job_stopped,
                            ],
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data("")
         # Get transformation matrix of socket pose
         if job.in_progress_mode() or job.in_retry_mode():
             exterior = job.is_part_of_plug_in()

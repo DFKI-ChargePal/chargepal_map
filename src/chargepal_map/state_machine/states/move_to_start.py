@@ -29,14 +29,14 @@ class MoveToStartLs(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self,
                        outcomes=[out.job_complete],
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Check job id
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data(ud.cart_name)
         if job.get_id() != Job.ID.move_home_arm:
             raise StateMachineError(f"This state doesn't support the job: {job}")
         start_pos = self.pilot.robot.joint_pos
@@ -68,14 +68,14 @@ class MoveToStartRs(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_complete], 
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Check job id
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data(ud.cart_name)
         if job.get_id() != Job.ID.move_home_arm:
             raise StateMachineError(f"This state doesn't support the job: {job}")
         start_pos = self.pilot.robot.joint_pos

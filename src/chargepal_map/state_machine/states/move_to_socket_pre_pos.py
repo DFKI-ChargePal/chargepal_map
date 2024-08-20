@@ -27,14 +27,14 @@ class MoveToSocketPrePos(State):
         self.user_cb = user_cb
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, outcomes=[out.socket_pre_pos, out.job_stopped],
-                       input_keys=['job', 'battery_id'], 
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'], 
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data(ud.cart_name)
         vel = cfg_data['vel']
         acc = cfg_data['acc']
         # Get latest socket pose

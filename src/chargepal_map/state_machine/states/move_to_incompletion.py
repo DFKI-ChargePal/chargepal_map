@@ -36,13 +36,13 @@ class MoveToIncompletion(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.job_incomplete, out.job_stopped],
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data(ud.cart_name)
         # Find matching key for motion path configuration
         plug_type_key = job.get_plug_type()
         if job.latest_state() == state_name(ObserveBattery):

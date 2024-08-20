@@ -34,13 +34,13 @@ class ObserveBattery(State):
                            out.battery_obs_plug_out,
                            out.err_obs_recover,
                            out.job_stopped], 
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data(ud.cart_name)
         found_socket, outcome = False, ''
         if self.user_cb is not None:
             rospy.loginfo(f"Ready to observe battery")

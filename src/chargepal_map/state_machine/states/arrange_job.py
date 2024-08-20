@@ -34,14 +34,14 @@ class ArrangeJob(State):
                                  out.arm_ready_to_move_ls,
                                  out.arm_ready_to_move_rs,
                                  out.job_stopped],
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         rospy.loginfo(f"Arrange the start of the state machine with respect to the job ID")
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data("")
         # Get current workspace
         shoulder_pan_pos = self.pilot.robot.joint_pos[0]
         shoulder_pan_ws_ls= cfg_data['workspace_left']['shoulder_pan_pos']

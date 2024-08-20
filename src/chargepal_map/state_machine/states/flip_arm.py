@@ -30,14 +30,14 @@ class FlipArm(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self, 
                        outcomes=[out.arm_ready_to_go, out.job_stopped],
-                       input_keys=['job', 'battery_id'],
-                       output_keys=['job', 'battery_id'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
         # Get user and configuration data
         job: Job = ud.job
-        cfg_data = self.cfg.extract_data(ud.battery_id)
+        cfg_data = self.cfg.extract_data(ud.cart_name)
         if not job.in_progress_mode():
             raise StateMachineError(f"Job is not in running mode. Interrupt process.")
         if job.is_part_of_ccs_female():
