@@ -64,7 +64,7 @@ class ArrangeJob(State):
             if is_ws_ls:
                 des_joint_pos = np.array(cfg_data['workspace_left']['home_joint_pos'])
             elif is_ws_rs:
-                des_joint_pos =  np.array(cfg_data['workspace_left']['home_joint_pos'])
+                des_joint_pos =  np.array(cfg_data['workspace_right']['home_joint_pos'])
             else:
                 raise StateMachineError(f"Robot arm is in an undefined workspace. Shoulder pan position: {shoulder_pan_pos}")
             # Get desired workspace
@@ -77,6 +77,7 @@ class ArrangeJob(State):
             # Check if robot is close to its home pos
             act_joint_pos = self.pilot.robot.joint_pos
             error_pos = np.abs(des_joint_pos - act_joint_pos)
+            rospy.logdebug(f"Error between current and home position: {error_pos}")
             if np.all(error_pos > 1e-2):
                 rospy.logwarn(f"Robot not in home position. This fact does not allow to start plugging.")
                 outcome = out.job_stopped
