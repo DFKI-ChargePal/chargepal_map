@@ -49,8 +49,8 @@ class Incompletion(State):
         self.cfg = StateConfig(type(self), config=config)
         State.__init__(self,
                        outcomes=[out.job_incomplete],
-                       input_keys=['job' 'cart_name', 'station_name'],
-                       output_keys=['job' 'cart_name', 'station_name'])
+                       input_keys=['job', 'cart_name', 'station_name'],
+                       output_keys=['job', 'cart_name', 'station_name'])
 
     def execute(self, ud: Any) -> str:
         print(state_header(type(self)))
