@@ -9,6 +9,11 @@ ROS package with a state machine using SMACH to run the different manipulation j
 
 ## Getting started
 
+1) Create a ROS workspace with the following dependencies
+```
+[chargepal_actions]()
+```
+
 1) Install the package in your catkin workspace.
 
 ----
